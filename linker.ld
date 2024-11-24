@@ -14,8 +14,10 @@ SECTIONS
     *(.data)
   }
 
-  .bass :
+  .bss :
   {
     *(.bss)
   }
+
+  /DISCARD/ : { *(.note*) *(.comment*) }
 }
