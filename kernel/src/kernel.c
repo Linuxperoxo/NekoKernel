@@ -22,7 +22,7 @@ void k_main(void)
   clear_screen();
   initgdt();
   print_screen("GDT is done! ");
-  print_screen("Hello, World! :D ");
+  print_screen("Hello, World! Welcome to my kernel :D ");
   print_screen("Hello, From Kernel! :D");
   while(1);
 }
