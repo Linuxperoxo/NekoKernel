@@ -43,12 +43,16 @@ section .text
 
 _start:
   ; O código começa aqui e deve ser o primeiro ponto do carregador de inicialização.
+  mov esp, stack_space
 
+  cli                      ; Desativa as interrupções para garantir que o sistema não seja interrompido inesperadamente.
+  
   ; Após isso, a função k_main será chamada, e o controle será transferido para o código do kernel.
-  jmp k_main             ; Chama a função k_main, o ponto de entrada do kernel, que irá inicializar o sistema operacional.
+  call k_main             ; Chama a função k_main, o ponto de entrada do kernel, que irá inicializar o sistema operacional.
 
   ; Após o retorno de k_main, o código entra aqui, pois não há mais nada a ser feito pelo bootloader.
-  ; Desativa as interrupções e coloca o processador em estado de "halt", aguardando uma reinicialização ou interrupção externa.
-  cli                      ; Desativa as interrupções para garantir que o sistema não seja interrompido inesperadamente.
   hlt                      ; "Halt": Coloca o processador em um estado de espera até que um evento externo (como uma interrupção) aconteça.
 
+section .bss
+resb 8192
+stack_space:

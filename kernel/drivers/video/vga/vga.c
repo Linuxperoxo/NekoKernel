@@ -1,5 +1,20 @@
+/*
+ * 
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : vga.c                         |
+ *    |  SRC MOD   : 24/11/2024                    | 
+ *    |                                            |
+ *    O--------------------------------------------/
+ *    
+ *
+ */
+
+#include <types.h>
 #include "vga.h"
-#include "../../../include/types.h"
 
 struct {
   __u8 __vga_background_color;
