@@ -7,6 +7,7 @@ KERNEL_DIR = kernel
 DRIVERS_DIR = $(KERNEL_DIR)/drivers
 INCLUDE_DIR = $(KERNEL_DIR)/include
 SRC_DIR = $(KERNEL_DIR)/src
+K_HEADERS = $(KERNEL_DIR)/k_headers
 
 # Variáveis de Arquivos
 BOOT_ASM = $(BOOT_DIR)/boot.asm
@@ -34,7 +35,7 @@ CC = gcc
 ASM = nasm
 STRIP = strip
 LD = ld
-CFLAGS = -ffreestanding -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 -I $(INCLUDE_DIR) -I $(DRIVERS_DIR)
+CFLAGS = -ffreestanding -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 -I $(INCLUDE_DIR) -I $(DRIVERS_DIR) -I $(K_HEADERS)
 ASFLAGS = -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_SCRIPT)
 
@@ -80,7 +81,7 @@ clean:
 
 # Regra de execução no QEMU (após a construção do kernel)
 run: $(KERNEL_BIN)
-	qemu-system-i386 -kernel $(KERNEL_BIN)
+	qemu-system-i386 -kernel build/bin/kernel -append "vga=0x302"
 
 # Regra para iniciar tudo (compilando e rodando)
 build_and_run: all run

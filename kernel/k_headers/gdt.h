@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 24/11/2024                    |
+ *    |  SRC MOD   : 25/11/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -15,9 +15,10 @@
 
 #include <types.h>
 
-// Estrutura que representa uma entrada na GDT (Global Descriptor Table)
-
 /*
+ *
+ * Estrutura que representa uma entrada na GDT (Global Descriptor Table)
+ *
  *
  * 1. `__limit` (16 bits):
  * Este campo define o limite do segmento de memória.
@@ -88,9 +89,8 @@ struct gdt_entry_struct {
 
 struct gdt_ptr_struct {
   __u16 __limit; // Tamanho da GDT - 1 (16 bits).
-  long unsigned int __base; // Endereço base da GDT (32 bits ou 64 bits, dependendo da arquitetura).
+  __u32 __base; // Endereço base da GDT (32 bits ou 64 bits, dependendo da arquitetura).
 } __attribute__((packed));
 
 void initgdt();
 void setgdtgate(__u32, __u32, __u32, __u8, __u8);
-

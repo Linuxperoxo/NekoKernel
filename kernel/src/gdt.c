@@ -6,26 +6,29 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.c                         |
- *    |  SRC MOD   : 22/10/2024                    |
+ *    |  SRC MOD   : 25/11/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include "gdt.h"
+#define GDT_ENTRIES 6
 
-extern void gdt_flush(long unsigned int);
+#include <gdt.h>
+#include <utils.h>
 
-struct gdt_entry_struct gdt_entries[5];
-struct gdt_ptr_struct gdt_ptr;
+extern void gdt_flush(__u32);
+
+struct gdt_entry_struct __gdt_entries[GDT_ENTRIES];
+struct gdt_ptr_struct __gdt_ptr;
 
 void initgdt()
 {
   // Definir o limite e o endereço base da GDT
 
-  gdt_ptr.__limit = (sizeof(struct gdt_entry_struct) * 5) - 1; // GDT tem 5 entradas.
-  gdt_ptr.__base = (long unsigned int) &gdt_entries; // Endereço base do GDT, ou seja, primeira entrada
+  __gdt_ptr.__limit = (sizeof(struct gdt_entry_struct) * GDT_ENTRIES) - 1; // GDT tem 6 entradas.
+  __gdt_ptr.__base = (__u32)&__gdt_entries; // Endereço base do GDT, ou seja, primeira entrada
   
   // Definir a primeira entrada (nula) da GDT, que é obrigatória.
   setgdtgate(0, 0, 0, 0, 0); // Null segment
@@ -43,20 +46,21 @@ void initgdt()
   setgdtgate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data segment
   
   // Atualizar a GDT com o ponteiro correto
-  gdt_flush((long unsigned int) &gdt_ptr);
+  gdt_flush((__u32)&__gdt_ptr);
 }
 
 // Função para configurar uma entrada na GDT
 void setgdtgate(__u32 __num__, __u32 __base__, __u32 __limit__, __u8 __acess__, __u8 __gran)
 {
 
-  gdt_entries[__num__].__base_low = (__base__ & 0xFFFF);
-  gdt_entries[__num__].__base_middle = (__base__ >> 16) & 0xFF;
-  gdt_entries[__num__].__base_high = (__base__ >> 24) & 0xFF;
+  __gdt_entries[__num__].__base_low = (__base__ & 0xFFFF);
+  __gdt_entries[__num__].__base_middle = (__base__ >> 16) & 0xFF;
+  __gdt_entries[__num__].__base_high = (__base__ >> 24) & 0xFF;
   
-  gdt_entries[__num__].__limit = (__limit__ & 0xFFFF);
-  gdt_entries[__num__].__flags = (__limit__ >> 16) & 0x0F;
-  gdt_entries[__num__].__flags |= (__gran & 0xF0);
+  __gdt_entries[__num__].__limit = (__limit__ & 0xFFFF);
+  __gdt_entries[__num__].__flags = (__limit__ >> 16) & 0x0F;
+  __gdt_entries[__num__].__flags |= (__gran & 0xF0);
   
-  gdt_entries[__num__].__acess = __acess__;
+  __gdt_entries[__num__].__acess = __acess__;
 }
+
