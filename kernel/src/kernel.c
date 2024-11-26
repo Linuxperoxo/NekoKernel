@@ -28,6 +28,13 @@ void k_main(void)
   init_vga();
   clear_screen();
   print_screen("Booting kernel...\n\n");
+  print_screen("    (\\_/) \n");
+  print_screen("   ( o.o ) \n");
+  print_screen("   /  |  \\ <- This is Neko! Say hi to Neko\n");
+  print_screen("  /   |   \\ \n");
+  print_screen(" (    |    )\n\n");
+
+
   print_screen("Starting VGA...   ");
   print_screen("[ OK ]\n");
 
@@ -42,9 +49,9 @@ void k_main(void)
    */
 
   print_screen("\n");
-  print_screen("GDT is done!\n");
-  print_screen("Hello, World!\n");
-  print_screen("Hello, From Kernel!\n");
-  print_screen("Welcome to my kernel :D\n");
+  //print_screen("GDT is done!\n");
+  //print_screen("Hello, World!\n");
+  //print_screen("Hello, From Kernel!\n");
+  print_screen("Neko : Welcome to my kernel :D\n");
   while(1);
 }
