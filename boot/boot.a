@@ -13,11 +13,10 @@
 ;
 ;
 
+BITS 32
+
 ; Cabeçalho Multiboot
 section .text
-  global _start       ; Marca o ponto de entrada para o carregador de inicialização (bootloader)
-  extern k_main       ; Declaração da função k_main, que será chamada pelo bootloader
-
   align 4             ; Alinha o endereço da próxima instrução a um limite de 4 bytes (necessário para a compatibilidade com o multiboot)
 
   ; Cabeçalho Multiboot: Esses 3 valores são necessários para que o GRUB reconheça o carregador de inicialização
@@ -40,18 +39,26 @@ section .text
   ; A expressão "- (0x1BADB002 + 0x00)" calcula a diferença entre o endereço atual
   ; e a soma dos dois primeiros valores (0x1BADB002 e 0x00).
   dd - (0x1BADB002 + 0x00)
+  
+  global _start       ; Marca o ponto de entrada para o carregador de inicialização (bootloader)
+  extern k_main       ; Declaração da função k_main, que será chamada pelo bootloader
 
 _start:
+  cli
+  
   ; O código começa aqui e deve ser o primeiro ponto do carregador de inicialização.
   mov esp, stack_space
-
-  cli                      ; Desativa as interrupções para garantir que o sistema não seja interrompido inesperadamente.
   
   ; Após isso, a função k_main será chamada, e o controle será transferido para o código do kernel.
   call k_main             ; Chama a função k_main, o ponto de entrada do kernel, que irá inicializar o sistema operacional.
 
   ; Após o retorno de k_main, o código entra aqui, pois não há mais nada a ser feito pelo bootloader.
   hlt                      ; "Halt": Coloca o processador em um estado de espera até que um evento externo (como uma interrupção) aconteça.
+
+haltkernel:
+  cli
+  hlt
+  jmp haltkernel
 
 section .bss
 resb 8192

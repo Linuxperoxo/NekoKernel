@@ -10,7 +10,7 @@ SRC_DIR = $(KERNEL_DIR)/src
 K_HEADERS = $(KERNEL_DIR)/k_headers
 
 # Variáveis de Arquivos
-BOOT_ASM = $(BOOT_DIR)/boot.asm
+BOOT_ASM = $(BOOT_DIR)/boot.s
 BOOT_OBJ = $(OBJ_DIR)/boot.o
 KERNEL_OBJ = $(OBJ_DIR)/kernel.o
 VGA_OBJ = $(OBJ_DIR)/vga.o
@@ -21,8 +21,12 @@ PORTS_HEADER = $(INCLUDE_DIR)/IO/ports.h
 GDT_SRC = $(SRC_DIR)/gdt.c
 GDT_HEADER = $(SRC_DIR)/gdt.h
 GDT_OBJ = $(OBJ_DIR)/gdt.o
-GDT_ASM = $(SRC_DIR)/gdt.asm
+GDT_ASM = $(SRC_DIR)/gdt.s
 GDT_ASM_OBJ = $(OBJ_DIR)/gdt_asm.o
+IDT_ASM = $(SRC_DIR)/interrupts/idt.s
+IDT_SRC = $(SRC_DIR)/interrupts/idt.c
+IDT_ASM_OBJ = $(OBJ_DIR)/idt_asm.o
+IDT_OBJ = $(OBJ_DIR)/idt.o
 
 # Nome do Kernel
 KERNEL_BIN = $(BIN_DIR)/kernel
@@ -35,7 +39,7 @@ CC = gcc
 ASM = nasm
 STRIP = strip
 LD = ld
-CFLAGS = -ffreestanding -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 -I $(INCLUDE_DIR) -I $(DRIVERS_DIR) -I $(K_HEADERS)
+CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 -I $(INCLUDE_DIR) -I $(DRIVERS_DIR) -I $(K_HEADERS)
 ASFLAGS = -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_SCRIPT)
 
@@ -46,12 +50,18 @@ LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_SCRIPT)
 # Regras do Makefile
 all: $(KERNEL_BIN)
 
+$(IDT_ASM_OBJ):
+	$(ASM) $(ASFLAGS) $(IDT_ASM) -o $@ 
+
+$(IDT_OBJ):
+	$(CC) $(CFLAGS) -c -o $@ $(IDT_SRC)
+
 # Regra para garantir que os diretórios existam antes de compilar
 $(OBJ_DIR) $(BIN_DIR):
 	mkdir -p $(OBJ_DIR) $(BIN_DIR)
 
 # Regra para compilar o kernel binário
-$(KERNEL_BIN): $(BOOT_OBJ) $(KERNEL_OBJ) $(VGA_OBJ) $(GDT_OBJ) $(GDT_ASM_OBJ)
+$(KERNEL_BIN): $(BOOT_OBJ) $(KERNEL_OBJ) $(VGA_OBJ) $(GDT_OBJ) $(GDT_ASM_OBJ) $(IDT_ASM_OBJ) $(IDT_OBJ)
 	$(LD) $(LDFLAGS) -o $(KERNEL_BIN) $^
 
 $(GDT_OBJ):
@@ -76,12 +86,21 @@ strip:
 	$(STRIP) $(KERNEL_BIN)
 	
 # Limpeza
+clean_obj:
+	rm -rf $(OBJ_DIR)
+
+clean_bin:
+	rm -rf $(BIN_DIR)
+
 clean:
 	rm -rf $(BUILD_DIR)
 
 # Regra de execução no QEMU (após a construção do kernel)
 run: $(KERNEL_BIN)
-	qemu-system-i386 -kernel build/bin/kernel -append "vga=0x302"
+	qemu-system-i386 -kernel $(KERNEL_BIN) -append
+
+run_debug: $(KERNEL_BIN)
+	qemu-system-i386 -kernel $(KERNEL_BIN) -s -S
 
 # Regra para iniciar tudo (compilando e rodando)
 build_and_run: all run

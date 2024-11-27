@@ -53,5 +53,6 @@ void k_main(void)
   //print_screen("Hello, World!\n");
   //print_screen("Hello, From Kernel!\n");
   print_screen("Neko : Welcome to my kernel :D\n");
+  int i = 1/0;
   while(1);
 }

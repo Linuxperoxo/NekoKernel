@@ -1,0 +1,2 @@
+* Ver os vídeos do "OliveStem" sobre Task State Segmente e Interrupts
+* Ver os vídeos do "Write your own Operating System" Memory Segments, Global Descriptor Table
