@@ -16,6 +16,81 @@
 BITS 16
 ORG 0x7C00
 
+;
+; === COMO FUNCIONA O BOOTLOADER? ===
+;
+; 1. Inicialização do computador:
+;    Quando o computador é ligado, o primeiro cóDIgo executado é o da BIOS. 
+;    A BIOS realiza o processo de inicialização do hardware, realizando verificações e configurando os DIspositivos necessários, 
+;    como a memória, o teclado, o processador, e os DIscos.
+;
+; 2. Localização do MBR:
+;    Após a inicialização, a BIOS começa a procurar por um Master Boot Record (MBR) nos DIscos. O MBR está localizado no primeiro 
+;    setor de cada DIsco (sector 0), que tem 512 bytes. Esse setor contém o código inicial de boot, que é o bootloader, que será 
+;    executado em seguida.
+;
+; 3. Validação do MBR:
+;    Quando a BIOS encontra o setor 0, ela verifica os últimos 2 bytes (512º byte), chamados de assinatura do MBR. Esses dois 
+;    bytes devem ser **0x55** (no byte 511) e **0xAA** (no byte 512), respectivamente. Essa assinatura é o que inDIca à BIOS 
+;    que o setor contém um cóDIgo de boot válido.
+;
+; 4. Carregamento do MBR:
+;    Caso a assinatura esteja correta, a BIOS então carrega o conteúdo do MBR para o endereço **0x7C00** na memória. Este é o 
+;    endereço padrão onde o bootloader será carregado, e a BIOS então passa o controle para esse endereço, ou seja, ela começa 
+;    a execução do cóDIgo do bootloader.
+;
+; 5. O que acontece depois?
+;    A partir daí, o bootloader pode começar a executar, carregando o sistema operacional ou qualquer outro cóDIgo necessário 
+;    para iniciar o computador.
+;
+; Em resumo, o processo de boot é o seguinte:
+; 1. A BIOS inicializa o hardware.
+; 2. A BIOS busca o MBR no DIsco e valida a assinatura (0x55AA).
+; 3. Se a assinatura for válida, a BIOS carrega o MBR para 0x7C00 e passa o controle para o bootloader.
+; =============================================
+
+;
+; === EXPLICAÇÃO SOBRE OS COMPONENTES DO HD ===
+;
+; PRATO (Platter):
+; - É o disco físico onde os dados são armazenados.
+; - Pode haver múltiplos pratos empilhados em um HD.
+; - Cada prato tem duas superfícies (superior e inferior) que podem armazenar dados.
+;
+; CABEÇOTE (Head):
+; - É o "braço leitor/escritor" do HD.
+; - Cada face do prato tem um cabeçote associado.
+; - Ele se move radialmente para acessar diferentes trilhas do prato.
+;
+; CILINDRO (Cylinder):
+; - Conjunto de trilhas alinhadas verticalmente através dos pratos.
+; - Quando o cabeçote está posicionado em um cilindro, ele pode acessar todas as trilhas no mesmo alinhamento.
+;
+; TRILHA (Track):
+; - É um anel circular no prato onde os dados são armazenados.
+; - Cada prato possui várias trilhas concêntricas.
+; - As trilhas são organizadas em setores.
+;
+; SETOR (Sector):
+; - É a menor unidade de armazenamento no HD.
+; - Cada setor geralmente armazena 512 bytes ou 4 KB de dados.
+; - O setor é identificado pelo endereço CHS (Cilindro, Cabeça, Setor) ou LBA (Endereçamento por Bloco Lógico)
+;
+; EXEMPLO DE ORGANIZAÇÃO:
+; 1. O prato gira continuamente.
+; 2. O cabeçote move-se para o cilindro desejado.
+; 3. Dentro do cilindro, o cabeçote acessa a trilha correta.
+; 4. Dentro da trilha, o cabeçote localiza o setor para ler ou escrever dados.
+;
+; RELAÇÃO ENTRE COMPONENTES:
+; - PRATO -> Disco físico onde os dados são gravados.
+; - CABEÇOTE -> "Braço leitor" que acessa as trilhas e setores.
+; - CILINDRO -> Agrupamento vertical de trilhas alinhadas.
+; - TRILHA -> Círculos concêntricos no prato.
+; - SETOR -> "Fatia de pizza" dentro da trilha, que contém os dados.
+;
+; ==============================================
+
 %define DEFAULT_COLOR 0x0F ; Caractere branco com fundo preto
 %define VGA_SCREEN_SIZE 80*25*2
 %define VGA_FRAMEBUFFER_BASE 0xB800
@@ -189,5 +264,5 @@ SECTION .text
   .jmpk:
     JMP 0x1000:0x0000
 
-TIMES 510 - ($ - $$) DB 0x00
-DW 0xAA55
+TIMES 510 - ($ - $$) DB 0x00 ; Garantindo que o binário tenha 512 bytes como explicado acima
+DW 0xAA55 ; Assinatura de boot válido
