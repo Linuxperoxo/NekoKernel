@@ -1,9 +1,7 @@
 OUTPUT_FORMAT(elf32-i386)
-ENTRY(_start)
+ENTRY(k_main)
 SECTIONS
 {
-  . = 0x100000;
-
   .text : 
   {
     *(.text)
@@ -18,6 +16,5 @@ SECTIONS
   {
     *(.bss)
   }
-
   /DISCARD/ : { *(.note*) *(.comment*) }
 }

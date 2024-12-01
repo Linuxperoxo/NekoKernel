@@ -1,106 +1,80 @@
-# Variáveis de Diretórios
-BOOT_DIR = boot
+
+
+# Flags
+CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
+ASMFLAGSBIN = -f bin
+ASMFLAGSELF = -f elf32
+LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
+QEMUFLAGS = -drive file=$(OS_IMG),format=raw
+QEMUFLAGSDEBUG = -drive file=$(OS_IMG),format=raw -s -S
+INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
+
+# Files
+KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel.c
+KERNEL_OBJ = $(OBJ_DIR)/kernel.o
+KERNEL_BIN = $(BIN_DIR)/kernel
+
+BOOTLOADER_SRC = $(BOOT_DIR)/bootloader.s
+BOOTLOADER_BIN = $(BIN_DIR)/bootloader
+
+KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
+KERNEL_LOADER_BIN = $(BIN_DIR)/loader
+
+VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
+VGA_DRIVER_OBJ = $(OBJ_DIR)/vga.o
+
+LINKER_FILE = linker.ld
+
+OS_IMG = $(IMG_DIR)/os.img
+
+# Dirs
 BUILD_DIR = build
 BIN_DIR = $(BUILD_DIR)/bin
 OBJ_DIR = $(BUILD_DIR)/obj
-KERNEL_DIR = kernel
-DRIVERS_DIR = $(KERNEL_DIR)/drivers
-INCLUDE_DIR = $(KERNEL_DIR)/include
-SRC_DIR = $(KERNEL_DIR)/src
-K_HEADERS = $(KERNEL_DIR)/k_headers
+IMG_DIR = $(BUILD_DIR)/img
 
-# Variáveis de Arquivos
-BOOT_ASM = $(BOOT_DIR)/boot.s
-BOOT_OBJ = $(OBJ_DIR)/boot.o
-KERNEL_OBJ = $(OBJ_DIR)/kernel.o
-VGA_OBJ = $(OBJ_DIR)/vga.o
-KERNEL_SRC = $(SRC_DIR)/kernel.c
-VGA_SRC = $(DRIVERS_DIR)/video/vga/vga.c
-VGA_HEADER = $(DRIVERS_DIR)/video/vga/vga.h
-PORTS_HEADER = $(INCLUDE_DIR)/IO/ports.h
-GDT_SRC = $(SRC_DIR)/gdt.c
-GDT_HEADER = $(SRC_DIR)/gdt.h
-GDT_OBJ = $(OBJ_DIR)/gdt.o
-GDT_ASM = $(SRC_DIR)/gdt.s
-GDT_ASM_OBJ = $(OBJ_DIR)/gdt_asm.o
-IDT_ASM = $(SRC_DIR)/interrupts/idt.s
-IDT_SRC = $(SRC_DIR)/interrupts/idt.c
-IDT_ASM_OBJ = $(OBJ_DIR)/idt_asm.o
-IDT_OBJ = $(OBJ_DIR)/idt.o
+BOOT_DIR = boot
 
-# Nome do Kernel
-KERNEL_BIN = $(BIN_DIR)/kernel
+KERNEL_SRC_DIR = kernel/src
+KERNEL_INCLUDE = kernel/include
+KERNEL_DRIVERS = drivers
+STD_INCLUDE = include
 
-# Linker Script na raiz do projeto
-LINKER_SCRIPT = linker.ld
+# Exec
+LD = /usr/bin/ld
+ASM = /usr/bin/nasm
+CC = /usr/bin/gcc
+QEMU = /usr/bin/qemu-system-i386
 
-# Compilador e Flags
-CC = gcc
-ASM = nasm
-STRIP = strip
-LD = ld
-CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 -I $(INCLUDE_DIR) -I $(DRIVERS_DIR) -I $(K_HEADERS)
-ASFLAGS = -f elf32
-LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_SCRIPT)
+# Rules
+all: $(BUILD_DIR) $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) $(KERNEL_BIN)
 
-# $^ : Todos as deps (Tudo após o ':')
-# $< : Primera dep
-# $@ : Alvo da regra (Tudo antes do ':') 
+$(BUILD_DIR):
+	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
-# Regras do Makefile
-all: $(KERNEL_BIN)
+$(BOOTLOADER_BIN):
+	$(ASM) $(ASMFLAGSBIN) $(BOOTLOADER_SRC) -o $@
 
-$(IDT_ASM_OBJ):
-	$(ASM) $(ASFLAGS) $(IDT_ASM) -o $@ 
+$(KERNEL_LOADER_BIN):
+	$(ASM) $(ASMFLAGSBIN) $(KERNEL_LOADER_SRC) -o $@
 
-$(IDT_OBJ):
-	$(CC) $(CFLAGS) -c -o $@ $(IDT_SRC)
+$(VGA_DRIVER_OBJ):
+	$(CC) $(CFLAGS) $(VGA_DRIVER_SRC) -c -o $@ 
 
-# Regra para garantir que os diretórios existam antes de compilar
-$(OBJ_DIR) $(BIN_DIR):
-	mkdir -p $(OBJ_DIR) $(BIN_DIR)
+$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ)
+	$(LD) $(LDFLAGS) $^ -o $@
 
-# Regra para compilar o kernel binário
-$(KERNEL_BIN): $(BOOT_OBJ) $(KERNEL_OBJ) $(VGA_OBJ) $(GDT_OBJ) $(GDT_ASM_OBJ) $(IDT_ASM_OBJ) $(IDT_OBJ)
-	$(LD) $(LDFLAGS) -o $(KERNEL_BIN) $^
+$(KERNEL_OBJ):
+	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@ 
 
-$(GDT_OBJ):
-	$(CC) $(CFLAGS) -c -o $@ $(GDT_SRC)  
-
-$(GDT_ASM_OBJ):
-	$(ASM) $(ASFLAGS) $(GDT_ASM) -o $(GDT_ASM_OBJ)
-
-# Regra para compilar o bootloader
-$(BOOT_OBJ): $(BOOT_ASM) $(OBJ_DIR)
-	$(ASM) $(ASFLAGS) -o $@ $<
-
-# Regra para compilar o arquivo do kernel
-$(KERNEL_OBJ): $(KERNEL_SRC) $(VGA_HEADER) $(PORTS_HEADER) $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-# Regra para compilar o driver VGA
-$(VGA_OBJ): $(VGA_SRC) $(VGA_HEADER) $(PORTS_HEADER) $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-strip:
-	$(STRIP) $(KERNEL_BIN)
-	
-# Limpeza
-clean_obj:
-	rm -rf $(OBJ_DIR)
-
-clean_bin:
-	rm -rf $(BIN_DIR)
+image: all
+	cat $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) $() > $(OS_IMG)
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-# Regra de execução no QEMU (após a construção do kernel)
-run: $(KERNEL_BIN)
-	qemu-system-i386 -kernel $(KERNEL_BIN) -append
+run: image
+	$(QEMU) $(QEMUFLAGS)
 
-run_debug: $(KERNEL_BIN)
-	qemu-system-i386 -kernel $(KERNEL_BIN) -s -S
-
-# Regra para iniciar tudo (compilando e rodando)
-build_and_run: all run
+rund: image
+	$(QEMU) $(QEMUFLAGSDEBUG)

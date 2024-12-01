@@ -6,17 +6,17 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.h                         |
- *    |  SRC MOD   : 25/11/2024                    | 
+ *    |  SRC MOD   : 30/11/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
  *
  */
 
-#ifndef __VGA__
-#define __VGA__
+#ifndef __DRIVERS_VIDEO_VGA__
+#define __DRIVERS_VIDEO_VGA__
 
-#include <types.h>
+#include <std/types.h>
 
 /*
  *
@@ -89,13 +89,24 @@
 
 #define DEFAULT_HEIGHT 24
 #define DEFAULT_WIDTH 80
-#define FRAME_BUFFER_ADDRS 0xb8000
+#define VGA_FRAMEBUFFER_ADDRS 0xb8000
 #define VGA_CTRL_PORT 0x3D4 // Porta de controle
 #define VGA_DATA_PORT 0x3D5 // Porta de dados
 
-void init_vga();
-void print_screen(const char*);
-void clear_screen();
-void vga_ptr(__u8, __u8);
+struct VGAState{
+  __u8* __framebuffer;
+  __u8 __current_row;
+  __u8 __current_col;
+  __u8 __bc_color;
+  __u8 __ch_color;
+};
+
+extern struct VGAState __vga;
+
+extern void vga_init();
+extern void vga_reset();
+extern void vga_set_color(__u16);
+extern void vga_clean();
+extern void vga_print_char(__u8);
 
 #endif
