@@ -2,5 +2,5 @@
 
 void k_main()
 {
-  printf("HELLO, WORLD!\n");
+  printf("CANSO\n");
 }

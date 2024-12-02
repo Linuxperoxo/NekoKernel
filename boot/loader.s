@@ -6,13 +6,18 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : loader.s                      |
-;    |  SRC MOD   : 30/11/2024                    |
+;    |  SRC MOD   : 01/12/2024                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
 ;
 ;
 
+;
+; Aqui vamos fazer o carregamento do kernel
+; e configurar algumas coisas antes, como a
+; stack entre outras coisas
+;
 
 BITS 16
 
@@ -21,6 +26,10 @@ SECTION .text
 
   MOV AX, 0xB800
   MOV ES, AX
+
+  ;
+  ; Escrita de teste para ver se está funcionando
+  ;
 
   MOV [ES:0x00], byte 'H'
   MOV [ES:0x02], byte 'E'
@@ -36,7 +45,10 @@ SECTION .text
   MOV [ES:0x16], byte 'D'
   MOV [ES:0x18], byte '!'
 
+  ;
+  ; Loop infinito
+  ;
+
   .loop:
     JMP .loop
-
 

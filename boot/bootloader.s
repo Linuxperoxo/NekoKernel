@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : bootloader.s                  |
-;    |  SRC MOD   : 30/11/2024                    |
+;    |  SRC MOD   : 01/12/2024                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
@@ -143,10 +143,6 @@ SECTION .text
   ;                  vai ser usar sempre determinados registradores para
   ;                  fazer a função funcionar do jeito que voce espera.
   ;
-  
-  ;
-  ; 
-  ;
 
   MOV AX, 0x1000 
   
@@ -258,11 +254,15 @@ SECTION .text
 
   ;
   ; Como carregamos o kernel no endereço físico 0x10000,
-  ; vamos passar o controle para esse endereço
+  ; vamos passar o controle para esse endereço.
+  ;
+  ; Esse endereço é onde começa nossa label k_loader
+  ; que é responsável por carregar tudo antes de passar
+  ; o controle para o kernel
   ;
 
   .jmpk:
-    JMP 0x1000:0x0000
+    JMP 0x1000:0x00
 
 TIMES 510 - ($ - $$) DB 0x00 ; Garantindo que o binário tenha 512 bytes como explicado acima
-DW 0xAA55 ; Assinatura de boot válido
+DW 0xAA55 ; Assinatura de setor de boot válido

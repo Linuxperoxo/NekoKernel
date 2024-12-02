@@ -68,7 +68,7 @@ $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@ 
 
 image: all
-	cat $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) $() > $(OS_IMG)
+	cat $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) > $(OS_IMG)
 
 clean:
 	rm -rf $(BUILD_DIR)
