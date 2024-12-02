@@ -5,8 +5,8 @@ CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-
 ASMFLAGSBIN = -f bin
 ASMFLAGSELF = -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
-QEMUFLAGS = -drive file=$(OS_IMG),format=raw
-QEMUFLAGSDEBUG = -drive file=$(OS_IMG),format=raw -s -S
+QEMUFLAGS = -kernel $(KERNEL_BIN)
+QEMUFLAGSDEBUG = -kernel $(KERNEL_BIN) -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
 # Files
@@ -14,18 +14,13 @@ KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel.c
 KERNEL_OBJ = $(OBJ_DIR)/kernel.o
 KERNEL_BIN = $(BIN_DIR)/kernel
 
-BOOTLOADER_SRC = $(BOOT_DIR)/bootloader.s
-BOOTLOADER_BIN = $(BIN_DIR)/bootloader
-
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
-KERNEL_LOADER_BIN = $(BIN_DIR)/loader
+KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
 
 VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
 VGA_DRIVER_OBJ = $(OBJ_DIR)/vga.o
 
 LINKER_FILE = linker.ld
-
-OS_IMG = $(IMG_DIR)/os.img
 
 # Dirs
 BUILD_DIR = build
@@ -47,34 +42,28 @@ CC = /usr/bin/gcc
 QEMU = /usr/bin/qemu-system-i386
 
 # Rules
-all: $(BUILD_DIR) $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) $(KERNEL_BIN)
+all: $(BUILD_DIR) $(KERNEL_BIN)
 
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
-$(BOOTLOADER_BIN):
-	$(ASM) $(ASMFLAGSBIN) $(BOOTLOADER_SRC) -o $@
-
-$(KERNEL_LOADER_BIN):
-	$(ASM) $(ASMFLAGSBIN) $(KERNEL_LOADER_SRC) -o $@
+$(KERNEL_LOADER_OBJ):
+	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
 
 $(VGA_DRIVER_OBJ):
 	$(CC) $(CFLAGS) $(VGA_DRIVER_SRC) -c -o $@ 
 
-$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ)
-	$(LD) $(LDFLAGS) $^ -o $@
-
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@ 
 
-image: all
-	cat $(BOOTLOADER_BIN) $(KERNEL_LOADER_BIN) > $(OS_IMG)
+$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ)
+	$(LD) $(LDFLAGS) $^ -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-run: image
+run: all
 	$(QEMU) $(QEMUFLAGS)
 
-rund: image
+rund: all
 	$(QEMU) $(QEMUFLAGSDEBUG)

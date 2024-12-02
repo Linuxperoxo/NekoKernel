@@ -108,5 +108,6 @@ extern void vga_reset();
 extern void vga_set_color(__u16);
 extern void vga_clean();
 extern void vga_print_char(__u8);
+extern void vga_set_ptr(__u8, __u8);
 
 #endif
