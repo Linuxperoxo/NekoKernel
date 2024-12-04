@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 02/12/2024                    | 
+ *    |  SRC MOD   : 04/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -40,7 +40,7 @@ inline __attribute__((always_inline)) void printf(const char* __text__) {
       break;
     }
   }
-  vga_set_ptr(__vga.__current_row, __vga.__current_col + 1);
+  vga_set_ptr(__vga.__current_row, __vga.__current_col);
 }
 
 #endif

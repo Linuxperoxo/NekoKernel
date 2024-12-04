@@ -54,18 +54,21 @@ inline __attribute__((always_inline)) void outl(__u16 __port__, __u32 __value__)
 
 inline __attribute__((always_inline)) __u8 inb(__u16 __port__) {
   __u8 __return = 0;
+ 
   __asm__ volatile ("inb %0, %1" : "=a" (__return) : "Nd" (__port__));
   return __return;
 }
 
 inline __attribute__((always_inline)) __u16 inw(__u16 __port__) {
   __u16 __return = 0;
+  
   __asm__ volatile ("inb %0, %1" : "=a" (__return) : "Nd" (__port__));
   return __return;
 }
 
 inline __attribute__((always_inline)) __u32 inl(__u16 __port__) {
   __u32 __return = 0;
+  
   __asm__ volatile ("inb %0, %1" : "=a" (__return) : "Nd" (__port__));
   return __return;
 }

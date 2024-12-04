@@ -1,5 +1,3 @@
-
-
 # Flags
 CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
 ASMFLAGSBIN = -f bin
