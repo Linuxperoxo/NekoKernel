@@ -1,4 +1,20 @@
+/*
+ *
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : kernel.c                      |
+ *    |  SRC MOD   : 05/12/2024                    |
+ *    |                                            |
+ *    O--------------------------------------------/
+ *
+ *
+ */
+
 #include <std/io.h>
+#include <gdt.h>
 
 void k_main() {
   vga_init();
@@ -13,6 +29,10 @@ void k_main() {
   printf(" (    |    )\n\n");
   
   printf("VGA...   [ OK ]\n");
+
+  printf("GDT...   ");
+  gdtinit();
+  printf("[ OK ]\n");
 
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
 }

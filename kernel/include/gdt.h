@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 04/12/2024                    |
+ *    |  SRC MOD   : 05/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -135,9 +135,13 @@ struct gdt_entry {
  *
  */
 
-struct gdt_prt {
+struct gdt_ptr {
   __u16 __limit; // Tamanho da GDT - 1 (16 bits).
   __u32 __gdt_first_entry; // Endereço base da GDT (32 bits ou 64 bits, dependendo da arquitetura).
 }__attribute__((packed));
+
+extern void gdtinit();
+extern void gdtsetentry(__u32, __u32, __u16, __u8, __u8, __u8);
+extern void gdtflush(__u32);
 
 #endif
