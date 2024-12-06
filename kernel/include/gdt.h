@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 05/12/2024                    |
+ *    |  SRC MOD   : 06/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -136,12 +136,31 @@ struct gdt_entry {
  */
 
 struct gdt_ptr {
-  __u16 __limit; // Tamanho da GDT - 1 (16 bits).
+  __u16 __limit; // Tamanho da GDT em Bytes - 1 (16 bits).
   __u32 __gdt_first_entry; // Endereço base da GDT (32 bits ou 64 bits, dependendo da arquitetura).
 }__attribute__((packed));
 
+/*
+ *
+ * struct gdt_ptr Membros:
+ *  
+ * 1. __limit: Tamanho do GDT em Bytes.
+ *
+ * EXEMPLO:
+ *  Se temos 3 segmentos, ou seja, 3 structs gdt_entry, o __limit vai ser o seguinte: 
+ *
+ *  __gdt_prt.__limit = sizeof(gdt_entry) * 3 - 1;
+ *
+ *  - 1 pois começamos no índice 0, igual um array
+ *
+ * 2. __gdt_first_entry: Ponteiro para o início do array de gdt_entry
+ *
+ * Para entender melhor veja o arquivo gdt.c
+ *
+ */
+
 extern void gdtinit();
-extern void gdtsetentry(__u32, __u32, __u16, __u8, __u8, __u8);
+extern void gdtsetentry(__u8, __u32, __u16, __u8, __u8, __u8);
 extern void gdtflush(__u32);
 
 #endif
