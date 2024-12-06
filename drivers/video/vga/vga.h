@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.h                         |
- *    |  SRC MOD   : 30/11/2024                    | 
+ *    |  SRC MOD   : 06/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -53,7 +53,7 @@
 
 /*
  *
- * Cores para o backgorund e caracteres 
+ * Cor para os caracteres 
  *
  */
 
@@ -69,6 +69,12 @@
 #define YELLOW_CHAR_COLOR 0x0E
 #define WHITE_CHAR_COLOR 0x0F
 
+/*
+ *
+ * Cor para o background
+ *
+ */
+
 #define BLACK_BC_COLOR 0x00
 #define BLUE_BC_COLOR 0x01
 #define GREEN_BC_COLOR 0x02
@@ -77,6 +83,12 @@
 #define PURPLE_BC_COLOR 0x05
 #define BROWN_BC_COLOR 0x06
 #define GRAY_BC_COLOR 0x07
+
+/*
+ *
+ * Cor Default 
+ *
+ */
 
 #define DEFAULT_CHAR_COLOR WHITE_CHAR_COLOR
 #define DEFAULT_BC_COLOR BLACK_BC_COLOR
@@ -87,9 +99,16 @@
  *
  */
 
-#define DEFAULT_HEIGHT 24
+#define VGA_FRAMEBUFFER_ADDRS 0xB8000
+#define DEFAULT_HEIGHT 25
 #define DEFAULT_WIDTH 80
-#define VGA_FRAMEBUFFER_ADDRS 0xb8000
+
+/*
+ *
+ * Portas I/O para 
+ *
+ */
+
 #define VGA_CTRL_PORT 0x3D4 // Porta de controle
 #define VGA_DATA_PORT 0x3D5 // Porta de dados
 
