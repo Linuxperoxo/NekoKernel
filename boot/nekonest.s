@@ -129,7 +129,7 @@
 ; EXEMPLO DE ORGANIZAÇÃO:
 ; 1. O prato gira continuamente.
 ; 2. O cabeçote move-se para o cilindro desejado.
-; 3. Dentro do cilindro, o cabeçote acessa a trilha correta.
+;3. Dentro do cilindro, o cabeçote acessa a trilha correta.
 ; 4. Dentro da trilha, o cabeçote localiza o setor para ler ou escrever dados.
 ;
 ; RELAÇÃO ENTRE COMPONENTES:
@@ -154,6 +154,10 @@
 
 GDT_kernel_code_entry EQU kernel_code_segment - GDT_entries_start ; 0x08 Primeira entrada GDT, com permissão 0 (Ring 0)
 GDT_kernel_data_entry EQU kernel_data_segment - GDT_entries_start ; 0x01 Segunda entrada GDT, com permissão 0 (Ring 9)
+
+;
+; Mais pra frente vou melhorar esses macros, deixei assim só por teste
+;
 
 %macro CLEANF 1
   MOV EDX, VGA_FRAMEBUFFER_ADDRS_MAP ; Ponteiro para o framebuffer do VGA
@@ -194,6 +198,33 @@ GDT_kernel_data_entry EQU kernel_data_segment - GDT_entries_start ; 0x01 Segunda
     
     JMP .print_cmp%3 ; Voltando para o início do loop 
   .print_exit%3:
+%endmacro
+
+%macro SLEEP 1
+    ; Lê o TSC inicial (64 bits)
+    RDTSC
+    MOV ESI, EAX         ; Armazena os 32 bits menos significativos em ESI
+    MOV EDI, EDX         ; Armazena os 32 bits mais significativos em EDI
+
+    ; Define o número de ciclos para o delay (1 segundo a 1 GHz = 1 bilhão de ciclos)
+    ; Exemplo para 1 segundo, assumindo um clock de 1 GHz:
+    MOV ECX, 1000000000  ; Parte baixa (low)
+    XOR EBX, EBX         ; Parte alta (high), porque 1 bilhão cabe em 32 bits
+
+.delay_loop%1:
+    RDTSC
+    ; Subtrai os 64 bits de ESI:EDI dos valores atuais em EAX:EDX
+    SUB EAX, ESI ; Subtrai a parte baixa
+    SBB EDX, EDI ; Subtrai a parte alta com carry
+
+    ; Compara os 64 bits do contador com o delay
+    CMP EDX, EBX          ; Compara a parte alta
+    JA .delay_loop%1      ; Se a parte alta for maior, continua no loop
+    JB .delay_check_low%1 ; Se a parte alta for menor, salta (fim do delay)
+
+    CMP EAX, ECX     ; Compara a parte baixa
+    JB .delay_loop%1 ; Continua no loop se a parte baixa ainda não alcançou o valor
+.delay_check_low%1:
 %endmacro
 
 SECTION .text
@@ -269,6 +300,8 @@ GDT_entries_ptr:
 protected_mode:
   CLEANF 0x00
   PRINTF boot_msg, DEFAULT_COLOR, 0x00
+  SLEEP 0x00 
+  CLEANF 0x01
 
   JMP $ ; Loop infinito (temporário)
 
