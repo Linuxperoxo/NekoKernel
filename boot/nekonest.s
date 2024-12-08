@@ -15,10 +15,6 @@
 ;
 
 ;
-; OBS: Futuramente o NekoNest será um projeto for fora, igual o GRUB
-;
-
-;
 ; NekoNest será nosso bootloader para o NekoKernel.
 ;
 ; === Como o NekoNest funciona? ===
@@ -142,6 +138,16 @@
 ; ==============================================
 
 [ORG 0x7C00]
+
+%define DATA_PORT       0x1F0      ; Porta de dados
+%define ERROR_PORT      0x1F1      ; Porta de erro
+%define SECTOR_COUNT    0x1F2      ; Número de setores
+%define SECTOR_NUMBER   0x1F3      ; Número do setor
+%define CYLINDER_LOW    0x1F4      ; Cilindro (bits baixos)
+%define CYLINDER_HIGH   0x1F5      ; Cilindro (bits altos)
+%define DRIVE_HEAD      0x1F6      ; Seleção de drive e cabeça
+%define STATUS_PORT     0x1F7      ; Porta de status
+%define COMMAND_PORT    0x1F7      ; Porta de comando
 
 ;
 ; Informações do VGA para o PRINTF e CLEANF
@@ -299,14 +305,74 @@ GDT_entries_ptr:
 [BITS 32]
 protected_mode:
   CLEANF 0x00
-  PRINTF boot_msg, DEFAULT_COLOR, 0x00
-  SLEEP 0x00 
-  CLEANF 0x01
 
-  JMP $ ; Loop infinito (temporário)
+  ;
+  ; Para mais informações de como funciona a leitura e escrita de um disco CHS: https://wiki.osdev.org/ATA_read/write_sectors
+  ;
+  ; Lá você pode ver um código que explica bem como funciona a comunicação com o controlador ATA/SATA
+  ;
 
-boot_msg:
-  DB "NEKONEST: BOOTING KERNEL...", 0x00
+  .ata_chs_read:
+    MOV DX, DRIVE_HEAD ; Porta que recebe o drive e o cabeçote
+    MOV AL, 0b00000000 ; O cabeçote é os 4 bits menos significativos
+    OR AL, 0b10100000  ; Por default os 4 bits mais significativos são 1010 
+    OUT DX, AL
+
+    MOV DX, SECTOR_COUNT ; Porta de contagem de setores 
+    MOV AL, 0x01         ; Quantos setores vamos ler
+    OUT DX, AL
+
+    MOV DX, SECTOR_NUMBER ; Porta do número do setor
+    MOV AL, 0x02          ; Setor no qual vamos começar a leitura
+    OUT DX, AL
+    
+    MOV DX, CYLINDER_LOW ; Porta cilindro baixo
+    XOR AL, AL           ; Número do cilindro (0) (bits baixos)
+    OUT DX, AL
+    MOV DX, CYLINDER_HIGH ; Porta cilindro alto
+    XOR AL, AL            ; Número do cilindro (0) (bits baixos)
+    OUT DX, AL
+
+    MOV DX, COMMAND_PORT ; Porta de comando
+    MOV AL, 0x20         ; Comando de leitura
+    OUT DX, AL   
+
+    MOV DX, ERROR_PORT ; Verificando se houve algum erro
+    IN AL, DX          ; Se AL voltar como 1 houve algum erro, com isso nós podemos ver a porta 0x1F7 para obter mais detalhes do error, não vamos fazer isso aqui
+    CMP AL, 0x00
+    JNZ .error
+    
+    .still_going:
+      IN AL, DX     ; Verificando se a leitura foi completa e se está disponivel no buffer no controlador
+      TEST AL, 8    ; Fazendo operação AND para ver se o BITS DRQ está setado como 1
+      JZ .still_going
+    
+    MOV EBX, 0x100000 ; Endereço de destino
+    MOV DX, DATA_PORT 
+    
+    .read_sector_loop:  ; Loop de leitura de dados
+      IN AX, DX         ; A cada leitura da porta de dados o controlador do disco incrementa ele automaticamente
+      MOV [EBX], AX     ; Movendo a word (16 bits) para o endereço 0x100000
+      ADD EBX, 0x02     ; Incrementando até ler as 256 words
+      CMP EBX, 0x100100 ; Vendo se os 512 Bytes foram lidos
+      JNZ .read_sector_loop  
+  
+  PRINTF all_done, DEFAULT_COLOR, 0x01
+  JMP $
+  
+  .error:
+    PRINTF disk_error_msg, DEFAULT_COLOR, 0x00
+    JMP $
+
+bootloader_msg:
+  boot:
+    DB "NEKONEST: BOOTING KERNEL...", 0x00
+
+  disk_error:
+    DB "NEKONEST: READ DISK ERROR", 0x00
+
+  all_done:
+    DB "NEKONEST: IS WORKING :D", 0x00
 
 MBR_sector_sig:
   TIMES 510 - ($ - $$) DB 0x00 ; Garantindo que o binário final tenha 512 bytes para a BIOS considerar como MBR bootável
