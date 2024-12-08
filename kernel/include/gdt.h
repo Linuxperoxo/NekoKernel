@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 06/12/2024                    |
+ *    |  SRC MOD   : 08/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
