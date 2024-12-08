@@ -13,10 +13,11 @@
  *
  */
 
-#include <std/io.h>
 #include <gdt.h>
+#include <std/io.h>
 
-void k_main() {
+void k_main()
+{
   vga_init();
   vga_clean();
 
