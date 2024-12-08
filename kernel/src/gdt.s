@@ -6,11 +6,22 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : gdt.s                         |
-;    |  SRC MOD   : 05/12/2024                    |
+;    |  SRC MOD   : 08/12/2024                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;
 ;
+;
+
+;
+; OBSOLETE FILE!!!
+;
+
+;
+; Esse arquivo não esta mais sendo usado no kernel, mas
+; decidi deixar aqui para ser um manual para outras pessoas,
+; algumas pessoas não estão acostumadas com a sintax do AS, então
+; a versão NASM ficará aqui
 ;
 
 BITS 32
