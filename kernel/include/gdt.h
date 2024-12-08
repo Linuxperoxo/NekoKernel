@@ -161,6 +161,6 @@ struct gdt_ptr {
 
 extern void gdtinit();
 extern void gdtsetentry(__u8, __u32, __u16, __u8, __u8, __u8);
-extern void gdtflush(__u32);
+extern void gdtflush(struct gdt_ptr*);
 
 #endif
