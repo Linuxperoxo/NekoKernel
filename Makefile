@@ -30,13 +30,14 @@ KERNEL_BIN = $(BIN_DIR)/kernel
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
 
+# Drivers
 VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
 VGA_DRIVER_OBJ = $(OBJ_DIR)/vga.o
+ATA_DRIVER_SRC = $(KERNEL_DRIVERS)/media/ata.c
+ATA_DRIVER_OBJ = $(OBJ_DIR)/ata.o
 
-GDT_C_SRC = $(KERNEL_SRC_DIR)/gdt.c
-GDT_ASM_SRC = $(KERNEL_SRC_DIR)/gdt.s
-GDT_C_OBJ = $(OBJ_DIR)/gdt_c.o
-GDT_ASM_OBJ = $(OBJ_DIR)/gdt_asm.o
+GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
+GDT_OBJ = $(OBJ_DIR)/gdt_c.o
 
 LINKER_FILE = linker.ld
 
@@ -66,14 +67,14 @@ all: $(BUILD_DIR) $(KERNEL_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
-$(GDT_ASM_OBJ):
-	$(ASM) $(ASMFLAGSELF) $(GDT_ASM_SRC) -o $@
-
-$(GDT_C_OBJ):
-	$(CC) $(CFLAGS) -c -o $@ $(GDT_C_SRC) 
+$(GDT_OBJ):
+	$(CC) $(CFLAGS) -c -o $@ $(GDT_SRC) 
 
 $(KERNEL_LOADER_OBJ):
 	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
+
+$(ATA_DRIVER_OBJ): 
+	$(CC) $(CFLAGS) $(ATA_DRIVER_SRC) -c -o $@
 
 $(VGA_DRIVER_OBJ):
 	$(CC) $(CFLAGS) $(VGA_DRIVER_SRC) -c -o $@ 
@@ -81,7 +82,7 @@ $(VGA_DRIVER_OBJ):
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@
 
-$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_C_OBJ) $(GDT_ASM_OBJ)
+$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 strip: all
