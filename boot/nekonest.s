@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : nekonest.s                    |
-;    |  SRC MOD   : 06/12/2024                    |
+;    |  SRC MOD   : 09/12/2024                    |
 ;    |  VERSION   : 0.0-1                         |
 ;    |                                            |
 ;    O--------------------------------------------/
@@ -139,6 +139,10 @@
 
 [ORG 0x7C00]
 
+;
+; Portas para manipulação do controlador ATA
+;
+
 %define DATA_PORT       0x1F0      ; Porta de dados
 %define ERROR_PORT      0x1F1      ; Porta de erro
 %define SECTOR_COUNT    0x1F2      ; Número de setores
@@ -161,115 +165,46 @@
 GDT_kernel_code_entry EQU kernel_code_segment - GDT_entries_start ; 0x08 Primeira entrada GDT, com permissão 0 (Ring 0)
 GDT_kernel_data_entry EQU kernel_data_segment - GDT_entries_start ; 0x01 Segunda entrada GDT, com permissão 0 (Ring 9)
 
-;
-; Mais pra frente vou melhorar esses macros, deixei assim só por teste
-;
-
-%macro CLEANF 1
-  MOV EDX, VGA_FRAMEBUFFER_ADDRS_MAP ; Ponteiro para o framebuffer do VGA
-  XOR BX, BX                         ; Zerando BX, fazer essa operação é mais barata que MOV BX, 0x00
-
-  .clean_cmp%1:
-    CMP BX, VGA_SCREEN_H * VGA_SCREEN_W * 2 ; Vendo se toda a tela foi limpa, usamos o * 2 pq temos 2 bytes para cada caractere, o primeiro sendo para o caractere e o segundo sendo para a cor
-    JZ .clean_exit%1
-    
-    MOV AL, 0x00          ; Caractere de limpeza '\0'
-    MOV AH, DEFAULT_COLOR ; Cor padrão
-    MOV [EDX], AX         ; Mandando para o framebuffer
-
-    ;
-    ; Incrementando para fazer a verificação em .clean_cmp
-    ;
-
-    ADD EDX, 0x02
-    ADD EBX, 0x02
-
-    JMP .clean_cmp%1
-  .clean_exit%1:
-%endmacro
-
-%macro PRINTF 3
-  MOV EBX, %1                        ; Ponteiro para a string 
-  MOV AH, %2                         ; Para Cor
-  MOV EDX, VGA_FRAMEBUFFER_ADDRS_MAP ; Ponteiro para o framebuffer do VGA 
-  
-  .print_cmp%3:
-    CMP [EBX], byte 0x00 ; Verificando se a string acabou
-    JZ .print_exit%3
-  
-    MOV AL, [EBX] ; Movendo o caractere para o registrador AL (8 bits)
-    MOV [EDX], AX ; Mandando o caractere e sua cor para o framebuffer
-    INC EBX       ; Incrementando string para o próximo caractere
-    ADD EDX, 2    ; Indo para o próximo endereço de caractere no framebuffer 
-    
-    JMP .print_cmp%3 ; Voltando para o início do loop 
-  .print_exit%3:
-%endmacro
-
-%macro SLEEP 1
-    ; Lê o TSC inicial (64 bits)
-    RDTSC
-    MOV ESI, EAX         ; Armazena os 32 bits menos significativos em ESI
-    MOV EDI, EDX         ; Armazena os 32 bits mais significativos em EDI
-
-    ; Define o número de ciclos para o delay (1 segundo a 1 GHz = 1 bilhão de ciclos)
-    ; Exemplo para 1 segundo, assumindo um clock de 1 GHz:
-    MOV ECX, 1000000000  ; Parte baixa (low)
-    XOR EBX, EBX         ; Parte alta (high), porque 1 bilhão cabe em 32 bits
-
-.delay_loop%1:
-    RDTSC
-    ; Subtrai os 64 bits de ESI:EDI dos valores atuais em EAX:EDX
-    SUB EAX, ESI ; Subtrai a parte baixa
-    SBB EDX, EDI ; Subtrai a parte alta com carry
-
-    ; Compara os 64 bits do contador com o delay
-    CMP EDX, EBX          ; Compara a parte alta
-    JA .delay_loop%1      ; Se a parte alta for maior, continua no loop
-    JB .delay_check_low%1 ; Se a parte alta for menor, salta (fim do delay)
-
-    CMP EAX, ECX     ; Compara a parte baixa
-    JB .delay_loop%1 ; Continua no loop se a parte baixa ainda não alcançou o valor
-.delay_check_low%1:
-%endmacro
-
 SECTION .text
+  CLI ; Desabilitando interrupções externas para não atrapalhar durante o boot 
+  
+  ;
+  ; Carregando GDT básico
+  ;
 
-CLI 
+  LGDT [GDT_entries_ptr]
 
-LGDT [GDT_entries_ptr]
+  ;
+  ; Saindo do real mode
+  ;
 
-;
-; Saindo do real mode
-;
+  MOV EAX, CR0
+  OR EAX, 0x01
+  MOV CR0, EAX
 
-MOV EAX, CR0
-OR EAX, 0x01
-MOV CR0, EAX
+  ;
+  ; Configurando os registradores de segmento já que estamos no modo protegido 
+  ;
 
-;
-; Configurando os registradores de segmento já que estamos no modo protegido 
-;
+  MOV AX, GDT_kernel_data_entry
+  MOV DS, AX
+  MOV FS, AX
+  MOV ES, AX
+  MOV GS, AX
+  MOV SS, AX
 
-MOV AX, GDT_kernel_data_entry
-MOV DS, AX
-MOV FS, AX
-MOV ES, AX
-MOV GS, AX
-MOV SS, AX
+  ;
+  ; Fazemos esse 'Far Jump' para alterar o registrador CS, ele não pode ser
+  ; alterado usando MOV, so usando a instrução JMP
+  ;
+  ; EXEMPLO:
+  ;   JMP 0x08:kernel_main ; CS = 0x08
+  ;
+  ; OUTRO EXEMPLO:
+  ;   JMP 0x10:kernel_main ; CS = 0x10
+  ;
 
-;
-; Fazemos esse 'Far Jump' para alterar o registrador CS, ele não pode ser
-; alterado usando MOV, so usando a instrução JMP
-;
-; EXEMPLO:
-;   JMP 0x08:kernel_main ; CS = 0x08
-;
-; OUTRO EXEMPLO:
-;   JMP 0x10:kernel_main ; CS = 0x10
-;
-
-JMP GDT_kernel_code_entry:protected_mode
+  JMP GDT_kernel_code_entry:protected_mode
 
 GDT_entries_start:
   null_segment: ; Segmento obrigatório
@@ -298,82 +233,193 @@ GDT_entries_ptr:
   DD GDT_entries_start
 
 ;
+; Rotina CLEANF:
+;
+; Limpa a tela por completo e reseta sua cor para o padrão
+;
+
+CLEANF:
+
+  ;
+  ; Não tem nenhum parâmetro
+  ;
+
+  PUSH EAX
+  PUSH EBX
+  PUSH EDX
+
+  MOV EDX, VGA_FRAMEBUFFER_ADDRS_MAP ; Ponteiro para o framebuffer do VGA
+  XOR BX, BX                         ; Zerando BX, fazer essa operação é mais barata que MOV BX, 0x00
+
+  .cmp:
+  CMP BX, VGA_SCREEN_H * VGA_SCREEN_W * 2 ; Vendo se toda a tela foi limpa, usamos o * 2 pq temos 2 bytes para cada caractere, o primeiro sendo para o caractere e o segundo sendo para a cor
+  JZ .exit
+    
+  MOV AL, 0x00          ; Caractere de limpeza '\0'
+  MOV AH, DEFAULT_COLOR ; Cor padrão
+  MOV [EDX], AX         ; Mandando para o framebuffer
+
+  ;
+  ; Incrementando para fazer a verificação em .cmp
+  ;
+
+  ADD EDX, 0x02
+  ADD EBX, 0x02
+  JMP .cmp
+  
+  .exit:
+    POP EDX
+    POP EBX
+    POP EAX
+    RET
+
+;
+; Rotina PRINTF
+;
+; Escreve no framebuffer do VGA
+;
+
+PRINTF:
+  
+  ;
+  ; EBX: Ponteiro para a string
+  ; AL : Cor do caractere e background
+  ;      bits 0-3: Cor do caractere
+  ;      bits 4-7: Cor de fundo do caractere
+  ;
+
+  PUSH EDX
+  PUSH ECX
+
+  MOV EDX, VGA_FRAMEBUFFER_ADDRS_MAP ; Ponteiro para o framebuffer do VGA 
+  
+  .cmp:
+    CMP [EBX], byte 0x00 ; Verificando se a string acabou
+    JZ .exit
+      
+    MOV CL, byte [EBX] 
+    MOV [EDX], CL
+    INC EDX
+    MOV [EDX], AL
+    INC EDX
+    INC EBX
+    JMP .cmp
+
+  .exit:
+    POP ECX
+    POP EDX
+    RET
+
+;
+; Rotina DISKERR
+;
+
+DISKERR:
+  PUSH EAX
+  PUSH EBX
+
+  MOV AL, DEFAULT_COLOR
+  MOV EBX, disk_error
+  CALL PRINTF
+
+  JMP $
+    
+  disk_error:
+    DB "NEKONEST: READ DISK ERROR", 0x00
+
+;
 ; Aqui já estamos no modo protegido 32 bits, já podemos usar os registradores
 ; eax, ebx, ecx e edx, a agora temos o endereçamento completo de sistemas 32 bits  
 ;
 
 [BITS 32]
 protected_mode:
-  CLEANF 0x00
 
+  ;
+  ; O modo protegido começa aqui
+  ;
+
+  MOV ESP, 0xFFFF ; Configurando uma stack temporária, ela vai ser substituida pelo kernel
+  CALL CLEANF
+  
   ;
   ; Para mais informações de como funciona a leitura e escrita de um disco CHS: https://wiki.osdev.org/ATA_read/write_sectors
   ;
   ; Lá você pode ver um código que explica bem como funciona a comunicação com o controlador ATA/SATA
   ;
 
-  .ata_chs_read:
-    MOV DX, DRIVE_HEAD ; Porta que recebe o drive e o cabeçote
-    MOV AL, 0b00000000 ; O cabeçote é os 4 bits menos significativos
-    OR AL, 0b10100000  ; Por default os 4 bits mais significativos são 1010 
-    OUT DX, AL
+  ;
+  ; Rotina de leitura do setor do kernel
+  ;
 
-    MOV DX, SECTOR_COUNT ; Porta de contagem de setores 
-    MOV AL, 0x01         ; Quantos setores vamos ler
-    OUT DX, AL
+  MOV DX, DRIVE_HEAD ; Porta que recebe o drive e o cabeçote
+  MOV AL, 0b00000000 ; O cabeçote é os 4 bits menos significativos
+  OR AL, 0b10100000  ; Por default os 4 bits mais significativos são 1010 
+  OUT DX, AL
 
-    MOV DX, SECTOR_NUMBER ; Porta do número do setor
-    MOV AL, 0x02          ; Setor no qual vamos começar a leitura
-    OUT DX, AL
-    
-    MOV DX, CYLINDER_LOW ; Porta cilindro baixo
-    XOR AL, AL           ; Número do cilindro (0) (bits baixos)
-    OUT DX, AL
-    MOV DX, CYLINDER_HIGH ; Porta cilindro alto
-    XOR AL, AL            ; Número do cilindro (0) (bits baixos)
-    OUT DX, AL
+  MOV DX, SECTOR_COUNT ; Porta de contagem de setores 
+  MOV AL, 0x01         ; Quantos setores vamos ler
+  OUT DX, AL
 
-    MOV DX, COMMAND_PORT ; Porta de comando
-    MOV AL, 0x20         ; Comando de leitura
-    OUT DX, AL   
+  MOV DX, SECTOR_NUMBER ; Porta do número do setor
+  MOV AL, 0x02          ; Setor no qual vamos começar a leitura
+  OUT DX, AL
+    
+  MOV DX, CYLINDER_LOW ; Porta cilindro baixo
+  XOR AL, AL           ; Número do cilindro (0) (bits baixos)
+  OUT DX, AL
+  MOV DX, CYLINDER_HIGH ; Porta cilindro alto
+  XOR AL, AL            ; Número do cilindro (0) (bits baixos)
+  OUT DX, AL
 
-    MOV DX, ERROR_PORT ; Verificando se houve algum erro
-    IN AL, DX          ; Se AL voltar como 1 houve algum erro, com isso nós podemos ver a porta 0x1F7 para obter mais detalhes do error, não vamos fazer isso aqui
-    CMP AL, 0x00
-    JNZ .error
-    
-    .still_going:
-      IN AL, DX     ; Verificando se a leitura foi completa e se está disponivel no buffer no controlador
-      TEST AL, 8    ; Fazendo operação AND para ver se o BITS DRQ está setado como 1
-      JZ .still_going
-    
-    MOV EBX, 0x100000 ; Endereço de destino
-    MOV DX, DATA_PORT 
-    
-    .read_sector_loop:  ; Loop de leitura de dados
-      IN AX, DX         ; A cada leitura da porta de dados o controlador do disco incrementa ele automaticamente
-      MOV [EBX], AX     ; Movendo a word (16 bits) para o endereço 0x100000
-      ADD EBX, 0x02     ; Incrementando até ler as 256 words
-      CMP EBX, 0x100100 ; Vendo se os 512 Bytes foram lidos
-      JNZ .read_sector_loop  
+  MOV DX, COMMAND_PORT ; Porta de comando
+  MOV AL, 0x20         ; Comando de leitura
+  OUT DX, AL   
+
+  MOV DX, ERROR_PORT ; Verificando se houve algum erro
+  IN AL, DX          ; Se AL voltar como 1 houve algum erro, com isso nós podemos ver a porta 0x1F7 para obter mais detalhes do error, não vamos fazer isso aqui
+  CMP AL, 0x00
+  JNZ DISKERR
+   
+  MOV DX, STATUS_PORT
+
+  .still_going:
+    IN AL, DX     ; Verificando se a leitura foi completa e se está disponivel no buffer no controlador
+    TEST AL, 8    ; Fazendo operação AND para ver se o BITS DRQ está setado como 1
+    JZ .still_going
+   
+  MOV EBX, 0x100000 ; Endereço de destino
+  MOV DX, DATA_PORT 
+   
+  .read_sector_loop:  ; Loop de leitura de dados
+    IN AX, DX         ; A cada leitura da porta de dados o controlador do disco incrementa ele automaticamente
+    MOV [EBX], AX     ; Movendo a word (16 bits) para o endereço 0x100000
+    ADD EBX, 0x02     ; Incrementando até ler as 256 words
+    CMP EBX, 0x100100 ; Vendo se os 512 Bytes foram lidos
+    JNZ .read_sector_loop
+
+  MOV AL, DEFAULT_COLOR
+  MOV EBX, boot
+  CALL PRINTF
   
-  PRINTF all_done, DEFAULT_COLOR, 0x01
   JMP $
   
-  .error:
-    PRINTF disk_error_msg, DEFAULT_COLOR, 0x00
-    JMP $
+;
+; Mensagens do NEKONEST :)
+;
 
-bootloader_msg:
-  boot:
-    DB "NEKONEST: BOOTING KERNEL...", 0x00
+boot:
+  DB "NEKONEST: BOOTING KERNEL...", 0x00
 
-  disk_error:
-    DB "NEKONEST: READ DISK ERROR", 0x00
 
-  all_done:
-    DB "NEKONEST: IS WORKING :D", 0x00
+all_done:
+  DB "NEKONEST: IS WORKING :D", 0x00
+
+;
+; Assinatura de Setor MBR bootável
+;
 
 MBR_sector_sig:
   TIMES 510 - ($ - $$) DB 0x00 ; Garantindo que o binário final tenha 512 bytes para a BIOS considerar como MBR bootável
   DW 0xAA55 ; Assinatura de setor MBR bootável válido
+  
