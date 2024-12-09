@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : loader.s                      |
-;    |  SRC MOD   : 02/12/2024                    |
+;    |  SRC MOD   : 09/12/2024                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
@@ -14,7 +14,7 @@
 ;
 
 SECTION .text
-  GLOBAL _start
+  GLOBAL k_loader
   
   ;
   ; Como a função k_main é feita em C e está
@@ -31,25 +31,22 @@ SECTION .text
   ; sobre
   ;
 
+  ;
+  ; Essa parte será temporária, o NestKernel vai ter
+  ; um bootloader próprio que eu já estou fazendo
+  ;
+
   ALIGN 4
 
   DD 0x1BADB002
   DD 0x00
   DD - (0x1BADB002 + 0x00)
 
-_start:
-  
-  ;
-  ; Configurando a stack
-  ;
-
-  MOV ESP, stack_space
-
-  CLI         ; Ignorando interrupções externas
-  
-  CALL k_main ; Chamando função principal do kernel 
-
-  JMP $       ; Loop infinito
+k_loader:  
+  MOV ESP, stack_space ; Configurando a stack 
+  CLI                  ; Ignorando interrupções externas
+  CALL k_main          ; Chamando função principal do kernel 
+  JMP $                ; Loop infinito
 
 SECTION .bss
 
@@ -57,5 +54,4 @@ SECTION .bss
 ; Stack de 8192 Kib
 ;
 
-RESB 8192
-stack_space:
+stack_space: RESB 8192
