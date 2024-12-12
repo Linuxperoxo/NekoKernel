@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 05/12/2024                    |
+ *    |  SRC MOD   : 09/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -16,7 +16,7 @@
 #include <gdt.h>
 #include <std/io.h>
 
-void k_main()
+void k_main(void)
 {
   vga_init();
   vga_clean();

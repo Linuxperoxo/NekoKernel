@@ -21,7 +21,8 @@ struct VGAState __vga = {
   0, 0, 0, 0, 0
 };
 
-void vga_init() {
+void vga_init() 
+{
   __vga.__framebuffer = (__u8*) VGA_FRAMEBUFFER_ADDRS;
   __vga.__current_row = 0;
   __vga.__current_col = 0;
@@ -29,17 +30,20 @@ void vga_init() {
   __vga.__ch_color = DEFAULT_CHAR_COLOR;
 }
 
-void vga_reset() {
+void vga_reset() 
+{
   vga_init();
   vga_clean();
 }
 
-void vga_set_color(__u16 __color__) {
+void vga_set_color(__u16 __color__) 
+{
   __vga.__bc_color = __color__ >> 4 & 0xFF;
   __vga.__ch_color = __color__ & 0xFF;
 }
 
-void vga_clean() {
+void vga_clean() 
+{
   __u16 __size = 0;
 
   while(__size < DEFAULT_WIDTH * DEFAULT_HEIGHT * 2) {
@@ -48,7 +52,8 @@ void vga_clean() {
   }
 }
 
-void vga_print_char(__u8 __ch__) {
+void vga_print_char(__u8 __ch__) 
+{
   if(__vga.__current_col + 1 >= DEFAULT_WIDTH) {
     __vga.__current_row += 1;
     __vga.__current_col = 0;
@@ -56,7 +61,8 @@ void vga_print_char(__u8 __ch__) {
   __vga.__framebuffer[DEFAULT_WIDTH * __vga.__current_row * 2 + __vga.__current_col++ * 2] = __ch__;
 }
 
-void vga_set_ptr(__u8 __row__, __u8 __col__) {
+void vga_set_ptr(__u8 __row__, __u8 __col__) 
+{
   
   /*
    *

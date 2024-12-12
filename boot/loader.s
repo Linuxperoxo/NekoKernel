@@ -43,10 +43,10 @@ SECTION .text
   DD - (0x1BADB002 + 0x00)
 
 k_loader:  
-  MOV ESP, stack_space ; Configurando a stack 
-  CLI                  ; Ignorando interrupções externas
-  CALL k_main          ; Chamando função principal do kernel 
-  JMP $                ; Loop infinito
+  MOV ESP, stack_space + 8192 ; Configurando a stack 
+  CLI                         ; Ignorando interrupções externas
+  CALL k_main                 ; Chamando função principal do kernel 
+  JMP $                       ; Loop infinito
 
 SECTION .bss
 

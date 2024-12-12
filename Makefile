@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 05/12/2024                    |
+#    |  SRC MOD   : 11/12/2024                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -18,7 +18,7 @@ CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-
 ASMFLAGSBIN = -f bin
 ASMFLAGSELF = -g -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
-QEMUFLAGS = -kernel $(KERNEL_BIN)
+QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw
 QEMUFLAGSDEBUG = $(QEMUFLAGS) -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
@@ -29,6 +29,11 @@ KERNEL_BIN = $(BIN_DIR)/kernel
 
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
+
+NEKONEST_BOOTLOADER_SRC = $(BOOT_DIR)/NekoNest/src/nekonest.s
+NEKONEST_BOOTLOADER_BIN = $(BIN_DIR)/nekonest
+
+NEKO_OS_IMG = ./nekoOS.img
 
 # Drivers
 VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
@@ -62,7 +67,7 @@ QEMU = /usr/bin/qemu-system-i386
 STRIP = /usr/bin/strip
 
 # Rules
-all: $(BUILD_DIR) $(KERNEL_BIN)
+kernel: $(BUILD_DIR) $(KERNEL_BIN)
 
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
@@ -85,14 +90,20 @@ $(KERNEL_OBJ):
 $(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-strip: all
+bootloader: $(NEKONEST_BOOTLOADER_BIN)
+
+$(NEKONEST_BOOTLOADER_BIN): $(BUILD_DIR)
+	$(ASM) $(ASMFLAGSBIN) $(NEKONEST_BOOTLOADER_SRC) -o $@
+
+image: kernel bootloader
+	cat $(NEKONEST_BOOTLOADER_BIN) $(KERNEL_BIN) > $(NEKO_OS_IMG)  
+
+strip: kernel
 	$(STRIP) $(KERNEL_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm $(NEKO_OS_IMG)
 
-run: all
+run: strip image
 	$(QEMU) $(QEMUFLAGS)
-
-rund:
-	$(QEMU) $(QEMUFLAGSDEBUG)
