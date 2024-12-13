@@ -136,7 +136,7 @@ struct gdt_entry {
  */
 
 struct gdt_ptr {
-  __u16 __limit; // Tamanho da GDT em Bytes - 1 (16 bits).
+  __u16 __limit; // Tamanho da GDT em Bytes (16 bits).
   __u32 __gdt_first_entry; // Endereço base da GDT (32 bits ou 64 bits, dependendo da arquitetura).
 }__attribute__((packed));
 

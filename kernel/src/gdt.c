@@ -16,6 +16,7 @@
 #include <gdt.h>
 
 #define GDT_DATA_SEGMENT 0x10
+#define GDT_CODE_SEGMENT 0x08
 #define GDT_ENTRIES 5
 
 static struct gdt_entry __gdt_entries[GDT_ENTRIES];
@@ -84,7 +85,7 @@ void gdtflush(struct gdt_ptr* __gdt_ptr__) {
      *
      */
 
-    "lgdt (%0);"
+    "lgdt (%0)\n"
     
     /*
      * 
@@ -93,7 +94,7 @@ void gdtflush(struct gdt_ptr* __gdt_ptr__) {
      *
      */
 
-    "ljmp $0x08, $.Lflush;" // Far Jump instruction 
+    "ljmp %2, $.Lflush\n" // Far Jump instruction 
 
     ".Lflush:\n" // .L = local label, without .L = global label
     
@@ -103,14 +104,14 @@ void gdtflush(struct gdt_ptr* __gdt_ptr__) {
      *
      */
 
-    "movw %1, %%ax;"
-    "movw %%ax, %%ds;"
-    "movw %%ax, %%es;"
-    "movw %%ax, %%ss;"
-    "movw %%ax, %%fs;"
-    "movw %%ax, %%gs;"
+    "movw %1, %%ax\n"
+    "movw %%ax, %%ds\n"
+    "movw %%ax, %%es\n"
+    "movw %%ax, %%ss\n"
+    "movw %%ax, %%fs\n"
+    "movw %%ax, %%gs\n"
     :
-    : "r"(__gdt_ptr__), "i"(GDT_DATA_SEGMENT)
+    : "r"(__gdt_ptr__), "i"(GDT_DATA_SEGMENT), "i"(GDT_CODE_SEGMENT)
     : "%ax"
   ); 
 }

@@ -14,6 +14,7 @@
  */
 
 #include <gdt.h>
+#include <idt.h>
 #include <std/io.h>
 
 void k_main(void)
@@ -34,6 +35,12 @@ void k_main(void)
   printf("GDT...   ");
   gdtinit();
   printf("[ OK ]\n");
+  
+  printf("IDT...   ");
+  idtinit(); 
+  printf("[ OK ]\n");
 
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
+
+  __u8 __test = 1/0;
 }

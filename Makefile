@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 11/12/2024                    |
+#    |  SRC MOD   : 12/12/2024                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -22,7 +22,7 @@ QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw
 QEMUFLAGSDEBUG = $(QEMUFLAGS) -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
-# Files
+# Kernel Files
 KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel.c
 KERNEL_OBJ = $(OBJ_DIR)/kernel.o
 KERNEL_BIN = $(BIN_DIR)/kernel
@@ -30,10 +30,21 @@ KERNEL_BIN = $(BIN_DIR)/kernel
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
 
+GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
+GDT_OBJ = $(OBJ_DIR)/gdt.o
+
+IDT_SRC = $(KERNEL_SRC_DIR)/idt.c
+IDT_OBJ = $(OBJ_DIR)/idt.o
+
+ISR_SRC = $(KERNEL_SRC_DIR)/isr.s
+ISR_OBJ = $(OBJ_DIR)/isr.o
+
 NEKONEST_BOOTLOADER_SRC = $(BOOT_DIR)/NekoNest/src/nekonest.s
 NEKONEST_BOOTLOADER_BIN = $(BIN_DIR)/nekonest
 
 NEKO_OS_IMG = ./nekoOS.img
+
+LINKER_FILE = linker.ld
 
 # Drivers
 VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
@@ -41,10 +52,6 @@ VGA_DRIVER_OBJ = $(OBJ_DIR)/vga.o
 ATA_DRIVER_SRC = $(KERNEL_DRIVERS)/media/ata.c
 ATA_DRIVER_OBJ = $(OBJ_DIR)/ata.o
 
-GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
-GDT_OBJ = $(OBJ_DIR)/gdt_c.o
-
-LINKER_FILE = linker.ld
 
 # Dirs
 BUILD_DIR = build
@@ -72,6 +79,12 @@ kernel: $(BUILD_DIR) $(KERNEL_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
+$(ISR_OBJ):
+	$(ASM) $(ASMFLAGSELF) $(ISR_SRC) -o $@
+
+$(IDT_OBJ):
+	$(CC) $(CFLAGS) $(IDT_SRC) -c -o $@
+
 $(GDT_OBJ):
 	$(CC) $(CFLAGS) -c -o $@ $(GDT_SRC) 
 
@@ -87,7 +100,7 @@ $(VGA_DRIVER_OBJ):
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@
 
-$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_OBJ)
+$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 bootloader: $(NEKONEST_BOOTLOADER_BIN)
