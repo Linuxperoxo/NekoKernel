@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : nekonest.s                    |
-;    |  SRC MOD   : 11/12/2024                    |
+;    |  SRC MOD   : 13/12/2024                    |
 ;    |  VERSION   : 0.0-1                         |
 ;    |                                            |
 ;    O--------------------------------------------/
@@ -142,8 +142,8 @@
 %define SECTOR_BYTE_SIZE 512
 %define TOTAL_BYTES_TO_READ SECTOR_BYTE_SIZE * SECTOR_TO_READ
 %define KERNEL_ADDRS_INIT 0x100000
-%define KERNEL_CODE_SEGMENT 0x1000 
-%define KERNEL_KLOADER_CODE_OFFSET 0x92C
+%define KERNEL_CODE_SEGMENT_OFFSET 0x1000 
+%define KERNEL_KLOADER_CODE_OFFSET 0xB00
 
 ;
 ; Portas para manipulação do controlador ATA
@@ -258,7 +258,7 @@ protected_mode:
   ;
 
   PUSH word 0x00               ; Cabeçote
-  PUSH word 0x10               ; Setores à serem lidos
+  PUSH word 23               ; Setores à serem lidos
   PUSH word 0x02               ; Número do setor
   PUSH word 0x0000             ; Cilíndro alto e baixo
   PUSH dword KERNEL_ADDRS_INIT ; Endereço de destino
@@ -272,7 +272,7 @@ protected_mode:
   ; Passando o controle para o kernel
   ;
 
-  JMP KERNEL_ADDRS_INIT + KERNEL_CODE_SEGMENT + KERNEL_KLOADER_CODE_OFFSET  
+  JMP KERNEL_ADDRS_INIT + KERNEL_CODE_SEGMENT_OFFSET + KERNEL_KLOADER_CODE_OFFSET  
 
 
 
