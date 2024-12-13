@@ -6,15 +6,15 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 04/12/2024                    | 
+ *    |  SRC MOD   : 13/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
  *
  */
 
-#ifndef __STDIO__
-#define __STDIO__
+#ifndef __STD_IO__
+#define __STD_IO__
 
 #include <std/types.h>
 #include <video/vga/vga.h>

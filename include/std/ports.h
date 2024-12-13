@@ -6,15 +6,15 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : ports.h                       |
- *    |  SRC MOD   : 11/12/2024                    |
+ *    |  SRC MOD   : 13/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#ifndef __PORTS__
-#define __PORTS__
+#ifndef __STD_PORTS__
+#define __STD_PORTS__
 
 /*
  *

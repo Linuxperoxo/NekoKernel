@@ -6,15 +6,15 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : types.h                       |
- *    |  SRC MOD   : 30/11/2024                    | 
+ *    |  SRC MOD   : 13/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
  *
  */
 
-#ifndef __STDTYPES__
-#define __STDTYPES__
+#ifndef __STD_TYPES__
+#define __STD_TYPES__
 
 /*
  *
