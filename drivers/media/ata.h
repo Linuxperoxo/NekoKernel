@@ -30,7 +30,7 @@
 #define ATA_READ_COMMAND 0x20
 #define ATA_WRITE_COMMANDO 0x30
 
-extern __u8 ata_chs_write(__u8, __u16, __u16);
+extern __u8 ata_chs_write(void*, __u8, __u16, __u16);
 //extern __u8 ata_chs_read(__u8, __u16, __u16, __u16);
 
 #endif
