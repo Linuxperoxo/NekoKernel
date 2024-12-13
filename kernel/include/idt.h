@@ -47,7 +47,7 @@ struct idt_entry {
 struct idt_ptr {
   __u16 __limit; // Tamanho da IDT em Bytes (16 bits)
   __u32 __idt_first_entry; // Endereço para o ínicio do nosso array de idt_entry (32 bits)  
-};
+}__attribute__((packed));
 
 /*
  *
