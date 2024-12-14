@@ -16,6 +16,13 @@
 #include <gdt.h>
 #include <idt.h>
 #include <std/io.h>
+#include <std/ports.h>
+
+void keyboard_handler(struct InterruptRegisters* __regs__)
+{
+  printf("Key Press!");
+  inb(0x60);
+}
 
 void k_main(void)
 {
@@ -42,5 +49,7 @@ void k_main(void)
 
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
 
-  __u8 __test = 1/0;
+  irq_install_isr_handler(0x01, &keyboard_handler);
+
+  printf("OK\n");
 }

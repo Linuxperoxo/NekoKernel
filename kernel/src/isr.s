@@ -104,9 +104,9 @@ isr_common_stub:
 
   MOV AX, 0x10
   MOV DS, AX
+  MOV ES, AX
   MOV FS, AX
   MOV GS, AX
-  MOV ES, AX
 
   PUSH ESP
 
@@ -134,9 +134,9 @@ irq_isr_common_stub:
 
   MOV AX, 0x10
   MOV DS, AX
+  MOV ES, AX
   MOV FS, AX
   MOV GS, AX
-  MOV ES, AX
 
   PUSH ESP
 

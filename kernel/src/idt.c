@@ -69,20 +69,20 @@ void idtinit()
    *
    */
 
-  outb(PRI_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
-  outb(SEC_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
+  outb(0x20, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
+  outb(0x20, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
 
-  outb(PRI_PIC_DATA_PORT, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
-  outb(SEC_PIC_DATA_PORT, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
+  outb(0x21, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
+  outb(0xA1, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
 
-  outb(PRI_PIC_DATA_PORT, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
-  outb(SEC_PIC_DATA_PORT, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
+  outb(0x21, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
+  outb(0x41, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
 
-  outb(PRI_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
-  outb(SEC_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
+  outb(0x21, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
+  outb(0x41, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
 
-  outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
-  outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
+  outb(0x21, 0x00); // Libera as interrupções no PIC primário
+  outb(0xA1, 0x00); // Libera as interrupções no PIC secundário
 
   idtsetgate(0x00, (__u32)isr0, 0x08, 0x8E);
   idtsetgate(0x01, (__u32)isr1, 0x08, 0x8E);
@@ -244,7 +244,26 @@ void irq_isr_handler(struct InterruptRegisters* __regs_struct__)
 
   if(__regs_struct__-> __int_num >= 40)
   {
-    outb(SEC_PIC_COMMAND_PORT, 0x20);
+    
+    /*
+     *
+     * Enviamos o comando de EOI(End of Interruption) para o PIC Slave caso 
+     * o número da interrupção esteja na faixa do PIC Slave, o EOI serve para
+     * sinalizar ao PIC que a interrupção foi tratada, permitindo que novas interrupções
+     * sejam processadas
+     *
+     */
+
+    outb(0xA0, 0x20);
   }
-  outb(PRI_PIC_COMMAND_PORT, 0x20);
+
+  /*
+   *
+   * Fazemos o mesmo para o PIC Master, já que ele sempre vai ser usado, mesmo quando o PIC
+   * secundário é usado, o PIC secundário passa o IRQ para o PIC primário pela linha IRQ2, 
+   * então temos que sinalizar a ele também
+   *
+   */
+
+  outb(0x20, 0x20);
 }
