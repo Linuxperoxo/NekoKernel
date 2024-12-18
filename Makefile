@@ -30,6 +30,9 @@ KERNEL_BIN = $(BIN_DIR)/kernel
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
 
+TERMINAL_SRC = $(KERNEL_SRC_DIR)/terminal.c
+TERMINAL_OBJ = $(OBJ_DIR)/terminal.o
+
 GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
 GDT_OBJ = $(OBJ_DIR)/gdt.o
 
@@ -47,11 +50,10 @@ NEKO_OS_IMG = ./nekoOS.img
 LINKER_FILE = linker.ld
 
 # Drivers
-VGA_DRIVER_SRC = $(KERNEL_DRIVERS)/video/vga/vga.c
-VGA_DRIVER_OBJ = $(OBJ_DIR)/vga.o
+KEYBOARD_DRIVER_SRC = $(KERNEL_DRIVERS)/device/io/keyboard/keyboard.c
+KEYBOARD_DRIVER_OBJ = $(OBJ_DIR)/keyboard.o
 ATA_DRIVER_SRC = $(KERNEL_DRIVERS)/media/ata.c
 ATA_DRIVER_OBJ = $(OBJ_DIR)/ata.o
-
 
 # Dirs
 BUILD_DIR = build
@@ -79,6 +81,9 @@ kernel: $(BUILD_DIR) $(KERNEL_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
+$(TERMINAL_OBJ):
+	$(CC) $(CFLAGS) $(TERMINAL_SRC) -c -o $@
+
 $(ISR_OBJ):
 	$(ASM) $(ASMFLAGSELF) $(ISR_SRC) -o $@
 
@@ -88,19 +93,19 @@ $(IDT_OBJ):
 $(GDT_OBJ):
 	$(CC) $(CFLAGS) -c -o $@ $(GDT_SRC) 
 
-$(KERNEL_LOADER_OBJ):
-	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
-
 $(ATA_DRIVER_OBJ): 
 	$(CC) $(CFLAGS) $(ATA_DRIVER_SRC) -c -o $@
 
-$(VGA_DRIVER_OBJ):
-	$(CC) $(CFLAGS) $(VGA_DRIVER_SRC) -c -o $@ 
+$(KEYBOARD_DRIVER_OBJ):
+	$(CC) $(CFLAGS) $(KEYBOARD_DRIVER_SRC) -c -o $@
 
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@
 
-$(KERNEL_BIN): $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(KERNEL_LOADER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ)
+$(KERNEL_LOADER_OBJ):
+	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
+
+$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TERMINAL_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 bootloader: $(NEKONEST_BOOTLOADER_BIN)
@@ -116,7 +121,7 @@ strip: kernel
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm $(NEKO_OS_IMG)
+	rm -f $(NEKO_OS_IMG)
 
 run: strip image
 	$(QEMU) $(QEMUFLAGS)
