@@ -16,7 +16,7 @@
 #ifndef __DRIVERS_VIDEO_VGA__
 #define __DRIVERS_VIDEO_VGA__
 
-#include <std/types.h>
+#include <std/int.h>
 
 /*
  *
