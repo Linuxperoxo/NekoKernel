@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 11/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -17,39 +17,49 @@
 #include <idt.h>
 #include <std/io.h>
 #include <std/ports.h>
+#include <terminal.h>
+#include <device/io/keyboard/keyboard.h>
 
-void keyboard_handler(struct InterruptRegisters* __regs__)
+void k_main()
 {
-  printf("Key Press!");
-  inb(0x60);
-}
+  cleanf();
 
-void k_main(void)
-{
-  vga_init();
-  vga_clean();
-
-  printf("Booting Kernel...\n");
+  terminal_init_vga();
   
-  printf("\n    (\\_/)\n");
+  printf("=== KERNEL INIT: \n\n");
+  
+  printf("TERMINAL...   ");
+  terminal_init();
+  printf("[ OK ]\n");
+  
+  printf("KEYBOARD...   ");
+  keyboard_init();
+  printf("[ OK ]\n");
+
+  printf("GDT...        ");
+  gdtinit();
+  printf("[ OK ]\n");
+
+  printf("IDT...        ");
+  idtinit(); 
+  printf("[ OK ]\n");
+
+  printf("\n=== NEKO WELCOME: \n\n");
+  
+  printf("    (\\_/)\n");
   printf("  >( o.o )<\n");
   printf("   /  |  \\ <- This is Neko! Say 'Hi' to Neko\n");
   printf("  /   |   \\\n");
   printf(" (    |    )\n\n");
   
-  printf("VGA...   [ OK ]\n");
-
-  printf("GDT...   ");
-  gdtinit();
-  printf("[ OK ]\n");
-  
-  printf("IDT...   ");
-  idtinit(); 
-  printf("[ OK ]\n");
-
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
+  
+  printf("\n=== USER LOGIN:\n\n");
+  printf("Login: ");
 
-  irq_install_isr_handler(0x01, &keyboard_handler);
+  char __nome[16];
 
-  printf("OK\n");
+  scanf((char*)&__nome, 15);
+
+  printf((char*)&__nome);
 }

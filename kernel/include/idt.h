@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.h                         |
- *    |  SRC MOD   : 13/12/2024                    |
+ *    |  SRC MOD   : 15/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -14,6 +14,7 @@
  */
 
 #include <std/types.h>
+#include <std/kernel.h>
 
 struct idt_entry {
   __u16 __base_low; // Parte baixa do endereço do ISR
@@ -68,36 +69,7 @@ struct idt_ptr {
  *
  */
 
-struct InterruptRegisters {
-  __u32 __cr2;
-  __u32 __ds;
-  __u32 __edi;
-  __u32 __esi;
-  __u32 __ebp;
-  __u32 __esp;
-  __u32 __ebx;
-  __u32 __edx;
-  __u32 __ecx;
-  __u32 __eax;
-  __u32 __int_num;
-  __u32 __error_code;
-  
-  /*
-   *
-   * Registradores que são empilhados automaticamento
-   * quando ocorre uma interrupção que vai ser atendida
-   *
-   */
-
-  __u32 __eip;
-  __u32 __csm;
-  __u32 __eflags;
-  __u32 __useresp;
-  __u32 __ss;
-};
-
-void idtinit(); 
-//extern void idtinit();
+extern void idtinit(); 
 extern void idtsetgate(__u8, __u32, __u16, __u8);
 extern void idtflush(struct idt_ptr*);
 extern void isr_handler(struct InterruptRegisters*);

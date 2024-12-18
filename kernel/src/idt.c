@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 13/12/2024                    |
+ *    |  SRC MOD   : 17/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -18,6 +18,7 @@
 #include <std/utils.h>
 #include <std/io.h>
 #include <std/ports.h>
+#include <std/kernel.h>
 
 #define IDT_ENTRIES 256
 #define EXCEPTIONS_MSG_NUM 28
@@ -69,20 +70,20 @@ void idtinit()
    *
    */
 
-  outb(0x20, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
-  outb(0x20, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
+  outb(PRI_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
+  outb(SEC_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
 
-  outb(0x21, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
-  outb(0xA1, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
+  outb(PRI_PIC_DATA_PORT, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
+  outb(SEC_PIC_DATA_PORT, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
 
-  outb(0x21, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
-  outb(0x41, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
+  outb(PRI_PIC_DATA_PORT, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
+  outb(SEC_PIC_DATA_PORT, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
 
-  outb(0x21, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
-  outb(0x41, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
+  outb(PRI_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
+  outb(SEC_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
 
-  outb(0x21, 0x00); // Libera as interrupções no PIC primário
-  outb(0xA1, 0x00); // Libera as interrupções no PIC secundário
+  outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
+  outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
 
   idtsetgate(0x00, (__u32)isr0, 0x08, 0x8E);
   idtsetgate(0x01, (__u32)isr1, 0x08, 0x8E);
@@ -209,7 +210,7 @@ void isr_handler(struct InterruptRegisters* __regs_struct__)
 {
   if(__regs_struct__->__int_num < 32)
   {
-    printf("NEKO PANIC! : ");
+    printf("\nNEKO PANIC! : ");
     printf(__exceptions_messsagens[__regs_struct__->__int_num]);
     printf("\n");
     while(1);
@@ -254,7 +255,7 @@ void irq_isr_handler(struct InterruptRegisters* __regs_struct__)
      *
      */
 
-    outb(0xA0, 0x20);
+    outb(SEC_PIC_COMMAND_PORT, 0x20);
   }
 
   /*
@@ -265,5 +266,5 @@ void irq_isr_handler(struct InterruptRegisters* __regs_struct__)
    *
    */
 
-  outb(0x20, 0x20);
+  outb(PRI_PIC_COMMAND_PORT, 0x20);
 }
