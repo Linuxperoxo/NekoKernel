@@ -143,7 +143,9 @@
 %define TOTAL_BYTES_TO_READ SECTOR_BYTE_SIZE * SECTOR_TO_READ
 %define KERNEL_ADDRS_INIT 0x100000
 %define KERNEL_CODE_SEGMENT_OFFSET 0x1000 
-%define KERNEL_KLOADER_CODE_OFFSET 0xB00
+%define KERNEL_KLOADER_CODE_OFFSET 0x0
+
+%define SECTORS_TO_READ 25
 
 ;
 ; Portas para manipulação do controlador ATA
@@ -258,7 +260,7 @@ protected_mode:
   ;
 
   PUSH word 0x00               ; Cabeçote
-  PUSH word 23               ; Setores à serem lidos
+  PUSH word SECTORS_TO_READ    ; Setores à serem lidos
   PUSH word 0x02               ; Número do setor
   PUSH word 0x0000             ; Cilíndro alto e baixo
   PUSH dword KERNEL_ADDRS_INIT ; Endereço de destino
