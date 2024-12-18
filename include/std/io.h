@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 13/12/2024                    | 
+ *    |  SRC MOD   : 18/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -17,30 +17,30 @@
 #define __STD_IO__
 
 #include <std/types.h>
-#include <video/vga/vga.h>
+#include <std/utils.h>
+#include <device/io/keyboard/keyboard.h>
+#include <terminal.h>
 
-inline __attribute__((always_inline)) void printf(const char* __text__) {
-  while(*__text__ != '\0') {
-    switch(*__text__) {
-      case '\n':
-        __vga.__current_row += 1;
-        __vga.__current_col = 0;
-        
-        ++__text__;
-      break;
-
-      case '\r':
-        __vga.__current_col = 0;
-
-        ++__text__;
-      break;
-
-      default:
-        vga_print_char(*__text__++);
-      break;
-    }
+inline __attribute__((always_inline)) void printf(const char* __text__) 
+{
+  while(*__text__ != '\0') 
+  {
+    terminal_out_write(*__text__++);
   }
-  vga_set_ptr(__vga.__current_row, __vga.__current_col);
+}
+
+inline __attribute__((always_inline)) void cleanf()
+{
+  terminal_clean();
+}
+
+inline __attribute__((always_inline)) void scanf(char* __dest__, __u8 __size__)
+{ 
+  __current_section.__in_buffer_offset = 0x00;
+
+  while(__current_section.__this_section_keyboard->__code != KEY_ENTER);
+
+  memcpy(__dest__, (char*)&__current_section.__terminal_in_buffer, __size__);
 }
 
 #endif
