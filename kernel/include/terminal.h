@@ -16,7 +16,7 @@
 #ifndef __K_TERMINAL__
 #define __K_TERMINAL__
 
-#include <std/types.h>
+#include <std/int.h>
 
 #define MAX_IN_BUFFER_SIZE 512
 #define MAX_OUT_BUFFER_SIZE 512

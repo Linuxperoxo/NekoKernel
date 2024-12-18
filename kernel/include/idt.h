@@ -6,14 +6,17 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.h                         |
- *    |  SRC MOD   : 15/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <std/types.h>
+#ifndef __K_IDT__
+#define __K_IDT__
+
+#include <std/int.h>
 #include <std/kernel.h>
 
 struct idt_entry {
@@ -141,3 +144,5 @@ extern void irq15();
 
 extern void isr128();
 extern void isr177();
+
+#endif

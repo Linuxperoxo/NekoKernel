@@ -14,7 +14,7 @@
  */
 
 #include <terminal.h>
-#include <std/types.h>
+#include <std/int.h>
 #include <std/utils.h>
 #include <std/io.h>
 #include <video/vga/vga.h>

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 17/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -16,6 +16,7 @@
 
 #include <idt.h>
 #include <std/utils.h>
+#include <std/int.h>
 #include <std/io.h>
 #include <std/ports.h>
 #include <std/kernel.h>

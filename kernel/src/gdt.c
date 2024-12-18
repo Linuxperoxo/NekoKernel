@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.c                         |
- *    |  SRC MOD   : 08/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -14,6 +14,7 @@
  */
 
 #include <gdt.h>
+#include <std/int.h>
 
 #define GDT_DATA_SEGMENT 0x10
 #define GDT_CODE_SEGMENT 0x08

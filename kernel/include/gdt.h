@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 08/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -58,10 +58,10 @@
  *
  */
 
-#ifndef __GDT__
-#define __GDT__
+#ifndef __K_GDT__
+#define __K_GDT__
 
-#include <std/types.h>
+#include <std/int.h>
 
 /*
  *

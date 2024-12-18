@@ -19,6 +19,7 @@
 #include <std/ports.h>
 #include <terminal.h>
 #include <device/io/keyboard/keyboard.h>
+#include <std/str.h>
 
 void k_main()
 {
@@ -56,10 +57,4 @@ void k_main()
   
   printf("\n=== USER LOGIN:\n\n");
   printf("Login: ");
-
-  char __nome[16];
-
-  scanf((char*)&__nome, 15);
-
-  printf((char*)&__nome);
 }
