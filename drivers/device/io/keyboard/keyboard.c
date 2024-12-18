@@ -15,7 +15,7 @@
 
 #include <idt.h>
 #include <std/io.h>
-#include <std/types.h>
+#include <std/int.h>
 #include <std/ports.h>
 #include <std/kernel.h>
 #include <device/io/keyboard/keyboard.h>

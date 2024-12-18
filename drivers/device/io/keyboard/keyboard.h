@@ -16,7 +16,7 @@
 #ifndef __DRIVERS_KEYBOARD__
 #define __DRIVERS_KEYBOARD__
 
-#include <std/types.h>
+#include <std/int.h>
 
 #define IRQ_KEYBOARD_NUM 0x01
 
