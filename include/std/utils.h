@@ -16,7 +16,7 @@
 #ifndef __STD_UTILS__
 #define __STD_UTILS__
 
-#include <std/types.h>
+#include <std/int.h>
 
 #define NULL (void*)0x00
 

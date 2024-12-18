@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : ports.h                       |
- *    |  SRC MOD   : 15/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -22,7 +22,7 @@
  *
  */
 
-#include <std/types.h>
+#include <std/int.h>
 
 /*
  *

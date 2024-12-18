@@ -16,7 +16,7 @@
 #ifndef __STD_IO__
 #define __STD_IO__
 
-#include <std/types.h>
+#include <std/int.h>
 #include <std/utils.h>
 #include <device/io/keyboard/keyboard.h>
 #include <terminal.h>

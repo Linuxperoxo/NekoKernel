@@ -5,16 +5,16 @@
  *    |                                            |
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
- *    |  FILE      : types.h                       |
- *    |  SRC MOD   : 13/12/2024                    | 
+ *    |  FILE      : int.h                         |
+ *    |  SRC MOD   : 18/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
  *
  */
 
-#ifndef __STD_TYPES__
-#define __STD_TYPES__
+#ifndef __STD_INT__
+#define __STD_INT__
 
 /*
  *

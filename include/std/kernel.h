@@ -16,6 +16,8 @@
 #ifndef __KERNEL__
 #define __KERNEL__
 
+#include <std/int.h>
+
 /*
  *
  * Struct que armazena o estado dos registradores 
