@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 12/12/2024                    |
+#    |  SRC MOD   : 18/12/2024                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
