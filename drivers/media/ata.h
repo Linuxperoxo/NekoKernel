@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : ata.h                         |
- *    |  SRC MOD   : 08/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -16,7 +16,7 @@
 #ifndef __DRIVERS_ATA__
 #define __DRIVERS_ATA__
 
-#include <std/types.h>
+#include <std/int.h>
 
 #define ATA_DATA_PORT 0x1F0
 #define ATA_ERROR_PORT 0x1F1

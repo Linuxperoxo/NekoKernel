@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : ata.c                         |
- *    |  SRC MOD   : 12/12/2024                    |
+ *    |  SRC MOD   : 18/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -14,6 +14,7 @@
  */
 
 #include <media/ata.h>
+#include <std/int.h>
 
 __u8 ata_chs_write(void* __dest__, __u8 __drive_head__, __u16 __sec_count_sec_num__, __u16 __cylin__) 
 {
