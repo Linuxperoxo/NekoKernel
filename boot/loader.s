@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : loader.s                      |
-;    |  SRC MOD   : 11/12/2024                    |
+;    |  SRC MOD   : 18/12/2024                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
@@ -36,11 +36,11 @@ SECTION .text
   ; um bootloader próprio que eu já estou fazendo
   ;
 
-  ALIGN 4
+  ;ALIGN 4
 
-  DD 0x1BADB002
-  DD 0x00
-  DD - (0x1BADB002 + 0x00)
+  ;DD 0x1BADB002
+  ;DD 0x00
+  ;DD - (0x1BADB002 + 0x00)
 
 k_loader:  
   MOV ESP, stack_space + 8192 ; Configurando a stack 
