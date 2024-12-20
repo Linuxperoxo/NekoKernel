@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : str.h                         |
- *    |  SRC MOD   : 18/12/2024                    | 
+ *    |  SRC MOD   : 19/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -37,10 +37,34 @@ __attribute__((always_inline)) inline __u8 strcmp(const char* __restrict __str1_
     if(*__str1__ != *__str2__)
       return 1;
 
+    printf("WOW\n");
+
     ++__str1__;
     ++__str2__;
   }
   return 0;
+}
+
+__attribute__((always_inline)) inline void strcpy(char* __restrict __dest__, const char* __restrict __src__)
+{
+  while(*__src__ != '\0')
+  {
+    *__dest__ = *__src__;
+    
+    ++__dest__;
+    ++__src__;
+  }
+}
+
+__attribute__((always_inline)) inline void strncpy(char* __restrict __dest__, const char* __restrict __src__, __u32 __size__)
+{
+  while(__size__--)
+  {
+    *__dest__ = *__src__;
+    
+    ++__dest__;
+    ++__src__;
+  }
 }
 
 __attribute__((always_inline)) inline void strcat(char* __restrict __dest__, const char* __restrict __to_cat__)
