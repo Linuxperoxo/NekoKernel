@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : terminal.c                    |
- *    |  SRC MOD   : 18/12/2024                    | 
+ *    |  SRC MOD   : 20/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -18,7 +18,7 @@
 #include <std/utils.h>
 #include <std/io.h>
 #include <video/vga/vga.h>
-#include <std/ports.h>
+#include <sys/ports.h>
 #include <device/io/keyboard/keyboard.h>
 
 struct Terminal __current_section;
@@ -124,7 +124,7 @@ void terminal_in_write(const char __ch__)
   terminal_mov_ptr(__current_section.__this_section_vga_state->__current_row, __current_section.__this_section_vga_state->__current_col);
 }
 
-void terminal_clean()
+void terminal_output_clear()
 {
   __u16 __size = 0;
 
@@ -133,6 +133,21 @@ void terminal_clean()
     __current_section.__this_section_vga_state->__framebuffer[__size++] = __current_section.__this_section_vga_state->__bc_color << 4 | __current_section.__this_section_vga_state->__ch_color;
   }
   __current_section.__this_section_vga_state->__last_put = 0x00;
+  __current_section.__out_buffer_offset = 0x00;
+}
+
+void terminal_input_clear()
+{
+  __current_section.__this_section_keyboard->__code = 0x00;
+  __current_section.__this_section_keyboard->__scan = 0x00;
+  __current_section.__in_buffer_offset = 0x00;
+
+  //memset((char*)&__current_section.__terminal_in_buffer, 0x00, MAX_IN_BUFFER_SIZE);
+}
+
+__u8 terminal_get_last_key()
+{
+  return __current_section.__this_section_keyboard->__code;
 }
 
 void terminal_keyboard_print()

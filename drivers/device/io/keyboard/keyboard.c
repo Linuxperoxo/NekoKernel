@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keyboard.c                    |
- *    |  SRC MOD   : 17/12/2024                    |
+ *    |  SRC MOD   : 20/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -16,8 +16,8 @@
 #include <idt.h>
 #include <std/io.h>
 #include <std/int.h>
-#include <std/ports.h>
-#include <std/kernel.h>
+#include <sys/ports.h>
+#include <sys/kernel.h>
 #include <device/io/keyboard/keyboard.h>
 
 struct Keyboard __keyboard = { 0x00 };

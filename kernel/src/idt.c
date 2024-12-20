@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 18/12/2024                    |
+ *    |  SRC MOD   : 20/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -18,8 +18,8 @@
 #include <std/utils.h>
 #include <std/int.h>
 #include <std/io.h>
-#include <std/ports.h>
-#include <std/kernel.h>
+#include <sys/ports.h>
+#include <sys/kernel.h>
 
 #define IDT_ENTRIES 256
 #define EXCEPTIONS_MSG_NUM 28

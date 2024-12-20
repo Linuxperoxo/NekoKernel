@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.h                         |
- *    |  SRC MOD   : 18/12/2024                    |
+ *    |  SRC MOD   : 20/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -17,7 +17,7 @@
 #define __K_IDT__
 
 #include <std/int.h>
-#include <std/kernel.h>
+#include <sys/kernel.h>
 
 struct idt_entry {
   __u16 __base_low; // Parte baixa do endereço do ISR

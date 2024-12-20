@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : terminal.h                    |
- *    |  SRC MOD   : 18/12/2024                    | 
+ *    |  SRC MOD   : 20/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -45,6 +45,8 @@ extern struct Terminal __current_section;
 extern void terminal_init();
 extern void terminal_init_vga();
 extern void terminal_out_write(const char);
-extern void terminal_clean(); 
+extern void terminal_output_clear();
+extern void terminal_input_clear();
+extern __u8 terminal_get_last_key();
 
 #endif
