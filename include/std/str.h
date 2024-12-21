@@ -37,8 +37,6 @@ __attribute__((always_inline)) inline __u8 strcmp(const char* __restrict __str1_
     if(*__str1__ != *__str2__)
       return 1;
 
-    printf("WOW\n");
-
     ++__str1__;
     ++__str2__;
   }
