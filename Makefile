@@ -14,7 +14,7 @@
 #
 
 # Flags
-CFLAGS = -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
+CFLAGS = -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
 ASMFLAGSBIN = -f bin
 ASMFLAGSELF = -g -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
@@ -32,6 +32,9 @@ KERNEL_LOADER_OBJ = $(OBJ_DIR)/loader.o
 
 TERMINAL_SRC = $(KERNEL_SRC_DIR)/terminal.c
 TERMINAL_OBJ = $(OBJ_DIR)/terminal.o
+
+SHELL_SRC = $(KERNEL_SRC_DIR)/shell.c
+SHELL_OBJ = $(OBJ_DIR)/shell.o
 
 GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
 GDT_OBJ = $(OBJ_DIR)/gdt.o
@@ -81,6 +84,9 @@ kernel: $(BUILD_DIR) $(KERNEL_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BIN_DIR) $(OBJ_DIR) $(IMG_DIR)
 
+$(SHELL_OBJ):
+	$(CC) $(CFLAGS) $(SHELL_SRC) -c -o $@
+
 $(TERMINAL_OBJ):
 	$(CC) $(CFLAGS) $(TERMINAL_SRC) -c -o $@
 
@@ -105,7 +111,7 @@ $(KERNEL_OBJ):
 $(KERNEL_LOADER_OBJ):
 	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
 
-$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TERMINAL_OBJ)
+$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 bootloader: $(NEKONEST_BOOTLOADER_BIN)
