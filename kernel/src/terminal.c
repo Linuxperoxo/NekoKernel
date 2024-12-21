@@ -142,7 +142,7 @@ void terminal_input_clear()
   __current_section.__this_section_keyboard->__scan = 0x00;
   __current_section.__in_buffer_offset = 0x00;
 
-  //memset((char*)&__current_section.__terminal_in_buffer, 0x00, MAX_IN_BUFFER_SIZE);
+  memset((char*)&__current_section.__terminal_in_buffer, 0x00, MAX_IN_BUFFER_SIZE);
 }
 
 __u8 terminal_get_last_key()
