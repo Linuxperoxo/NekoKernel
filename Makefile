@@ -125,3 +125,6 @@ clean:
 
 run: strip image
 	$(QEMU) $(QEMUFLAGS)
+
+rund: image
+	$(QEMU) $(QEMUFLAGS) -s -S
