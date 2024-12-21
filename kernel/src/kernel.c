@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 20/12/2024                    |
+ *    |  SRC MOD   : 21/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -20,6 +20,7 @@
 #include <terminal.h>
 #include <device/io/keyboard/keyboard.h>
 #include <std/str.h>
+#include <shell.h>
 
 void k_main()
 {
@@ -55,18 +56,7 @@ void k_main()
   
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
   
-  printf("\n=== USER LOGIN:\n\n");
-  
-  printf("Login: ");
+  printf("\n=== USER SPACE:\n\n");
 
-  char __name[20];
-  scanf((char*)&__name, 20);
-
-  printf("Password: ");
-
-  char __pass[20];
-  scanf((char*)&__pass, 20);
-
-  if(strcmp((char*)&__name, "root") == 0 && strcmp((char*)&__pass, "root") == 0)
-    printf("Are u Sudo! :D\n");
+  shell_init();
 }
