@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 20/12/2024                    | 
+ *    |  SRC MOD   : 21/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -34,13 +34,13 @@ inline __attribute__((always_inline)) void cleanf()
   terminal_output_clear();
 }
 
-inline __attribute__((always_inline)) void scanf(char* __dest__, __u8 __size__)
+inline __attribute__((always_inline)) void scanf(char* __dest__, __u32 __size__)
 { 
   terminal_input_clear();
 
   while(terminal_get_last_key() != KEY_ENTER || KEY_IS_PRESS);
 
-  memcpy(__dest__, (char*)&__current_section.__terminal_in_buffer, __size__);
+  terminal_cpy_input(__dest__, __size__);
 }
 
 #endif
