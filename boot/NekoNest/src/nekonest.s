@@ -145,7 +145,7 @@
 %define KERNEL_CODE_SEGMENT_OFFSET 0x1000 
 %define KERNEL_KLOADER_CODE_OFFSET 0x0
 
-%define SECTORS_TO_READ 25
+%define SECTORS_TO_READ 26
 
 ;
 ; Portas para manipulação do controlador ATA
