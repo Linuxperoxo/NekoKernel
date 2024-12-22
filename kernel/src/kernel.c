@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 21/12/2024                    |
+ *    |  SRC MOD   : 22/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -20,6 +20,7 @@
 #include <terminal.h>
 #include <device/io/keyboard/keyboard.h>
 #include <std/str.h>
+#include <sys/kernel.h>
 #include <shell.h>
 
 void k_main()
