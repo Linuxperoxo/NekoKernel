@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keryboard.h                   |
- *    |  SRC MOD   : 17/12/2024                    |
+ *    |  SRC MOD   : 31/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -23,8 +23,6 @@
 #define KEYBOARD_IN_PORT 0x60
 #define KEYBOARD_COMMAND_PORT 0x64
 #define KEYBOARD_RESET_COMMAND 0xFF
-
-#define KEYBOARD_KEY_FLAGS_STATUS (__keyboard.__flags & 0xFF)
 
 /*
  *
@@ -89,34 +87,22 @@
  *
  */
 
+#define KEYBOARD_KEY_FLAGS_STATUS (__current_keyboard->__flags & 0xFF)
 #define KEY_IS_PRESS (KEYBOARD_KEY_FLAGS_STATUS & 0x01)
 #define KEY_IS_VISIBLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x02) >> 1)
 #define KEY_IS_ESPECIAL ((KEYBOARD_KEY_FLAGS_STATUS & 0x04) >> 2)
-#define KEYBOARD_TERMINAL_BUFFER_ENABLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x08) >> 3)
-
-/*
- *
- * Buffer Bit Flags
- *
- */
-
-#define KEYBOARD_FLAG_VISIBLE ((KEYBOARD_KEY_FLAGS_STATUS & 16) >> 4)
-#define KEYBOARD_FLAG_ESPECIAL ((KEYBOARD_KEY_FLAGS_STATUS & 32) >> 5)
-#define KEYBOARD_FLAG_CODE ((KEYBOARD_KEY_FLAGS_STATUS & 64) >> 6)
-#define KEYBOARD_FLAG_RELEASE ((KEYBOARD_KEY_FLAGS_STATUS & 128) >> 7)
-
-/*
- *
- * Buffer Flags
- *
- */
+#define KEYBOARD_BUFFER_ENABLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x08) >> 3)
 
 struct Keyboard {
   __u8 __scan; // Tem todo o scan da instrução IN
   __u8 __code; // Tecla que foi pressionada
   __u8 __char; // Caractere a ser impresso
   __u8 __flags; // Flags da tecla
+
+  void (*__buffer_func)(const __u8);
 };
+
+extern struct Keyboard* __current_keyboard;
 
 /*
  * __full_scan:
@@ -140,10 +126,13 @@ struct Keyboard {
  *  * bit 2: É um caractere especial ou não, 1 para especial, 0 para não especial
  *  * bit 3: Buffer Habilitado, 1 para sim, 0 para não
  *
+ * __buffer_func:
+ *
+ *  * A cada interrupção se o bit 3 de flags estiver habilitado, esssa função será chamada
+ *
  */
 
-extern struct Keyboard __keyboard;
-
 extern void keyboard_init();
+extern void keyboard_switch(struct Keyboard*);
 
 #endif
