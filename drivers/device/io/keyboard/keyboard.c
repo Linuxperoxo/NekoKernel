@@ -18,11 +18,10 @@
 #include <std/int.h>
 #include <sys/ports.h>
 #include <sys/kernel.h>
+#include <terminal.h>
 #include <device/io/keyboard/keyboard.h>
 
 struct Keyboard __keyboard = { 0x00 };
-
-extern void terminal_keyboard_input();
 
 __u8 __keyboard_layout[] = {
   '\0',
@@ -65,11 +64,13 @@ void keyboard_handler(struct InterruptRegisters*)
                        __keyboard.__char >= KEY_NUM_ASCII_INIT && __keyboard.__char <= KEY_NUM_ASCII_END ? __keyboard.__flags | 0x04 : __keyboard.__flags & 0xFB;
 
   if(KEYBOARD_TERMINAL_BUFFER_ENABLE)
-    terminal_keyboard_input();
+    terminal_in(__keyboard.__char);
 }
 
 void keyboard_init()
 {
   irq_install_isr_handler(IRQ_KEYBOARD_NUM, &keyboard_handler);
+
+  __keyboard.__flags = 0x08;
 }
 

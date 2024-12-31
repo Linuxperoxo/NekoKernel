@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : shell.c                       |
- *    |  SRC MOD   : 21/12/2024                    |
+ *    |  SRC MOD   : 30/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -30,7 +30,6 @@ void shell_init()
   while(1)
   {
     printf((char*)SHELL_PS1);
-    scanf((char*)&__shell.__buffer, SHELL_IN_BUFFER_SIZE);
   }
 }
 

@@ -25,15 +25,8 @@
 
 void k_main()
 {
-  cleanf();
-
-  terminal_init_vga();
-  
-  printf("=== KERNEL INIT: \n\n");
-  
-  printf("TERMINAL...   ");
-  terminal_init();
-  printf("[ OK ]\n");
+  struct Terminal __first_session;
+  terminal_init(&__first_session);
   
   printf("KEYBOARD...   ");
   keyboard_init();
@@ -58,6 +51,4 @@ void k_main()
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
   
   printf("\n=== USER SPACE:\n\n");
-
-  shell_init();
 }

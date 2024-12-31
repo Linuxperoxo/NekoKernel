@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 20/12/2024                    |
+ *    |  SRC MOD   : 30/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -175,7 +175,7 @@ void idtflush(struct idt_ptr* __idt_ptr__)
   );
 }
 
-__u8* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
+char* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
   "Division By Zero",
   "Debug",
   "Non Maskble Interrupt",
@@ -193,7 +193,7 @@ __u8* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
   "Unknown Interruption",
   "Coprocessor Fault",
   "Machine Check",
-  "Reserved",
+  "Kernel sysinit failed",
   "Reserved",
   "Reserved",
   "Reserved",
@@ -215,6 +215,11 @@ void isr_handler(struct InterruptRegisters* __regs_struct__)
     printf(__exceptions_messsagens[__regs_struct__->__int_num]);
     printf("\n");
     while(1);
+  }
+
+  if(__regs_struct__->__int_num >= 0x80)
+  {
+
   }
 }
 
