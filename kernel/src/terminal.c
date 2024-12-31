@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : terminal.c                    |
- *    |  SRC MOD   : 30/12/2024                    | 
+ *    |  SRC MOD   : 31/12/2024                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -27,16 +27,13 @@
  *
  */
 
-#ifndef NULL
-#define NULL (void*)0x00
-#endif
+#define TERMINAL __current_terminal
+#define TERMINAL_OUT_OFFSET TERMINAL->__out_offset
+#define TERMINAL_IN_OFFSET TERMINAL->__in_offset
+#define TERMINAL_VGA TERMINAL->__vga_state
+#define TERMINAL_KB TERMINAL->__keyboard
 
-#define TERMINAL __terminal
-#define TERMINAL_OUT_OFFSET __terminal->__out_offset
-#define TERMINAL_IN_OFFSET __terminal->__in_offset
-#define TERMINAL_VGA __terminal->__vga_state
-
-struct Terminal* __terminal = NULL;
+struct Terminal* TERMINAL = NULL;
 
 /*
  *
@@ -131,17 +128,32 @@ void terminal_init(struct Terminal* __terminal_section__)
   TERMINAL_VGA.__bc_color    = BLACK_BC_COLOR;
   TERMINAL_VGA.__ch_color    = WHITE_CHAR_COLOR;
   TERMINAL_VGA.__last_put    = 0x00;
+
+  /*
+   *
+   * Configurando struct Keyboard linkada ao terminal
+   *
+   */
+
+  TERMINAL_KB.__scan        = 0x00;
+  TERMINAL_KB.__code        = 0x00;
+  TERMINAL_KB.__char        = 0x00;
+  TERMINAL_KB.__flags       = 0x08;
+  TERMINAL_KB.__buffer_func = &terminal_in; 
+
+  keyboard_switch(&TERMINAL_KB);
 }
 
 void terminal_out(const char __ch__)
 {
+  TERMINAL_OUT_OFFSET = TERMINAL_OUT_OFFSET >= MAX_OUT_BUFFER_SIZE ? 0 : TERMINAL_OUT_OFFSET;
   TERMINAL->__out_buffer[TERMINAL_OUT_OFFSET] = __ch__;
   
   switch(TERMINAL->__out_buffer[TERMINAL_OUT_OFFSET])
   {
     case '\n':    
       TERMINAL_VGA.__current_col  = 0x00;
-      TERMINAL_VGA.__current_row += 0x01;
+   TERMINAL_VGA.__current_row += 0x01;
 
       ++TERMINAL_OUT_OFFSET;
       
@@ -157,21 +169,106 @@ void terminal_out(const char __ch__)
       terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col);
       return;
     break;
-  }
-  
-  if(TERMINAL_VGA.__current_col >= DEFAULT_WIDTH)
-  {
-    TERMINAL_VGA.__current_col  = 0x00;
-    TERMINAL_VGA.__current_row += 0x01;
-  }
-  terminal_put_char(TERMINAL->__out_buffer[TERMINAL_OUT_OFFSET++]);
-  terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col);
+
+    default:
+      if(TERMINAL_VGA.__current_col >= DEFAULT_WIDTH)
+      {
+        TERMINAL_VGA.__current_col  = 0x00;
+        TERMINAL_VGA.__current_row += 0x01;
+      }
+
+      if(TERMINAL_VGA.__current_row >= DEFAULT_HEIGHT)
+      {
+
+        /*
+         *
+         * Vou fazer ainda
+         *
+         */
+
+      }
+
+      terminal_put_char(TERMINAL->__out_buffer[TERMINAL_OUT_OFFSET++]);
+      terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col);
+    break;
+  }  
 }
 
-void terminal_in(const char __ch__)
+/*
+ *
+ * Essa função é responsável por manipular os inputs no terminal
+ *
+ */
+
+void terminal_in(const __u8 __key_code__)
 {
-  if(KEY_IS_PRESS && KEY_IS_VISIBLE)
+  if(KEY_IS_PRESS)
   {
-    terminal_out(__ch__);
+    switch(__key_code__)
+    {
+      case KEY_ENTER:
+
+        /*
+         *
+         * Caso a tecla pressionada seja Enter, vamos limpar o buffer de entrada
+         * e quebrar a linha
+         *
+         */
+
+        TERMINAL_IN_OFFSET = 0x00;
+        TERMINAL->__flags |= 0x01; // Levantando a flag que representa que o buffer está pronto 
+
+        terminal_out('\n');
+      break;
+
+      case KEY_BACK:
+        if(TERMINAL_IN_OFFSET > 0x00)
+        {
+          if(TERMINAL_VGA.__current_col > 0x00)
+          {
+            TERMINAL_VGA.__current_col -= 1;
+          }
+          else
+          {
+            if(TERMINAL_VGA.__current_row > 0x00)
+            {
+              TERMINAL_VGA.__current_col  = DEFAULT_WIDTH - 1;
+              TERMINAL_VGA.__current_row -= 1;
+            }
+          }
+          
+          terminal_out('\0');
+          
+          TERMINAL_VGA.__current_col                 -= 1;
+          TERMINAL_OUT_OFFSET                        -= 1;
+          TERMINAL->__in_buffer[TERMINAL_IN_OFFSET--] = 0x00;
+
+          terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col);
+        }  
+      break;
+
+      default:
+        TERMINAL_IN_OFFSET = TERMINAL_IN_OFFSET >= MAX_IN_BUFFER_SIZE ? 0 : TERMINAL_IN_OFFSET;
+        
+        if(TERMINAL_BUFFER_IS_READY)
+          memset(&TERMINAL->__in_buffer, 0x00, MAX_IN_BUFFER_SIZE);
+
+        TERMINAL->__in_buffer[TERMINAL_IN_OFFSET++] = KEY_IS_VISIBLE ? TERMINAL_KB.__char : TERMINAL_KB.__code;
+        TERMINAL->__flags                          &= 0xFE; // Desabilitando a flag que fala que o buffer está pronto
+
+        if(KEY_IS_VISIBLE)
+          terminal_out(TERMINAL_KB.__char);
+      break;
+    }
   }
+}
+
+void terminal_cln_flag()
+{
+  TERMINAL->__flags = 0x00;
+}
+
+void terminal_set_flag(const __u8 __new_flag__)
+{
+  TERMINAL->__flags &= ((__new_flag__ << 4) & 0xF0);   
 }
