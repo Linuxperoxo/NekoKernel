@@ -129,6 +129,11 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(NEKO_OS_IMG)
 
+commit:
+	git add .
+	git commit -m "full update"
+	git push origin main
+
 run: strip image
 	$(QEMU) $(QEMUFLAGS)
 
