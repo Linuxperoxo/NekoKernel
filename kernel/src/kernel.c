@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 22/12/2024                    |
+ *    |  SRC MOD   : 31/12/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -49,6 +49,4 @@ void k_main()
   printf(" (    |    )\n\n");
   
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
-  
-  printf("\n=== USER SPACE:\n\n");
 }

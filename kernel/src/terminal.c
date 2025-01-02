@@ -94,16 +94,7 @@ __attribute__((always_inline)) inline void terminal_mov_ptr(__u8 __row__, __u8 _
  */
 
 void terminal_init(struct Terminal* __terminal_section__)
-{ 
-  if(__terminal_section__ == NULL)
-  {
-    __asm__ volatile(
-      "int $0x11\n"
-      :
-      :
-      :
-    );
-  }
+{
 
   /*
    *
@@ -128,6 +119,8 @@ void terminal_init(struct Terminal* __terminal_section__)
   TERMINAL_VGA.__bc_color    = BLACK_BC_COLOR;
   TERMINAL_VGA.__ch_color    = WHITE_CHAR_COLOR;
   TERMINAL_VGA.__last_put    = 0x00;
+  
+  printf("TERMINAL...   [ OK ]\n");
 
   /*
    *
@@ -153,7 +146,7 @@ void terminal_out(const char __ch__)
   {
     case '\n':    
       TERMINAL_VGA.__current_col  = 0x00;
-   TERMINAL_VGA.__current_row += 0x01;
+      TERMINAL_VGA.__current_row += 0x01;
 
       ++TERMINAL_OUT_OFFSET;
       
