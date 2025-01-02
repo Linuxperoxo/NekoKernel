@@ -30,9 +30,7 @@ inline __attribute__((always_inline)) void printf(const char* __text__)
 
 inline __attribute__((always_inline)) void scanf(char* __dest__, __u32 __size__)
 { 
-  terminal_cln_flags()
 
-  while(!TERMINAL_BUFFER_IS_READY);
 }
 
 #endif

@@ -239,9 +239,9 @@ void terminal_in(const __u8 __key_code__)
           
           terminal_out('\0');
           
-          TERMINAL_VGA.__current_col                 -= 1;
-          TERMINAL_OUT_OFFSET                        -= 1;
-          TERMINAL->__in_buffer[TERMINAL_IN_OFFSET--] = 0x00;
+          TERMINAL_VGA.__current_col                   -= 1;
+          TERMINAL_OUT_OFFSET                          -= 1;
+          TERMINAL->__in_buffer[--TERMINAL_IN_OFFSET]   = 0x00;
 
           terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col);
         }  
