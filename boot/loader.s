@@ -6,12 +6,14 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : loader.s                      |
-;    |  SRC MOD   : 18/12/2024                    |
+;    |  SRC MOD   : 02/01/2025                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
 ;
 ;
+
+%define STACK_ADDRS 0xFFFFFF
 
 SECTION .text
   GLOBAL k_loader
@@ -43,15 +45,9 @@ SECTION .text
   ;DD - (0x1BADB002 + 0x00)
 
 k_loader:  
-  MOV ESP, stack_space + 8192 ; Configurando a stack 
-  CLI                         ; Ignorando interrupções externas
-  CALL k_main                 ; Chamando função principal do kernel 
-  JMP $                       ; Loop infinito
+  MOV ESP, STACK_ADDRS ; Configurando a stack
+  MOV EBP, ESP
+  CLI                  ; Ignorando interrupções externas
+  CALL k_main          ; Chamando função principal do kernel 
+  JMP $                ; Loop infinito
 
-SECTION .bss
-
-;
-; Stack de 8192 Kib
-;
-
-stack_space: RESB 8192
