@@ -1,4 +1,4 @@
-;/*
+/*
  *
  *
  *    /--------------------------------------------O
@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 31/12/2024                    |
+ *    |  SRC MOD   : 02/01/2024                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -47,7 +47,7 @@ void k_main()
   printf("  /   |   \\\n");
   printf(" (    |    )\n\n");
   
-  printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
+  printf("\nNeko Say -> Welcome to Neko Kernel! :D\n\n");
 
-  scanf((void*)100000, 20);
+  shell_init();
 }
