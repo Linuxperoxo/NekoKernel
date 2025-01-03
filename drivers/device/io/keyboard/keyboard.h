@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keryboard.h                   |
- *    |  SRC MOD   : 31/12/2024                    |
+ *    |  SRC MOD   : 02/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -87,7 +87,7 @@
  *
  */
 
-#define KEYBOARD_KEY_FLAGS_STATUS (__current_keyboard->__flags & 0xFF)
+#define KEYBOARD_KEY_FLAGS_STATUS ( keyboard_flags() & 0xFF)
 #define KEY_IS_PRESS (KEYBOARD_KEY_FLAGS_STATUS & 0x01)
 #define KEY_IS_VISIBLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x02) >> 1)
 #define KEY_IS_ESPECIAL ((KEYBOARD_KEY_FLAGS_STATUS & 0x04) >> 2)
@@ -101,8 +101,6 @@ struct Keyboard {
 
   void (*__buffer_func)(const __u8);
 };
-
-extern struct Keyboard* __current_keyboard;
 
 /*
  * __full_scan:
@@ -134,5 +132,6 @@ extern struct Keyboard* __current_keyboard;
 
 extern void keyboard_init();
 extern void keyboard_switch(struct Keyboard*);
+extern __u8 keyboard_flags();
 
 #endif

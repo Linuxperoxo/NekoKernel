@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keyboard.c                    |
- *    |  SRC MOD   : 31/12/2024                    |
+ *    |  SRC MOD   : 02/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -21,7 +21,15 @@
 #include <terminal.h>
 #include <device/io/keyboard/keyboard.h>
 
-struct Keyboard* __current_keyboard = NULL;
+/*
+ *
+ * Macros
+ *
+ */
+
+#define KEYBOARD __current_keyboard
+
+static struct Keyboard* KEYBOARD = NULL;
 
 __u8 __keyboard_layout[] = {
   '\0',
@@ -40,9 +48,12 @@ __u8 __keyboard_layout[] = {
 
 void keyboard_handler(struct InterruptRegisters*) 
 {
-  __current_keyboard->__scan = inb(KEYBOARD_IN_PORT);
-  __current_keyboard->__code = __current_keyboard->__scan & 0x7F; 
-  __current_keyboard->__char = __keyboard_layout[__current_keyboard->__code];
+  if(KEYBOARD == NULL)
+    return;
+
+  KEYBOARD->__scan = inb(KEYBOARD_IN_PORT);
+  KEYBOARD->__code = KEYBOARD->__scan & 0x7F; 
+  KEYBOARD->__char = __keyboard_layout[KEYBOARD->__code];
   
   /*
    *
@@ -50,7 +61,7 @@ void keyboard_handler(struct InterruptRegisters*)
    *
    */
 
-  __current_keyboard->__flags = ((__current_keyboard->__scan & 0x80) >> 7) == 0x00 ? __current_keyboard->__flags | 0x01 : __current_keyboard->__flags & 0xFE;
+  KEYBOARD->__flags = ((KEYBOARD->__scan & 0x80) >> 7) == 0x00 ? KEYBOARD->__flags | 0x01 : KEYBOARD->__flags & 0xFE;
   
   /*
    *
@@ -58,7 +69,7 @@ void keyboard_handler(struct InterruptRegisters*)
    *
   */
 
-  __current_keyboard->__flags = __current_keyboard->__char != '\0' ? __current_keyboard->__flags | 0x02 : __current_keyboard->__flags & 0xFD;
+  KEYBOARD->__flags = KEYBOARD->__char != '\0' ? KEYBOARD->__flags | 0x02 : KEYBOARD->__flags & 0xFD;
   
   /*
    *
@@ -66,11 +77,11 @@ void keyboard_handler(struct InterruptRegisters*)
    *
    */
   
-  __current_keyboard->__flags = __current_keyboard->__char >= KEY_LOW_ALPHA_ASCII_INIT && __current_keyboard->__char <= KEY_LOW_ALPHA_ASCII_END ||
-                                __current_keyboard->__char >= KEY_NUM_ASCII_INIT && __current_keyboard->__char <= KEY_NUM_ASCII_END ? __current_keyboard->__flags | 0x04 : __current_keyboard->__flags & 0xFB;
+  KEYBOARD->__flags = KEYBOARD->__char >= KEY_LOW_ALPHA_ASCII_INIT && KEYBOARD->__char <= KEY_LOW_ALPHA_ASCII_END ||
+                                KEYBOARD->__char >= KEY_NUM_ASCII_INIT && KEYBOARD->__char <= KEY_NUM_ASCII_END ? KEYBOARD->__flags | 0x04 : KEYBOARD->__flags & 0xFB;
 
   if(KEYBOARD_BUFFER_ENABLE)
-    __current_keyboard->__buffer_func(__current_keyboard->__code);
+    KEYBOARD->__buffer_func(KEYBOARD->__code);
 }
 
 /*
@@ -86,6 +97,10 @@ void keyboard_init()
 
 void keyboard_switch(struct Keyboard* __new_keyboard__)
 {
-  __current_keyboard = __new_keyboard__;
+  KEYBOARD = __new_keyboard__;
 }
 
+__u8 keyboard_flags()
+{
+  return KEYBOARD != NULL ? KEYBOARD->__flags : 0x00;
+}
