@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 31/12/2024                    | 
+ *    |  SRC MOD   : 02/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -22,15 +22,19 @@
 
 inline __attribute__((always_inline)) void printf(const char* __text__) 
 {
-  while(*__text__ != '\0') 
+  while(*__text__ != '\0')
   {
     terminal_out(*__text__++);
   }
 }
 
-inline __attribute__((always_inline)) void scanf(char* __dest__, __u32 __size__)
-{ 
+inline __attribute__((always_inline)) void scanf(char* __dest__, __u16 __size__)
+{
+  terminal_cln_flag();
 
+  while(!TERMINAL_BUFFER_IS_READY);
+
+  terminal_cpy_in(__dest__, __size__);
 }
 
 #endif
