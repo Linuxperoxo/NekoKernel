@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 02/01/2025                    |
+ *    |  SRC MOD   : 03/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -46,20 +46,14 @@
 struct idt_entry __idt_entries[IDT_ENTRIES];
 struct idt_ptr __idt_ptr;
 
-void idtinit() 
+void idt_init() 
 {
   __idt_ptr.__limit = sizeof(struct idt_entry) * IDT_ENTRIES - 1;
   __idt_ptr.__idt_first_entry = (__u32)&__idt_entries;
 
-  memset(&__idt_entries, 0x00, sizeof(struct idt_entry) * IDT_ENTRIES);
-
   /*
    *
    * Comando para configurar o CHIP PIC Master e Slave
-   *
-   */
-
-  /*
    *
    * O PIC Master ou primário recebe interrupções de I/O de IRQ0 - IRQ7, porém,
    * ele usar a linha do IRQ2 para se comunicar como PIC Slave ou secundário, ou seja,
@@ -284,7 +278,8 @@ void isr_handler(struct InterruptRegisters* __regs_struct__)
     printf("\nNEKO PANIC! : ");
     printf(__exceptions_messsagens[__regs_struct__->__int_num]);
     printf("\n");
-    while(1);
+    
+    for(;;);
   }
 
   if(__regs_struct__->__int_num >= 0x80)

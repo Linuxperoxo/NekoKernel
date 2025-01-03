@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 02/01/2024                    |
+ *    |  SRC MOD   : 03/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -38,7 +38,7 @@ void k_main()
   printf("[ OK ]\n");
 
   printf("IDT...        ");
-  idtinit(); 
+  idt_init(); 
   printf("[ OK ]\n");
 
   /*

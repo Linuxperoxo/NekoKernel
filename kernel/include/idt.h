@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.h                         |
- *    |  SRC MOD   : 20/12/2024                    |
+ *    |  SRC MOD   : 03/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -72,7 +72,7 @@ struct idt_ptr {
  *
  */
 
-extern void idtinit(); 
+extern void idt_init(); 
 extern void idtsetgate(__u8, __u32, __u16, __u8);
 extern void idtflush(struct idt_ptr*);
 extern void isr_handler(struct InterruptRegisters*);

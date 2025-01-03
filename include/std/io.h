@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 02/01/2025                    | 
+ *    |  SRC MOD   : 03/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -18,6 +18,7 @@
 
 #include <std/int.h>
 #include <std/utils.h>
+#include <timer.h>
 #include <terminal.h>
 
 inline __attribute__((always_inline)) void printf(const char* __text__) 
@@ -32,7 +33,10 @@ inline __attribute__((always_inline)) void scanf(char* __dest__, __u16 __size__)
 {
   terminal_cln_flag();
 
-  while(!TERMINAL_BUFFER_IS_READY);
+  while(!TERMINAL_BUFFER_IS_READY)
+  {
+    sleep_for(100);
+  }
 
   terminal_cpy_in(__dest__, __size__);
 }
