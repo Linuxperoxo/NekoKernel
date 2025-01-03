@@ -1,4 +1,4 @@
-/*
+;/*
  *
  *
  *    /--------------------------------------------O
@@ -24,9 +24,8 @@
 #include <shell.h>
 
 void k_main()
-{
-  struct Terminal __first_session;
-  terminal_init(&__first_session);
+{ 
+  terminal_init();
   
   printf("KEYBOARD...   ");
   keyboard_init();
@@ -49,4 +48,6 @@ void k_main()
   printf(" (    |    )\n\n");
   
   printf("\nNeko Say -> Welcome to Neko Kernel! :D\n");
+
+  scanf((void*)100000, 20);
 }

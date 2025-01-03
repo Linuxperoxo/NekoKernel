@@ -1,4 +1,2 @@
-* Refatorar todo o código de terminal.c
 * Refatorar boa parte do idt.c/idt.s
 * Adicionar syscall
-* Fazer scanf

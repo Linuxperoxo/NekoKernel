@@ -31,5 +31,4 @@ SECTIONS
   {
     *(.bss)
   }
-  /DISCARD/ : { *(.note*) *(.comment*) }
 }
