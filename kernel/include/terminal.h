@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : terminal.h                    |
- *    |  SRC MOD   : 31/12/2024                    | 
+ *    |  SRC MOD   : 02/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -25,33 +25,39 @@
 
 /*
  *
- * Flags para o terminal
+ * Runtime flags
  *
  */
 
-#define TERMINAL_FLAGS_STATUS (__current_terminal->__flags & 0xFF)
-#define TERMINAL_BUFFER_IS_READY (TERMINAL_FLAGS_STATUS & 0x01)
+#define TERMINAL_BUFFER_IS_READY ((terminal_sts_flag() >> 4) & 0x01)
+
+/*
+ *
+ * Custom flags
+ *
+ */
+
+#define TERMINAL_INV_INPUT (terminal_sts_flag() & 0x01)
 
 struct Terminal
 {
   struct VGAState __vga_state;
   struct Keyboard __keyboard;
   
-  __u8 __in_buffer[MAX_IN_BUFFER_SIZE];
   __u16 __in_offset;
-
-  __u8 __out_buffer[MAX_OUT_BUFFER_SIZE];
   __u16 __out_offset;
 
+  __u8 __out_buffer[MAX_OUT_BUFFER_SIZE];
+  __u8 __in_buffer[MAX_IN_BUFFER_SIZE];
   __u8 __flags;
 };
 
-extern struct Terminal* __current_terminal;
-
-extern void terminal_init(struct Terminal*);
+extern void terminal_init();
 extern void terminal_out(const char);
 extern void terminal_in(const __u8);
 extern void terminal_cln_flag();
 extern void terminal_set_flag(const __u8);
+extern __u8 terminal_sts_flag();
+extern void terminal_cpy_in(void*, __u16);
 
 #endif
