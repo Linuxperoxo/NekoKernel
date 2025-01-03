@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : shell.c                       |
- *    |  SRC MOD   : 30/12/2024                    |
+ *    |  SRC MOD   : 02/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -27,9 +27,10 @@ struct Shell __shell;
 
 void shell_init()
 {
-  while(1)
+  for(;;)
   {
     printf((char*)SHELL_PS1);
+    scanf((char*)&__shell.__buffer, SHELL_IN_BUFFER_SIZE);
   }
 }
 
