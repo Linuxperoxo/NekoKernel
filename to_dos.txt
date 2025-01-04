@@ -1,2 +1,3 @@
-* Refatorar boa parte do idt.c/idt.s
+* Refatorar idt.c/irq.s
+* Refatorar gdt.c
 * Adicionar syscall

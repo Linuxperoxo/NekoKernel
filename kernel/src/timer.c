@@ -72,8 +72,6 @@ void timer_init()
 
 void sleep_for(__u32 __ms__)
 {
-  __ticks = 0x00;
-
   __asm__ volatile(
     "xorl %%ebx, %%ebx\n"
     "movl %%ebx, (%1)\n"

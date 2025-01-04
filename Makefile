@@ -18,7 +18,7 @@ CFLAGS = -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-p
 ASMFLAGSBIN = -f bin
 ASMFLAGSELF = -g -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
-QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw
+QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw 
 QEMUFLAGSDEBUG = $(QEMUFLAGS) -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
@@ -44,6 +44,9 @@ IDT_OBJ = $(OBJ_DIR)/idt.o
 
 ISR_SRC = $(KERNEL_SRC_DIR)/isr.s
 ISR_OBJ = $(OBJ_DIR)/isr.o
+
+TIMER_SRC = $(KERNEL_SRC_DIR)/timer.c
+TIMER_OBJ = $(OBJ_DIR)/timer.o
 
 NEKONEST_BOOTLOADER_SRC = $(BOOT_DIR)/NekoNest/src/nekonest.s
 NEKONEST_BOOTLOADER_BIN = $(BIN_DIR)/nekonest
@@ -90,6 +93,9 @@ $(SHELL_OBJ):
 $(TERMINAL_OBJ):
 	$(CC) $(CFLAGS) $(TERMINAL_SRC) -c -o $@
 
+$(TIMER_OBJ):
+	$(CC) $(CFLAGS) $(TIMER_SRC) -c -o $@
+
 $(ISR_OBJ):
 	$(ASM) $(ASMFLAGSELF) $(ISR_SRC) -o $@
 
@@ -111,7 +117,7 @@ $(KERNEL_OBJ):
 $(KERNEL_LOADER_OBJ):
 	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
 
-$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ)
+$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TIMER_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 bootloader: $(NEKONEST_BOOTLOADER_BIN)

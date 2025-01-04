@@ -18,11 +18,12 @@
 #include <std/io.h>
 #include <sys/ports.h>
 #include <terminal.h>
-#include <device/io/keyboard/keyboard.h>
 #include <std/str.h>
 #include <sys/kernel.h>
+#include <media/ata.h>
 #include <shell.h>
 #include <timer.h>
+#include <device/io/keyboard/keyboard.h>
 
 void k_main()
 { 
@@ -39,6 +40,20 @@ void k_main()
   printf("IDT...        ");
   idtinit(); 
   printf("[ OK ]\n");
+
+  /*
+   *
+   * Esse código assembly foi apenas por testes
+   *
+   * __asm__ volatile(
+   * "movw $0b00001011, %%ax\n"
+   * "movw %%ax, %%cs\n"
+   * :
+   * :
+   * : "%eax"
+   * );
+   * 
+   */
 
   printf("TIMER...      ");
   timer_init();
