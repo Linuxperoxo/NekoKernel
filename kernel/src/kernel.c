@@ -22,11 +22,12 @@
 #include <std/str.h>
 #include <sys/kernel.h>
 #include <shell.h>
+#include <timer.h>
 
 void k_main()
 { 
   terminal_init();
-  
+
   printf("KEYBOARD...   ");
   keyboard_init();
   printf("[ OK ]\n");
@@ -39,6 +40,10 @@ void k_main()
   idtinit(); 
   printf("[ OK ]\n");
 
+  printf("TIMER...      ");
+  timer_init();
+  printf("[ OK ]\n");
+
   printf("\n=== NEKO WELCOME: \n\n");
   
   printf("    (\\_/)\n");
@@ -46,8 +51,6 @@ void k_main()
   printf("   /  |  \\ <- This is Neko! Say 'Hi' to Neko\n");
   printf("  /   |   \\\n");
   printf(" (    |    )\n\n");
-  
-  printf("\nNeko Say -> Welcome to Neko Kernel! :D\n\n");
 
-  shell_init();
+  printf("\nSYSNEKO: Welcome to Neko Kernel! :D\n\n");
 }
