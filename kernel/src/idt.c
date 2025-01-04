@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 30/12/2024                    |
+ *    |  SRC MOD   : 02/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -22,19 +22,26 @@
 #include <sys/kernel.h>
 
 #define IDT_ENTRIES 256
-#define EXCEPTIONS_MSG_NUM 28
+#define EXCEPTIONS_MSG_NUM 32
 #define ISR_FOR_IRQ 16
 
 /*
  *
- * PIC Ports
+ * Portas para o PIC primário (master)
  *
  */
 
 #define PRI_PIC_COMMAND_PORT 0x20
-#define PRI_PIC_DATA_PORT 0x21
+#define PRI_PIC_DATA_PORT    0x21
+
+/*
+ *
+ * Portas para PIC secundário (Escravo) 
+ *
+ */
+
 #define SEC_PIC_COMMAND_PORT 0xA0
-#define SEC_PIC_DATA_PORT 0xA1
+#define SEC_PIC_DATA_PORT    0xA1
 
 struct idt_entry __idt_entries[IDT_ENTRIES];
 struct idt_ptr __idt_ptr;
@@ -175,36 +182,99 @@ void idtflush(struct idt_ptr* __idt_ptr__)
   );
 }
 
+/* 
+ *
+ * Exceções:
+ * 
+ * Exceção 0 - Division By Zero:
+ * Ocorre quando o processador tenta dividir um número por zero.
+ *
+ * Exceção 1 - Debug:
+ * Usada pelo depurador, é gerada quando uma instrução de depuração é encontrada, como o comando `int 3`.
+ *
+ * Exceção 2 - Non Maskable Interrupt (NMI):
+ * Uma interrupção crítica que não pode ser mascarada. Frequentemente associada a falhas de hardware, como memória defeituosa.
+ *
+ * Exceção 3 - Breakpoint:
+ * Gerada quando o processador encontra uma instrução de breakpoint (normalmente `int 3`), usada para depuração.
+ *
+ * Exceção 4 - Into Detected Overflow (Overflow):
+ * Ocorre quando uma operação aritmética resulta em um overflow, ou seja, o valor excede o limite que pode ser representado no tipo de dado.
+ *
+ * Exceção 5 - Bound Range Exceeded:
+ * Gerada quando o processador detecta um erro no uso da instrução `BOUND`, que verifica se um índice está dentro de um intervalo especificado.
+ *
+ * Exceção 6 - Invalid Opcode:
+ * Ocorre quando o processador encontra um opcode (código de operação) inválido ou desconhecido.
+ *
+ * Exceção 7 - No Coprocessor:
+ * Gerada quando uma instrução que requer um coprocessador (como a FPU) é executada, mas o coprocessador não está presente.
+ *
+ * Exceção 8 - Double Fault:
+ * Ocorre quando uma exceção é gerada enquanto o processador ainda está lidando com outra exceção.
+ * 
+ * Exceção 9 - Coprocessor Segment Overrun:
+ * Relacionada a um erro de acesso ao coprocessador, como um erro ao acessar o segmento de dados do coprocessador.
+ *
+ * Exceção 10 - Invalid TSS (Task State Segment):
+ * Gerada quando o processador encontra um erro ao acessar o Task State Segment (TSS), que mantém o estado de uma tarefa no sistema.
+ *
+ * Exceção 11 - Stack Fault:
+ * Ocorre quando há um erro relacionado à pilha, como um estouro de pilha ou uma violação de acesso.
+ *
+ * Exceção 12 - Page Fault:
+ * Ocorre quando o processador tenta acessar uma página de memória que não está mapeada ou que está fora dos limites da memória física.
+ *
+ * Exceção 13 - General Protection Fault:
+ * Gerada quando o processador detecta uma violação de proteção de memória, como acessar uma área de memória protegida ou executar uma operação inválida.
+ *
+ * Exceção 14 - Unknown Interrupt:
+ * Uma interrupção desconhecida ou não mapeada. Ocorre quando o processador recebe uma interrupção inválida.
+ *
+ * Exceção 15 - Coprocessor Fault:
+ * Gerada quando ocorre uma falha ao tentar acessar ou utilizar um coprocessador.
+ *
+ * Exceção 16 - Machine Check Exception:
+ * Indica uma falha crítica de hardware, como falhas de memória ou falhas no próprio processador.
+ *
+ * Exceções 17 a 31 - None:
+ * Essas exceções não são usadas pela arquitetura x86 e são reservadas para uso futuro ou personalização. Elas podem ser usadas em implementações específicas ou em extensões do processador.
+ *
+ */
+
 char* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
-  "Division By Zero",
-  "Debug",
-  "Non Maskble Interrupt",
-  "Breakpoint",
-  "Into Detected Overflow",
-  "Out of Bounds",
-  "Invalid Opcode",
-  "No Coprocessor",
-  "Double fault",
-  "Coprocessor Segment Overrun",
-  "Bad TSS",
-  "Stack Fault",
-  "General Protection Fault",
-  "Page Fault",
-  "Unknown Interruption",
-  "Coprocessor Fault",
-  "Machine Check",
-  "Kernel sysinit failed",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved",
-  "Reserved"
+  "Division By Zero",               // Exceção 0  - Division By Zero
+  "Debug",                          // Exceção 1  - Debug
+  "Non Maskable Interrupt",         // Exceção 2  - Non Maskable Interrupt (NMI)
+  "Breakpoint",                     // Exceção 3  - Breakpoint
+  "Into Detected Overflow",         // Exceção 4  - Into Detected Overflow (Overflow)
+  "Out of Bounds",                  // Exceção 5  - Bound Range Exceeded
+  "Invalid Opcode",                 // Exceção 6  - Invalid Opcode
+  "No Coprocessor",                 // Exceção 7  - No Coprocessor (Coprocessor Not Available)
+  "Double fault",                   // Exceção 8  - Double Fault
+  "Coprocessor Segment Overrun",    // Exceção 9  - Coprocessor Segment Overrun
+  "Bad TSS",                        // Exceção 10 - Invalid TSS (Task State Segment)
+  "Stack Fault",                    // Exceção 11 - Stack Fault
+  "Page Fault",                     // Exceção 12 - Page Fault
+  "General Protection Fault",       // Exceção 13 - General Protection Fault
+  "Unknown Interruption",           // Exceção 14 - Unknown Interrupt
+  "Coprocessor Fault",              // Exceção 15 - Coprocessor Fault
+  "Machine Check",                  // Exceção 16 - Machine Check Exception
+  "None",                           // Exceção 17 - None
+  "None",                           // Exceção 18 - None
+  "None",                           // Exceção 19 - None
+  "None",                           // Exceção 20 - None
+  "None",                           // Exceção 21 - None
+  "None",                           // Exceção 22 - None
+  "None",                           // Exceção 23 - None
+  "None",                           // Exceção 24 - None
+  "None",                           // Exceção 25 - None
+  "None",                           // Exceção 26 - None
+  "None",                           // Exceção 27 - None
+  "None",                           // Exceção 28 - None
+  "None",                           // Exceção 29 - None
+  "None",                           // Exceção 30 - None
+  "None"                            // Exceção 31 - None
 };
 
 void isr_handler(struct InterruptRegisters* __regs_struct__)
