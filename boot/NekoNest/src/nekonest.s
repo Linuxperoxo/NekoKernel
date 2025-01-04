@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : nekonest.s                    |
-;    |  SRC MOD   : 30/12/2024                    |
+;    |  SRC MOD   : 02/01/2024                    |
 ;    |  VERSION   : 0.0-1                         |
 ;    |                                            |
 ;    O--------------------------------------------/
@@ -145,7 +145,7 @@
 %define KERNEL_CODE_SEGMENT_OFFSET 0x1000 
 %define KERNEL_KLOADER_CODE_OFFSET 0x0
 
-%define SECTORS_TO_READ 25
+%define SECTORS_TO_READ 27
 
 ;
 ; Portas para manipulação do controlador ATA
