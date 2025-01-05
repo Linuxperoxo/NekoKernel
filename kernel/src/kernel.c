@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 03/01/2025                    |
+ *    |  SRC MOD   : 05/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -24,6 +24,13 @@
 #include <shell.h>
 #include <timer.h>
 #include <device/io/keyboard/keyboard.h>
+
+void k_shutdown()
+{
+  printf("\nSYSTEM SHUTTING DOWN!...\n");
+  sleep_for(2000);
+  outw(0x604, 0x2000);
+}
 
 void k_main()
 { 
@@ -68,4 +75,6 @@ void k_main()
   printf(" (    |    )\n\n");
 
   printf("\nSYSNEKO: Welcome to Neko Kernel! :D\n\n");
+
+  k_shutdown();
 }
