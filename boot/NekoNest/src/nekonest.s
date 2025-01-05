@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : nekonest.s                    |
-;    |  SRC MOD   : 02/01/2024                    |
+;    |  SRC MOD   : 04/01/2024                    |
 ;    |  VERSION   : 0.0-1                         |
 ;    |                                            |
 ;    O--------------------------------------------/

@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 02/01/2025                    |
+#    |  SRC MOD   : 03/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -51,7 +51,7 @@ TIMER_OBJ = $(OBJ_DIR)/timer.o
 NEKONEST_BOOTLOADER_SRC = $(BOOT_DIR)/NekoNest/src/nekonest.s
 NEKONEST_BOOTLOADER_BIN = $(BIN_DIR)/nekonest
 
-NEKO_OS_IMG = ./nekoOS.img
+NEKO_OS_IMG = $(IMG_DIR)/nekoOS.img
 
 LINKER_FILE = linker.ld
 
