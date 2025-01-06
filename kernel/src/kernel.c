@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 05/01/2025                    |
+ *    |  SRC MOD   : 06/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -23,6 +23,7 @@
 #include <media/ata.h>
 #include <shell.h>
 #include <timer.h>
+#include <syscall.h>
 #include <device/io/keyboard/keyboard.h>
 
 void k_shutdown()
@@ -75,6 +76,15 @@ void k_main()
   printf(" (    |    )\n\n");
 
   printf("\nSYSNEKO: Welcome to Neko Kernel! :D\n\n");
+
+  irq_install_isr_handler(0x03, &syscall_handler);
+
+  __asm__ volatile(
+    "int $0x23\n"
+    :
+    :
+    :
+  );
 
   k_shutdown();
 }

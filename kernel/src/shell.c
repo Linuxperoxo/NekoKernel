@@ -23,7 +23,7 @@ struct Shell
   char __buffer[SHELL_IN_BUFFER_SIZE];
 };
 
-struct Shell __shell;
+static struct Shell __shell;
 
 void shell_init()
 {
