@@ -17,6 +17,7 @@
 #define __KERNEL__
 
 #include <std/int.h>
+#include <std/io.h>
 
 /*
  *
