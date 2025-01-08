@@ -1,3 +1,18 @@
+/*
+ *
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : linker.ld                     |
+ *    |  SRC MOD   : 08/01/2025                    |
+ *    |                                            |
+ *    O--------------------------------------------/
+ *
+ *
+ */
+
 OUTPUT_FORMAT(elf32-i386)
 ENTRY(k_loader)
 SECTIONS
@@ -15,7 +30,7 @@ SECTIONS
    * 
    */
 
-  . = 0x101000;
+  . = 0x10001000;
 
   .text : 
   {

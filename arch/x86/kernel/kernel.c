@@ -26,28 +26,24 @@
 #include <syscall.h>
 #include <device/io/keyboard/keyboard.h>
 
-void k_shutdown()
+void k_init()
 {
-  printf("\nSYSTEM SHUTTING DOWN!...\n");
-  sleep_for(2000);
-  outw(0x604, 0x2000);
+  terminal_init();
+  keyboard_init();
+  gdtinit();
+  idt_init(); 
+  timer_init();
+
+  printf("==========================================\n");
+  printf("==          Neko Operating System       ==\n");
+  printf("==      Copyright Linuxperoxo 2024      ==\n");
+  printf("==========================================\n");
 }
 
 void k_main()
 { 
-  terminal_init();
-
-  printf("KEYBOARD...   ");
-  keyboard_init();
-  printf("[ OK ]\n");
-
-  printf("GDT...        ");
-  gdtinit();
-  printf("[ OK ]\n");
-
-  printf("IDT...        ");
-  idt_init(); 
-  printf("[ OK ]\n");
+ 
+  k_init();
 
   /*
    *
@@ -63,10 +59,6 @@ void k_main()
    * 
    */
 
-  printf("TIMER...      ");
-  timer_init();
-  printf("[ OK ]\n");
-
   printf("\n=== NEKO WELCOME: \n\n");
   
   printf("    (\\_/)\n");
@@ -75,16 +67,7 @@ void k_main()
   printf("  /   |   \\\n");
   printf(" (    |    )\n\n");
 
-  printf("\nSYSNEKO: Welcome to Neko Kernel! :D\n\n");
+  printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
 
-  irq_install_isr_handler(0x03, &syscall_handler);
-
-  __asm__ volatile(
-    "int $0x23\n"
-    :
-    :
-    :
-  );
-
-  k_shutdown();
+  shell_init();
 }

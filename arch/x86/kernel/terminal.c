@@ -128,8 +128,6 @@ void terminal_init()
   TERMINAL_VGA.__bc_color    = BLACK_BC_COLOR;
   TERMINAL_VGA.__ch_color    = WHITE_CHAR_COLOR;
   TERMINAL_VGA.__last_put    = 0x00;
-  
-  printf("TERMINAL...   [ OK ]\n");
 
   /*
    *

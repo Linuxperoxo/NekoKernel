@@ -44,7 +44,9 @@ SECTION .text
   ;DD 0x00
   ;DD - (0x1BADB002 + 0x00)
 
-k_loader:  
+k_loader:
+  MOV AL, 0xFF
+  MOV [0xC0000000], AL
   MOV ESP, STACK_ADDRS ; Configurando a stack
   MOV EBP, ESP
   CLI                  ; Ignorando interrupções externas
