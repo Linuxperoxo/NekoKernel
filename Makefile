@@ -51,8 +51,8 @@ SYSCALL_OBJ = $(OBJ_DIR)/syscall.o
 TIMER_SRC = $(KERNEL_SRC_DIR)/timer.c
 TIMER_OBJ = $(OBJ_DIR)/timer.o
 
-BOOTLOADER_SRC = ./arch/x86/boot/booloader.s
-BOOTLOADER_BIN = $(BIN_DIR)/bootloader
+BOOTLOADER_SRC = ./arch/x86/boot/nekonest.s
+BOOTLOADER_BIN = $(BIN_DIR)/nekonest
 
 NEKO_OS_IMG = $(IMG_DIR)/NekoOS.img
 

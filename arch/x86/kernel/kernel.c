@@ -30,7 +30,7 @@ void k_init()
 {
   terminal_init();
   keyboard_init();
-  gdtinit();
+  gdt_init();
   idt_init(); 
   timer_init();
 
