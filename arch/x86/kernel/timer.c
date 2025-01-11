@@ -31,18 +31,21 @@
 #define TIMER_COMMAND_PORT   0x43
 
 /*
+ *
  * O PIC trabalha a uma frequência de 119318.16666 Mhz
  *
  */
 
-static __u32 __divisor = DIVISOR_NUM / FREQUENCY; // Gera interrupção a cada 1ms
-static __u32 __ticks   = 0x00;
+static __u32 __divisor   = DIVISOR_NUM / FREQUENCY; // Gera interrupção a cada 1ms
+static __u32 __sys_clock = 0x00;
+static __u16 __chrono    = 0x00;
 
 void timer_handler(struct InterruptRegisters* __regs__)
 {
-  __ticks += 1;
+  __sys_clock += 1;
+  __chrono    += 1;
 
-  if(__ticks % 100 == 0)
+  if(__sys_clock % 1000 == 0)
     task_switch(__regs__);
 }
 
@@ -89,7 +92,7 @@ void sleep_for(__u32 __ms__)
     "nop\n"
     "jnz .loop\n"
     :
-    :"m"(__ms__), "p"(&__ticks)
+    :"m"(__ms__), "p"(&__chrono)
     :"%eax", "%ebx"
   );
 }
