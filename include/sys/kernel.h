@@ -28,7 +28,7 @@
 
 struct InterruptRegisters 
 {
-  __u32 __cr2;
+  __u32 __cs;
   __u32 __ds;
   __u32 __edi;
   __u32 __esi;

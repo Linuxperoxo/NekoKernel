@@ -99,7 +99,7 @@ isr_common_stub:
   PUSHA
   MOV EAX, DS
   PUSH EAX
-  MOV EAX, CR2
+  MOV EAX, CS
   PUSH EAX
 
   MOV AX, 0x10

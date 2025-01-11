@@ -31,6 +31,8 @@ struct Task
     __u32 __ecx;
     __u32 __edx;
     __u32 __edi;
+    __u32 __ebp;
+    __u32 __esp;
     __u32 __esi;
     __u32 __eip;
     __u16 __ss;
@@ -41,8 +43,8 @@ struct Task
 
   struct
   {
-    __u8 __user_id;
-    __u8 __task_state;
+    __u8 __user_id    : 4;
+    __u8 __task_state : 4;
   };
 };
 
