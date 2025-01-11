@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 06/01/2025                    |
+ *    |  SRC MOD   : 10/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -23,6 +23,7 @@
 #include <media/ata.h>
 #include <shell.h>
 #include <timer.h>
+#include <task.h>
 #include <syscall.h>
 #include <device/io/keyboard/keyboard.h>
 
@@ -30,8 +31,9 @@ void k_init()
 {
   terminal_init();
   keyboard_init();
+  idt_init();
   gdt_init();
-  idt_init(); 
+  task_init();
   timer_init();
 
   printf("==========================================\n");
@@ -42,7 +44,6 @@ void k_init()
 
 void k_main()
 { 
- 
   k_init();
 
   /*

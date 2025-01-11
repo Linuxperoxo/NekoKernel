@@ -150,7 +150,7 @@
 ;
 
 %define KERNEL_DEST            0x10000000
-%define KERNEL_FILE_SIZE       13824
+%define KERNEL_FILE_SIZE       14336
 %define KERNEL_K_LOADER_OFFSET 0x1000
 
 ;

@@ -30,6 +30,12 @@ SECTIONS
    * 
    */
 
+  /*
+   *
+   * O Código começa nesse endereço
+   *
+   */
+
   . = 0x10001000;
 
   .text : 

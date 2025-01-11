@@ -6,14 +6,14 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : loader.s                      |
-;    |  SRC MOD   : 02/01/2025                    |
+;    |  SRC MOD   : 09/01/2025                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;    
 ;
 ;
 
-%define STACK_ADDRS 0xFFFFFF
+%define STACK_ADDRS 0x2FFFFFFF
 
 SECTION .text
   GLOBAL k_loader

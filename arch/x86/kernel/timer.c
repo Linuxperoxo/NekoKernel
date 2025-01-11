@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : timer.c                       |
- *    |  SRC MOD   : 02/01/2024                    |
+ *    |  SRC MOD   : 10/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -17,6 +17,7 @@
 #include <std/int.h>
 #include <idt.h>
 #include <std/io.h>
+#include <task.h>
 #include <sys/kernel.h>
 #include <sys/ports.h>
 
@@ -37,9 +38,12 @@
 static __u32 __divisor = DIVISOR_NUM / FREQUENCY; // Gera interrupção a cada 1ms
 static __u32 __ticks   = 0x00;
 
-void timer_handler(struct InterruptRegisters *regs)
+void timer_handler(struct InterruptRegisters* __regs__)
 {
   __ticks += 1;
+
+  if(__ticks % 100 == 0)
+    task_switch(__regs__);
 }
 
 void timer_init()

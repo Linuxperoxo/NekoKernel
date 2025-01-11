@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.h                      |
- *    |  SRC MOD   : 22/12/2024                    |
+ *    |  SRC MOD   : 10/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -26,7 +26,8 @@
  *
  */
 
-struct InterruptRegisters {
+struct InterruptRegisters 
+{
   __u32 __cr2;
   __u32 __ds;
   __u32 __edi;

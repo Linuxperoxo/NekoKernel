@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : gdt.h                         |
- *    |  SRC MOD   : 08/01/2025                    |
+ *    |  SRC MOD   : 09/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -71,23 +71,23 @@
 
 struct gdtEntry
 {
-  __u16 __seg_limit;  // Limite do segmento (16 bits)
-  __u16 __base_low;   // Base do segmento (parte baixa, 16 bits)
-  __u8  __base_mid;   // Base do segmento (parte intermediária, 8 bits)
-  __u8  __access;     // Acessibilidade e tipo do segmento (8 bits)
-  __u8  __flags  : 4; // 4 bits para as flags de controle (P, DPL, S, Tipo de segmento)
-  __u8  __gran   : 4; // 4 bits para granularidade (G, DB, L, AVL)
-  __u8  __base_high;  // Base do segmento (parte alta, 8 bits)
+  __u16 __seg_limit_low;      // Limite do segmento (16 bits)
+  __u16 __base_low;           // Base do segmento (parte baixa, 16 bits)
+  __u8  __base_mid;           // Base do segmento (parte intermediária, 8 bits)
+  __u8  __access;             // Acessibilidade e tipo do segmento (8 bits)
+  __u8  __seg_limit_high : 4; // 4 bits para as flags de controle (P, DPL, S, Tipo de segmento)
+  __u8  __gran : 4;           // 4 bits para granularidade (G, DB, L, AVL)
+  __u8  __base_high;          // Base do segmento (parte alta, 8 bits)
 } __attribute__((packed));
 
 /*
  *
  * ====================================================
  *
- * 1. __seg_limit:
+ * 1. __seg_limit_low | __seg_limit_high:
  *    Define o limite (tamanho) do segmento de memória, representando a maior posição que o segmento pode alcançar.
  *    Os 16 bits de __seg_limit especificam os bits baixos do limite, enquanto os 4 bits mais altos do limite são
- *    armazenados em __flags.
+ *    armazenados em __seg_limit_high.
  *    
  * ====================================================
  *
@@ -116,19 +116,6 @@ struct gdtEntry
  *      
  * ====================================================
  *
- * 5. __flags (4 bits):
- *    Contém as permissões de presença e controle do segmento:
- *    - Bit 7 (P): Indica se o segmento está presente na memória (1 = presente, 0 = ausente).
- *    - Bits 6-5 (DPL): Define o nível de privilégio do descritor (DPL):
- *      - 00: Ring 0 (nível mais alto de privilégio)
- *      - 01: Ring 1
- *      - 10: Ring 2
- *      - 11: Ring 3 (nível mais baixo de privilégio)
- *    - Bit 4 (S): Indica se o segmento é de dados ou código (1 = dados/código, 0 = sistema).
- *    - Bits 3-0 (Tipo de Segmento): Define o tipo de segmento (ex.: 0xA para código executável, 0x2 para dados).
- *   
- * ====================================================
- *
  * 4. __gran (4 bits):
  *    Contém a granularidade e outras flags de controle do segmento:
  *    - Bit 7 (G): Granularidade (1 = segmento é dado em páginas de 4KB, 0 = segmento é dado em bytes).
@@ -140,7 +127,7 @@ struct gdtEntry
  *
  * ====================================================
  *
- * 6. __base_high:
+ * 5. __base_high:
  *    Completa o endereço base do segmento, representando os bits 24-31 do endereço base.
  *    Juntamente com __base_low e __base_mid, forma o endereço base completo de 32 bits do segmento.
  *
@@ -180,8 +167,8 @@ struct gdtPtr
  */
 
 extern void gdt_init();
-extern void gdt_entry(__u8, __u32, __u16, __u8, __u8, __u8);
-extern void gdt_update(struct gdtPtr*);
+extern void gdt_entry(__u8 __gdt_index__, __u32 __base__, __u32 __limit_20bits__, __u8 __gran__, __u8 __access__);
+extern void gdt_update(struct gdtPtr* __gdt_ptr__);
 
 #endif
 

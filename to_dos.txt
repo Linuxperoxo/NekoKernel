@@ -1,4 +1,4 @@
+* Configurar os segmentos certinho
 * Refatorar idt.c/irq.s
-* Refatorar gdt.c
 * Adicionar syscall
-* Começar com o paging
+  * Começar com o paging
