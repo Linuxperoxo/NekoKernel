@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 08/01/2025                    |
+#    |  SRC MOD   : 10/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -41,6 +41,9 @@ GDT_OBJ = $(OBJ_DIR)/gdt.o
 
 IDT_SRC = $(KERNEL_SRC_DIR)/idt.c
 IDT_OBJ = $(OBJ_DIR)/idt.o
+
+TASK_SRC = $(KERNEL_SRC_DIR)/task.c
+TASK_OBJ = $(OBJ_DIR)/task.o
 
 ISR_SRC = $(KERNEL_SRC_DIR)/isr.s
 ISR_OBJ = $(OBJ_DIR)/isr.o
@@ -95,8 +98,10 @@ $(BUILD_DIR):
 
 # === KERNEL_BIN
 
-$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TIMER_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ) $(SYSCALL_OBJ)
+$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TIMER_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ) $(SYSCALL_OBJ) $(TASK_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
+$(TASK_OBJ):
+	$(CC) $(CFLAGS) $(TASK_SRC) -c -o $@
 $(SYSCALL_OBJ):
 	$(CC) $(CFLAGS) $(SYSCALL_SRC) -c -o $@
 $(SHELL_OBJ):
@@ -122,7 +127,7 @@ $(KERNEL_LOADER_OBJ):
 
 # ==============================================
 
-kernel: $(BUILD_DIR) $(KERNEL_BIN)
+kernel: clean $(BUILD_DIR) $(KERNEL_BIN)
 
 bootloader: $(BUILD_DIR)
 	$(ASM) $(ASMFLAGSBIN) $(BOOTLOADER_SRC) -o $(BOOTLOADER_BIN)
