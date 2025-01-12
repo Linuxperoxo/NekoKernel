@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 03/01/2025                    |
+ *    |  SRC MOD   : 12/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -21,9 +21,74 @@
 #include <sys/ports.h>
 #include <sys/kernel.h>
 
-#define IDT_ENTRIES 256
-#define EXCEPTIONS_MSG_NUM 32
-#define ISR_FOR_IRQ 16
+#define IDT_ENTRIES    256
+#define EXCEPTIONS_NUM 32
+#define IRQ_ROUTINES   16
+
+extern void isr0();
+extern void isr1();
+extern void isr2();
+extern void isr3();
+extern void isr4();
+extern void isr5();
+extern void isr6();
+extern void isr7();
+extern void isr8();
+extern void isr9();
+extern void isr10();
+extern void isr11();
+extern void isr12();
+extern void isr13();
+extern void isr14();
+extern void isr15();
+extern void isr16();
+extern void isr17();
+extern void isr18();
+extern void isr19();
+extern void isr20();
+extern void isr21();
+extern void isr22();
+extern void isr23();
+extern void isr24();
+extern void isr25();
+extern void isr26();
+extern void isr27();
+extern void isr28();
+extern void isr29();
+extern void isr30();
+extern void isr31();
+
+/*
+ *
+ * IRQs
+ *
+ */
+
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+
+/*
+ *
+ * Syscall 
+ *
+ */
+
+extern void irq128();
+extern void irq177();
 
 /*
  *
@@ -45,136 +110,6 @@
 
 struct idt_entry __idt_entries[IDT_ENTRIES];
 struct idt_ptr __idt_ptr;
-
-void idt_init() 
-{
-  __idt_ptr.__limit = sizeof(struct idt_entry) * IDT_ENTRIES - 1;
-  __idt_ptr.__idt_first_entry = (__u32)&__idt_entries;
-
-  /*
-   *
-   * Comando para configurar o CHIP PIC Master e Slave
-   *
-   * O PIC Master ou primário recebe interrupções de I/O de IRQ0 - IRQ7, porém,
-   * ele usar a linha do IRQ2 para se comunicar como PIC Slave ou secundário, ou seja,
-   * qualquer interrupção vinda pelo IRQ2 foir uma interrupção qe veio do PIC Slave, IRQ8 - IRQ15,
-   * com isso, no total vamos ter 15 interrupções possíveis.
-   *
-   * O PIC recebe IRQs, envia para o processador o vetor do IDT para essa interrupção. O PIC envia 
-   * através do barramento de controle. Quando o processador recebe o vetor de interrupção, ele usa o
-   * vetor para procurar o endereço do ISR associada na entrada IDT, que contém o endereço da rotina de 
-   * tratamento (ISR) associada à interrupção.
-   *
-   * EXEMPLO: Digamos que o PIC recebe uma interrupção no PIC Master, IRQ0, ele vai enviar o vetor dessa
-   * interrupção, vetor 32 do IDT, o processador vai consultar o __idt_entries[32], nessa entrada vai ter 
-   * um ISR associado a essa interrupção, imagine o ISR sendo um ponteiro para uma função, e depois disso
-   * o processador vai dar jmp para essa rotina/função.
-   *
-   */
-
-  outb(PRI_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
-  outb(SEC_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
-
-  outb(PRI_PIC_DATA_PORT, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
-  outb(SEC_PIC_DATA_PORT, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
-
-  outb(PRI_PIC_DATA_PORT, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
-  outb(SEC_PIC_DATA_PORT, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
-
-  outb(PRI_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
-  outb(SEC_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
-
-  outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
-  outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
-
-  idtsetgate(0x00, (__u32)isr0, 0x08, 0x8E);
-  idtsetgate(0x01, (__u32)isr1, 0x08, 0x8E);
-  idtsetgate(0x02, (__u32)isr2, 0x08, 0x8E);
-  idtsetgate(0x03, (__u32)isr3, 0x08, 0x8E);
-  idtsetgate(0x04, (__u32)isr4, 0x08, 0x8E);
-  idtsetgate(0x05, (__u32)isr5, 0x08, 0x8E);
-  idtsetgate(0x06, (__u32)isr6, 0x08, 0x8E);
-  idtsetgate(0x07, (__u32)isr7, 0x08, 0x8E);
-  idtsetgate(0x08, (__u32)isr8, 0x08, 0x8E);
-  idtsetgate(0x09, (__u32)isr9, 0x08, 0x8E);
-  idtsetgate(0x0A, (__u32)isr10, 0x08, 0x8E);
-  idtsetgate(0x0B, (__u32)isr11, 0x08, 0x8E);
-  idtsetgate(0x0C, (__u32)isr12, 0x08, 0x8E);
-  idtsetgate(0x0D, (__u32)isr13, 0x08, 0x8E);
-  idtsetgate(0x0E, (__u32)isr14, 0x08, 0x8E);
-  idtsetgate(0x0F, (__u32)isr15, 0x08, 0x8E);
-  idtsetgate(0x10, (__u32)isr16, 0x08, 0x8E);
-  idtsetgate(0x11, (__u32)isr17, 0x08, 0x8E);
-  idtsetgate(0x12, (__u32)isr18, 0x08, 0x8E);
-  idtsetgate(0x13, (__u32)isr19, 0x08, 0x8E);
-  idtsetgate(0x14, (__u32)isr20, 0x08, 0x8E);
-  idtsetgate(0x15, (__u32)isr21, 0x08, 0x8E);
-  idtsetgate(0x16, (__u32)isr22, 0x08, 0x8E);
-  idtsetgate(0x17, (__u32)isr23, 0x08, 0x8E);
-  idtsetgate(0x18, (__u32)isr24, 0x08, 0x8E);
-  idtsetgate(0x19, (__u32)isr25, 0x08, 0x8E);
-  idtsetgate(0x1A, (__u32)isr26, 0x08, 0x8E);
-  idtsetgate(0x1B, (__u32)isr27, 0x08, 0x8E);
-  idtsetgate(0x1C, (__u32)isr28, 0x08, 0x8E);
-  idtsetgate(0x1D, (__u32)isr29, 0x08, 0x8E);
-  idtsetgate(0x1E, (__u32)isr30, 0x08, 0x8E);
-  idtsetgate(0x1F, (__u32)isr31, 0x08, 0x8E);
-
-  /*
-   *
-   * IRQs
-   *
-   */
-
-  idtsetgate(0x20, (__u32)irq0, 0x08, 0x8E);
-  idtsetgate(0x21, (__u32)irq1, 0x08, 0x8E);
-  idtsetgate(0x22, (__u32)irq2, 0x08, 0x8E);
-  idtsetgate(0x23, (__u32)irq3, 0x08, 0x8E);
-  idtsetgate(0x24, (__u32)irq4, 0x08, 0x8E);
-  idtsetgate(0x25, (__u32)irq5, 0x08, 0x8E);
-  idtsetgate(0x26, (__u32)irq6, 0x08, 0x8E);
-  idtsetgate(0x27, (__u32)irq7, 0x08, 0x8E);
-  idtsetgate(0x28, (__u32)irq8, 0x08, 0x8E);
-  idtsetgate(0x29, (__u32)irq9, 0x08, 0x8E);
-  idtsetgate(0x30, (__u32)irq10, 0x08, 0x8E);
-  idtsetgate(0x31, (__u32)irq11, 0x08, 0x8E);
-  idtsetgate(0x32, (__u32)irq12, 0x08, 0x8E);
-  idtsetgate(0x33, (__u32)irq13, 0x08, 0x8E);
-  idtsetgate(0x34, (__u32)irq14, 0x08, 0x8E);
-  idtsetgate(0x35, (__u32)irq15, 0x08, 0x8E);
-
-  /*
-   *
-   * Syscall
-   *
-   */
-
-  idtsetgate(0x80, (__u32)isr128, 0x08, 0x8E);
-  idtsetgate(0xB1, (__u32)isr177, 0x08, 0x8E);
-
-  idtflush(&__idt_ptr);
-}
-
-void idtsetgate(__u8 __num__, __u32 __base__, __u16 __seg_selector__, __u8 __flags__)
-{
-  __idt_entries[__num__].__base_low = __base__ & 0xFFFF;
-  __idt_entries[__num__].__base_high = (__base__ >> 16) & 0xFFFF;
-  __idt_entries[__num__].__seg_selector = __seg_selector__;
-  __idt_entries[__num__].__always0 = 0x00;
-  __idt_entries[__num__].__flags = __flags__ | 0x60;
-}
-
-void idtflush(struct idt_ptr* __idt_ptr__)
-{
-  __asm__ volatile(
-    "movl %0, %%eax\n"
-    "lidt (%%eax)\n"
-    "sti\n"
-    :
-    : "p"(__idt_ptr__)
-    : "%eax"
-  );
-}
 
 /* 
  *
@@ -236,7 +171,7 @@ void idtflush(struct idt_ptr* __idt_ptr__)
  *
  */
 
-char* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
+char* __exceptions_messsagens[EXCEPTIONS_NUM] = {
   "Division By Zero",               // Exceção 0  - Division By Zero
   "Debug",                          // Exceção 1  - Debug
   "Non Maskable Interrupt",         // Exceção 2  - Non Maskable Interrupt (NMI)
@@ -271,52 +206,167 @@ char* __exceptions_messsagens[EXCEPTIONS_MSG_NUM] = {
   "None"                            // Exceção 31 - None
 };
 
-void isr_handler(struct InterruptRegisters* __regs_struct__)
-{
-  if(__regs_struct__->__int_num < 32)
-  {
-    printf("\nNEKO PANIC! : ");
-    printf(__exceptions_messsagens[__regs_struct__->__int_num]);
-    printf("\n");
-    
-    for(;;);
-  }
-
-  if(__regs_struct__->__int_num >= 0x80)
-  {
-
-  }
-}
-
-void* __irq_isr[ISR_FOR_IRQ] = { 
+void* __irq_installed_routines[IRQ_ROUTINES] = { 
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void irq_install_isr_handler(__u8 __irq__, void (*handler)(struct InterruptRegisters*))
+__attribute__((always_inline)) inline void idt_entry(__u8 __num__, __u32 __base__, __u16 __seg_selector__, __u8 __flags__)
 {
-  __irq_isr[__irq__] = handler;
+  __idt_entries[__num__].__base_low = __base__ & 0xFFFF;
+  __idt_entries[__num__].__base_high = (__base__ >> 16) & 0xFFFF;
+  __idt_entries[__num__].__seg_selector = __seg_selector__;
+  __idt_entries[__num__].__always0 = 0x00;
+  __idt_entries[__num__].__flags = __flags__ | 0x60;
 }
 
-void irq_unistall_isr_handler(__u8 __irq__)
+void idt_init() 
 {
-  __irq_isr[__irq__] = 0x00;
+  __idt_ptr.__limit = sizeof(struct idt_entry) * IDT_ENTRIES - 1;
+  __idt_ptr.__idt_first_entry = (__u32)&__idt_entries;
+
+  /*
+   *
+   * Comando para configurar o CHIP PIC Master e Slave
+   *
+   * O PIC Master ou primário recebe interrupções de I/O de IRQ0 - IRQ7, porém,
+   * ele usar a linha do IRQ2 para se comunicar como PIC Slave ou secundário, ou seja,
+   * qualquer interrupção vinda pelo IRQ2 foir uma interrupção qe veio do PIC Slave, IRQ8 - IRQ15,
+   * com isso, no total vamos ter 15 interrupções possíveis.
+   *
+   * O PIC recebe IRQs, envia para o processador o vetor do IDT para essa interrupção. O PIC envia 
+   * através do barramento de controle. Quando o processador recebe o vetor de interrupção, ele usa o
+   * vetor para procurar o endereço do ISR associada na entrada IDT, que contém o endereço da rotina de 
+   * tratamento (ISR) associada à interrupção.
+   *
+   * EXEMPLO: Digamos que o PIC recebe uma interrupção no PIC Master, IRQ0, ele vai enviar o vetor dessa
+   * interrupção, vetor 32 do IDT, o processador vai consultar o __idt_entries[32], nessa entrada vai ter 
+   * um ISR associado a essa interrupção, imagine o ISR sendo um ponteiro para uma função, e depois disso
+   * o processador vai dar jmp para essa rotina/função.
+   *
+   */
+
+  outb(PRI_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip primário espera 4 comandos
+  outb(SEC_PIC_COMMAND_PORT, 0x11); // Inicia o modo de configuração, agora o chip secundário espera mais 4 comandos
+
+  outb(PRI_PIC_DATA_PORT, 0x20); // Vetor base para o PIC primário, vai de __idt_entries[32 - 39]
+  outb(SEC_PIC_DATA_PORT, 0x28); // Vetor base para o PIC secundário, vai de __idt_entries[40 - 47]
+
+  outb(PRI_PIC_DATA_PORT, 0x04); // Conecta o PIC secundário à linha IRQ2 do PIC primário 
+  outb(SEC_PIC_DATA_PORT, 0x02); // Configura a linha de comunicação (IRQ2) do PIC primário para o secundário
+
+  outb(PRI_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC primário
+  outb(SEC_PIC_DATA_PORT, 0x01); // Configura o modo de operação 8086/88 para o PIC secundário
+
+  outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
+  outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
+
+  idt_entry(0x00, (__u32)isr0, 0x08, 0x8E);
+  idt_entry(0x01, (__u32)isr1, 0x08, 0x8E);
+  idt_entry(0x02, (__u32)isr2, 0x08, 0x8E);
+  idt_entry(0x03, (__u32)isr3, 0x08, 0x8E);
+  idt_entry(0x04, (__u32)isr4, 0x08, 0x8E);
+  idt_entry(0x05, (__u32)isr5, 0x08, 0x8E);
+  idt_entry(0x06, (__u32)isr6, 0x08, 0x8E);
+  idt_entry(0x07, (__u32)isr7, 0x08, 0x8E);
+  idt_entry(0x08, (__u32)isr8, 0x08, 0x8E);
+  idt_entry(0x09, (__u32)isr9, 0x08, 0x8E);
+  idt_entry(0x0A, (__u32)isr10, 0x08, 0x8E);
+  idt_entry(0x0B, (__u32)isr11, 0x08, 0x8E);
+  idt_entry(0x0C, (__u32)isr12, 0x08, 0x8E);
+  idt_entry(0x0D, (__u32)isr13, 0x08, 0x8E);
+  idt_entry(0x0E, (__u32)isr14, 0x08, 0x8E);
+  idt_entry(0x0F, (__u32)isr15, 0x08, 0x8E);
+  idt_entry(0x10, (__u32)isr16, 0x08, 0x8E);
+  idt_entry(0x11, (__u32)isr17, 0x08, 0x8E);
+  idt_entry(0x12, (__u32)isr18, 0x08, 0x8E);
+  idt_entry(0x13, (__u32)isr19, 0x08, 0x8E);
+  idt_entry(0x14, (__u32)isr20, 0x08, 0x8E);
+  idt_entry(0x15, (__u32)isr21, 0x08, 0x8E);
+  idt_entry(0x16, (__u32)isr22, 0x08, 0x8E);
+  idt_entry(0x17, (__u32)isr23, 0x08, 0x8E);
+  idt_entry(0x18, (__u32)isr24, 0x08, 0x8E);
+  idt_entry(0x19, (__u32)isr25, 0x08, 0x8E);
+  idt_entry(0x1A, (__u32)isr26, 0x08, 0x8E);
+  idt_entry(0x1B, (__u32)isr27, 0x08, 0x8E);
+  idt_entry(0x1C, (__u32)isr28, 0x08, 0x8E);
+  idt_entry(0x1D, (__u32)isr29, 0x08, 0x8E);
+  idt_entry(0x1E, (__u32)isr30, 0x08, 0x8E);
+  idt_entry(0x1F, (__u32)isr31, 0x08, 0x8E);
+
+  /*
+   *
+   * IRQs
+   *
+   */
+
+  idt_entry(0x20, (__u32)irq0, 0x08, 0x8E);
+  idt_entry(0x21, (__u32)irq1, 0x08, 0x8E);
+  idt_entry(0x22, (__u32)irq2, 0x08, 0x8E);
+  idt_entry(0x23, (__u32)irq3, 0x08, 0x8E);
+  idt_entry(0x24, (__u32)irq4, 0x08, 0x8E);
+  idt_entry(0x25, (__u32)irq5, 0x08, 0x8E);
+  idt_entry(0x26, (__u32)irq6, 0x08, 0x8E);
+  idt_entry(0x27, (__u32)irq7, 0x08, 0x8E);
+  idt_entry(0x28, (__u32)irq8, 0x08, 0x8E);
+  idt_entry(0x29, (__u32)irq9, 0x08, 0x8E);
+  idt_entry(0x30, (__u32)irq10, 0x08, 0x8E);
+  idt_entry(0x31, (__u32)irq11, 0x08, 0x8E);
+  idt_entry(0x32, (__u32)irq12, 0x08, 0x8E);
+  idt_entry(0x33, (__u32)irq13, 0x08, 0x8E);
+  idt_entry(0x34, (__u32)irq14, 0x08, 0x8E);
+  idt_entry(0x35, (__u32)irq15, 0x08, 0x8E);
+
+  /*
+   *
+   * Syscall
+   *
+   */
+
+  idt_entry(0x80, (__u32)irq128, 0x08, 0x8E);
+  idt_entry(0xB1, (__u32)irq177, 0x08, 0x8E);
+
+  __asm__ volatile(
+    "lidt (%0)\n"
+    "sti"
+    :
+    :"p"(&__idt_ptr)
+    :
+  );
 }
 
-void irq_isr_handler(struct InterruptRegisters* __regs_struct__)
+void isr_handler(struct InterruptRegisters* __regs_struct__)
 {
-  void (*handler)(struct InterruptRegisters*);
-
-  handler = __irq_isr[__regs_struct__->__int_num - 32];
-
-  if(handler)
+  if(__regs_struct__->__interrupt < EXCEPTIONS_NUM)
   {
-    handler(__regs_struct__);
-  }
-
-  if(__regs_struct__-> __int_num >= 40)
-  {
+    printf("\nNEKO PANIC! : ");
+    printf(__exceptions_messsagens[__regs_struct__->__interrupt]);
+    printf("\n");
     
+    __asm__ volatile(
+      ".LExeceptionLoop:"
+      "jmp .LExeceptionLoop\n"
+      :
+      :
+      :
+    );
+  } 
+}
+
+void irq_handler(struct InterruptRegisters* __regs_struct__)
+{ 
+  void (*__irq_routine)(struct InterruptRegisters*);
+
+  __irq_routine = __irq_installed_routines[__regs_struct__->__interrupt];
+
+  if(__irq_routine)
+  {
+    __irq_routine(__regs_struct__);
+  }
+  
+  if(__regs_struct__-> __interrupt >= 40)
+  {
+
     /*
      *
      * Enviamos o comando de EOI(End of Interruption) para o PIC Slave caso 
@@ -336,6 +386,17 @@ void irq_isr_handler(struct InterruptRegisters* __regs_struct__)
    * então temos que sinalizar a ele também
    *
    */
-
+  
   outb(PRI_PIC_COMMAND_PORT, 0x20);
 }
+
+void irq_install_routine(__u8 __index__, void (*handler)(struct InterruptRegisters*))
+{
+  __irq_installed_routines[__index__] = handler;
+}
+
+void irq_unistall_routine(__u8 __index__)
+{
+  __irq_installed_routines[__index__] = 0x00;
+}
+
