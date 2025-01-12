@@ -45,13 +45,12 @@ void timer_handler(struct InterruptRegisters* __regs__)
   __sys_clock += 1;
   __chrono    += 1;
 
-  if(__sys_clock % 1000 == 0)
-    task_switch(__regs__);
+  task_switch(__regs__);
 }
 
 void timer_init()
 {
-  irq_install_isr_handler(0x00, &timer_handler);
+  irq_install_routine(0x00, &timer_handler);
   
   /*
    *
