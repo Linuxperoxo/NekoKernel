@@ -69,6 +69,6 @@ void k_main()
   printf(" (    |    )\n\n");
 
   printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
-
+  
   shell_init();
 }

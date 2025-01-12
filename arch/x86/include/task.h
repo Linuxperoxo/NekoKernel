@@ -39,6 +39,7 @@ struct Task
     __u16 __cs;
     __u16 __ds;
     __u16 __es;
+    __u16 __fs;
     __u16 __gs;
   };
 
