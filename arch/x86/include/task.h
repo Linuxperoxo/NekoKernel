@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.h                        |
- *    |  SRC MOD   : 10/01/2025                    |
+ *    |  SRC MOD   : 12/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -39,6 +39,7 @@ struct Task
     __u16 __cs;
     __u16 __ds;
     __u16 __es;
+    __u16 __gs;
   };
 
   struct

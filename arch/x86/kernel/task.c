@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.c                        |
- *    |  SRC MOD   : 10/01/2025                    |
+ *    |  SRC MOD   : 12/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -51,6 +51,8 @@ struct
  *
  */
 
+/*
+
 void task1_code()
 {
   while(1)
@@ -69,23 +71,12 @@ void task2_code()
   }
 }
 
+*/
+
 void task_init()
 {
-  static struct Task  __task_1;
-  static struct Task  __task_2;
-
-  __TaskList.__current_task = &__task_1;
-  __TaskList.__root_task    = &__task_1;
-
-  __TaskList.__current_task->__prev_task  = &__task_2;
-  __TaskList.__current_task->__next_task  = &__task_2;
-  __TaskList.__current_task->__task_state = TASK_SLEEPING; 
-  __TaskList.__current_task->__eip        = (__u32)&task1_code;
-
-  __task_2.__prev_task  = &__task_1;
-  __task_2.__next_task  = &__task_1;
-  __task_2.__task_state = TASK_SLEEPING;
-  __task_2.__eip        = (__u32)&task2_code;
+  __TaskList.__current_task = NULL;
+  __TaskList.__root_task    = NULL;
 }
 
 void task_save(struct InterruptRegisters* __int_regs__)
@@ -110,8 +101,8 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__esp = __int_regs__->__esp;
-  __TaskList.__current_task->__ebp = __int_regs__->__ebp;
+  //__TaskList.__current_task->__esp = __int_regs__->__esp;
+  //__TaskList.__current_task->__ebp = __int_regs__->__ebp;
   
   /*
    *
@@ -120,7 +111,7 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  //__TaskList.__current_task->__eip = __int_regs__->__eip;
+  __TaskList.__current_task->__eip = __int_regs__->__eip;
   
   /*
    *
@@ -128,9 +119,11 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__cs  = __int_regs__->__cs;
-  __TaskList.__current_task->__ds  = __int_regs__->__ds;
-  __TaskList.__current_task->__ss  = __int_regs__->__ss;
+  __TaskList.__current_task->__cs = __int_regs__->__cs;
+  __TaskList.__current_task->__ds = __int_regs__->__ds;
+  __TaskList.__current_task->__ss = __int_regs__->__ss;
+  __TaskList.__current_task->__gs = __int_regs__->__gs;
+  __TaskList.__current_task->__fs = __int_regs__->__fs;
 }
 
 void task_load(struct InterruptRegisters* __int_regs__)
@@ -155,8 +148,8 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __int_regs__->__esp = __TaskList.__current_task->__esp;
-  __int_regs__->__ebp = __TaskList.__current_task->__ebp;
+  //__int_regs__->__esp = __TaskList.__current_task->__esp;
+  //__int_regs__->__ebp = __TaskList.__current_task->__ebp;
 
   /*
    *
@@ -172,9 +165,11 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __int_regs__->__cs  = __TaskList.__current_task->__cs;
-  __int_regs__->__ds  = __TaskList.__current_task->__ds;
-  __int_regs__->__ss  = __TaskList.__current_task->__ss;
+  __int_regs__->__cs = __TaskList.__current_task->__cs;
+  __int_regs__->__ds = __TaskList.__current_task->__ds;
+  __int_regs__->__ss = __TaskList.__current_task->__ss;
+  __int_regs__->__gs = __TaskList.__current_task->__gs;
+  __int_regs__->__fs = __TaskList.__current_task->__fs;
 }
 
 void task_switch(struct InterruptRegisters* __int_regs__)
@@ -188,6 +183,21 @@ void task_switch(struct InterruptRegisters* __int_regs__)
    * e restaurando a estado da próxima task, isso se ela estiver disponível
    *
    */
+
+  /*
+   *
+   * Aqui fazemos uma verificação para evitar uma falha
+   *
+   */
+
+  if(__TaskList.__current_task == NULL)
+  {
+    if(__TaskList.__root_task == NULL)
+    {
+      return;
+    }
+    __TaskList.__current_task = __TaskList.__root_task;
+  }
 
   /*
    *
@@ -223,3 +233,4 @@ void task_switch(struct InterruptRegisters* __int_regs__)
 
   task_load(__int_regs__);
 }
+
