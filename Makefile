@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 10/01/2025                    |
+#    |  SRC MOD   : 12/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -19,13 +19,13 @@ ASMFLAGSBIN = -f bin
 ASMFLAGSELF = -g -f elf32
 LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
 QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw -m 4G
-QEMUFLAGSDEBUG = $(QEMUFLAGS) -s -S
+QEMUFLAGSDEBUG = -drive file=$(DEBUG_FILE),format=raw -m 4G -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
 # Kernel Files
 KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel.c
 KERNEL_OBJ = $(OBJ_DIR)/kernel.o
-KERNEL_BIN = $(BIN_DIR)/kernel
+KERNEL_BIN = $(BIN_DIR)/kernel.bin
 
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_BOOT_DIR)/loader.o
@@ -55,9 +55,10 @@ TIMER_SRC = $(KERNEL_SRC_DIR)/timer.c
 TIMER_OBJ = $(OBJ_DIR)/timer.o
 
 BOOTLOADER_SRC = ./arch/x86/boot/nekonest.s
-BOOTLOADER_BIN = $(BIN_DIR)/nekonest
+BOOTLOADER_BIN = $(BIN_DIR)/nekonest.bin
 
 NEKO_OS_IMG = $(IMG_DIR)/NekoOS.img
+DEBUG_FILE  = $(BIN_DIR)/debug.bin
 
 LINKER_FILE = linker.ld
 
@@ -127,7 +128,7 @@ $(KERNEL_LOADER_OBJ):
 
 # ==============================================
 
-kernel: clean $(BUILD_DIR) $(KERNEL_BIN)
+kernel: $(BUILD_DIR) $(KERNEL_BIN)
 
 bootloader: $(BUILD_DIR)
 	$(ASM) $(ASMFLAGSBIN) $(BOOTLOADER_SRC) -o $(BOOTLOADER_BIN)
@@ -141,8 +142,13 @@ strip: kernel
 clean:
 	rm -rf $(BUILD_DIR)
 
-run: image
+run: strip image
 	$(QEMU) $(QEMUFLAGS)
 
-debug: image
+gdb:
+	gdb $(DEBUG_FILE)
+
+debug: clean image
+	cp -v $(KERNEL_BIN) $(DEBUG_FILE)
+	strip $(KERNEL_BIN)
 	$(QEMU) $(QEMUFLAGS) -s -S
