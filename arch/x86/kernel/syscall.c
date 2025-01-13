@@ -5,7 +5,7 @@
  *    |                                            |
  *    |  copyright : (c) 2024 per linuxperoxo.     |
  *    |  author    : linuxperoxo                   |
- *    |  file      : terminal.c                    |
+ *    |  file      : syscall.c                     |
  *    |  src mod   : 13/01/2025                    | 
  *    |                                            |
  *    o--------------------------------------------/
