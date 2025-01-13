@@ -44,6 +44,7 @@ Estou planejando implementar várias outras funcionalidades no NekoKernel, inclu
 - Melhoria geral no código
 - Paging
 - User mode
+- malloc() free()
 
 Compilação
 
