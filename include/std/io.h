@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 03/01/2025                    | 
+ *    |  SRC MOD   : 12/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -35,9 +35,8 @@ inline __attribute__((always_inline)) void scanf(char* __dest__, __u16 __size__)
 
   while(!TERMINAL_BUFFER_IS_READY)
   {
-    sleep_for(100);
+    sleep_for(10);
   }
-
   terminal_cpy_in(__dest__, __size__);
 }
 
