@@ -26,6 +26,13 @@ struct Task
 
   struct
   {
+    
+    /*
+     *
+     * Registradores da task
+     *
+     */
+
     __u32 __eax;
     __u32 __ebx;
     __u32 __ecx;
@@ -45,12 +52,23 @@ struct Task
 
   struct
   {
+
+    /*
+     *
+     * Id do usuário, status da task e id da task, essas informações
+     * vão ser usadas mais no futuro
+     *
+     */
+
     __u8 __user_id    : 4;
     __u8 __task_state : 4;
+    __u8 __task_id;
   };
 };
 
 extern void task_init();
 extern void task_switch();
+//extern void task_create(__u32 __eip__, __8 __user_id);
+//extern void task_kill(__u8 __task_id__);
 
 #endif

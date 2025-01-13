@@ -50,7 +50,7 @@ void timer_handler(struct InterruptRegisters* __regs__)
 
 void timer_init()
 {
-  irq_install_routine(0x00, &timer_handler);
+  idt_install_coop_routine(0x20, &timer_handler);
   
   /*
    *

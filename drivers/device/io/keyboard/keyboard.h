@@ -18,7 +18,7 @@
 
 #include <std/int.h>
 
-#define IRQ_KEYBOARD_NUM 0x01
+#define INT_KEYBOARD_NUM 0x21
 
 #define KEYBOARD_IN_PORT 0x60
 #define KEYBOARD_COMMAND_PORT 0x64

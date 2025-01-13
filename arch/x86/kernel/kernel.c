@@ -33,6 +33,7 @@ void k_init()
   keyboard_init();
   idt_init();
   gdt_init();
+  syscall_init();
   task_init();
   timer_init();
 
@@ -69,6 +70,6 @@ void k_main()
   printf(" (    |    )\n\n");
 
   printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
-  
+
   shell_init();
 }

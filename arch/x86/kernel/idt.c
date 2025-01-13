@@ -21,9 +21,14 @@
 #include <sys/ports.h>
 #include <sys/kernel.h>
 
-#define IDT_ENTRIES    256
-#define EXCEPTIONS_NUM 32
-#define IRQ_ROUTINES   16
+#define CPU_EXCEPTIONS_NUM 32
+#define IDT_ENTRIES        256
+
+/*
+ *
+ * All IRQs
+ *
+ */
 
 extern void isr0();
 extern void isr1();
@@ -57,38 +62,24 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
-
-/*
- *
- * IRQs
- *
- */
-
-extern void irq0();
-extern void irq1();
-extern void irq2();
-extern void irq3();
-extern void irq4();
-extern void irq5();
-extern void irq6();
-extern void irq7();
-extern void irq8();
-extern void irq9();
-extern void irq10();
-extern void irq11();
-extern void irq12();
-extern void irq13();
-extern void irq14();
-extern void irq15();
-
-/*
- *
- * Syscall 
- *
- */
-
-extern void irq128();
-extern void irq177();
+extern void irq32();
+extern void irq33();
+extern void irq34();
+extern void irq35();
+extern void irq36();
+extern void irq37();
+extern void irq38();
+extern void irq39();
+extern void irq40();
+extern void irq41();
+extern void irq42();
+extern void irq43();
+extern void irq44();
+extern void irq45();
+extern void irq46();
+extern void irq47();
+extern void isr_syscall128();
+extern void isr_syscall177();
 
 /*
  *
@@ -110,6 +101,7 @@ extern void irq177();
 
 struct idt_entry __idt_entries[IDT_ENTRIES];
 struct idt_ptr __idt_ptr;
+struct isrInterrupt __isr_table[IDT_ENTRIES];
 
 /* 
  *
@@ -171,7 +163,7 @@ struct idt_ptr __idt_ptr;
  *
  */
 
-char* __exceptions_messsagens[EXCEPTIONS_NUM] = {
+char* __exceptions_messsagens[CPU_EXCEPTIONS_NUM] = {
   "Division By Zero",               // Exceção 0  - Division By Zero
   "Debug",                          // Exceção 1  - Debug
   "Non Maskable Interrupt",         // Exceção 2  - Non Maskable Interrupt (NMI)
@@ -206,18 +198,68 @@ char* __exceptions_messsagens[EXCEPTIONS_NUM] = {
   "None"                            // Exceção 31 - None
 };
 
-void* __irq_installed_routines[IRQ_ROUTINES] = { 
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0
-};
-
-__attribute__((always_inline)) inline void idt_entry(__u8 __num__, __u32 __base__, __u16 __seg_selector__, __u8 __flags__)
+void idt_entry(__u8 __num__, __u32 __base__, __u16 __seg_selector__, __u8 __flags__)
 {
   __idt_entries[__num__].__base_low = __base__ & 0xFFFF;
   __idt_entries[__num__].__base_high = (__base__ >> 16) & 0xFFFF;
   __idt_entries[__num__].__seg_selector = __seg_selector__;
   __idt_entries[__num__].__always0 = 0x00;
   __idt_entries[__num__].__flags = __flags__ | 0x60;
+}
+
+void isr_handler(struct InterruptRegisters* __regs_struct__)
+{
+  if(__regs_struct__->__interrupt < CPU_EXCEPTIONS_NUM)
+  {
+    printf("\nNEKO PANIC! : ");
+    printf(__exceptions_messsagens[__regs_struct__->__interrupt]);
+    printf("\n");
+    
+    __asm__ volatile(
+      ".LExeceptionLoop:"
+      "jmp .LExeceptionLoop\n"
+      :
+      :
+      :
+    );
+  } 
+}
+
+void irq_handler(struct InterruptRegisters* __regs_struct__)
+{
+  if(__isr_table[__regs_struct__->__interrupt].__coop_routine)
+    __isr_table[__regs_struct__->__interrupt].__coop_routine(__regs_struct__);
+  
+  if(__regs_struct__-> __interrupt >= 40)
+  {
+
+    /*
+     *
+     * Enviamos o comando de EOI(End of Interruption) para o PIC Slave caso 
+     * o número da interrupção esteja na faixa do PIC Slave, o EOI serve para
+     * sinalizar ao PIC que a interrupção foi tratada, permitindo que novas interrupções
+     * sejam processadas
+     *
+     */
+
+    outb(SEC_PIC_COMMAND_PORT, 0x20);
+  }
+
+  /*
+   *
+   * Fazemos o mesmo para o PIC Master, já que ele sempre vai ser usado, mesmo quando o PIC
+   * secundário é usado, o PIC secundário passa o IRQ para o PIC primário pela linha IRQ2, 
+   * então temos que sinalizar a ele também
+   *
+   */
+  
+  outb(PRI_PIC_COMMAND_PORT, 0x20);
+}
+
+void syscall_handler(struct InterruptRegisters* __regs_struct__)
+{
+  if(__isr_table[__regs_struct__->__interrupt].__coop_routine)
+    __isr_table[__regs_struct__->__interrupt].__coop_routine(__regs_struct__);
 }
 
 void idt_init() 
@@ -261,70 +303,129 @@ void idt_init()
   outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
   outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
 
-  idt_entry(0x00, (__u32)isr0, 0x08, 0x8E);
-  idt_entry(0x01, (__u32)isr1, 0x08, 0x8E);
-  idt_entry(0x02, (__u32)isr2, 0x08, 0x8E);
-  idt_entry(0x03, (__u32)isr3, 0x08, 0x8E);
-  idt_entry(0x04, (__u32)isr4, 0x08, 0x8E);
-  idt_entry(0x05, (__u32)isr5, 0x08, 0x8E);
-  idt_entry(0x06, (__u32)isr6, 0x08, 0x8E);
-  idt_entry(0x07, (__u32)isr7, 0x08, 0x8E);
-  idt_entry(0x08, (__u32)isr8, 0x08, 0x8E);
-  idt_entry(0x09, (__u32)isr9, 0x08, 0x8E);
-  idt_entry(0x0A, (__u32)isr10, 0x08, 0x8E);
-  idt_entry(0x0B, (__u32)isr11, 0x08, 0x8E);
-  idt_entry(0x0C, (__u32)isr12, 0x08, 0x8E);
-  idt_entry(0x0D, (__u32)isr13, 0x08, 0x8E);
-  idt_entry(0x0E, (__u32)isr14, 0x08, 0x8E);
-  idt_entry(0x0F, (__u32)isr15, 0x08, 0x8E);
-  idt_entry(0x10, (__u32)isr16, 0x08, 0x8E);
-  idt_entry(0x11, (__u32)isr17, 0x08, 0x8E);
-  idt_entry(0x12, (__u32)isr18, 0x08, 0x8E);
-  idt_entry(0x13, (__u32)isr19, 0x08, 0x8E);
-  idt_entry(0x14, (__u32)isr20, 0x08, 0x8E);
-  idt_entry(0x15, (__u32)isr21, 0x08, 0x8E);
-  idt_entry(0x16, (__u32)isr22, 0x08, 0x8E);
-  idt_entry(0x17, (__u32)isr23, 0x08, 0x8E);
-  idt_entry(0x18, (__u32)isr24, 0x08, 0x8E);
-  idt_entry(0x19, (__u32)isr25, 0x08, 0x8E);
-  idt_entry(0x1A, (__u32)isr26, 0x08, 0x8E);
-  idt_entry(0x1B, (__u32)isr27, 0x08, 0x8E);
-  idt_entry(0x1C, (__u32)isr28, 0x08, 0x8E);
-  idt_entry(0x1D, (__u32)isr29, 0x08, 0x8E);
-  idt_entry(0x1E, (__u32)isr30, 0x08, 0x8E);
-  idt_entry(0x1F, (__u32)isr31, 0x08, 0x8E);
+  __isr_table[0x00].__int_routine = (__u32)&isr0;
+  __isr_table[0x01].__int_routine = (__u32)&isr1;
+  __isr_table[0x02].__int_routine = (__u32)&isr2;
+  __isr_table[0x03].__int_routine = (__u32)&isr3;
+  __isr_table[0x04].__int_routine = (__u32)&isr4;
+  __isr_table[0x05].__int_routine = (__u32)&isr5;
+  __isr_table[0x06].__int_routine = (__u32)&isr6;
+  __isr_table[0x07].__int_routine = (__u32)&isr7;
+  __isr_table[0x08].__int_routine = (__u32)&isr8;
+  __isr_table[0x09].__int_routine = (__u32)&isr9;
+  __isr_table[0x0A].__int_routine = (__u32)&isr10;
+  __isr_table[0x0B].__int_routine = (__u32)&isr11;
+  __isr_table[0x0C].__int_routine = (__u32)&isr12;
+  __isr_table[0x0D].__int_routine = (__u32)&isr13;
+  __isr_table[0x0E].__int_routine = (__u32)&isr14;
+  __isr_table[0x0F].__int_routine = (__u32)&isr15;
+  __isr_table[0x10].__int_routine = (__u32)&isr16;
+  __isr_table[0x11].__int_routine = (__u32)&isr17;
+  __isr_table[0x12].__int_routine = (__u32)&isr18;
+  __isr_table[0x13].__int_routine = (__u32)&isr19;
+  __isr_table[0x14].__int_routine = (__u32)&isr20;
+  __isr_table[0x15].__int_routine = (__u32)&isr21;
+  __isr_table[0x16].__int_routine = (__u32)&isr22;
+  __isr_table[0x17].__int_routine = (__u32)&isr23;
+  __isr_table[0x18].__int_routine = (__u32)&isr24;
+  __isr_table[0x19].__int_routine = (__u32)&isr25;
+  __isr_table[0x1A].__int_routine = (__u32)&isr26;
+  __isr_table[0x1B].__int_routine = (__u32)&isr27;
+  __isr_table[0x1C].__int_routine = (__u32)&isr28;
+  __isr_table[0x1D].__int_routine = (__u32)&isr29;
+  __isr_table[0x1E].__int_routine = (__u32)&isr30;
+  __isr_table[0x1F].__int_routine = (__u32)&isr31;
+  
+  __isr_table[0x20].__int_routine = (__u32)&irq32;
+  __isr_table[0x21].__int_routine = (__u32)&irq33;
+  __isr_table[0x22].__int_routine = (__u32)&irq34;
+  __isr_table[0x23].__int_routine = (__u32)&irq35;
+  __isr_table[0x24].__int_routine = (__u32)&irq36;
+  __isr_table[0x25].__int_routine = (__u32)&irq37;
+  __isr_table[0x26].__int_routine = (__u32)&irq38;
+  __isr_table[0x27].__int_routine = (__u32)&irq39;
+  __isr_table[0x28].__int_routine = (__u32)&irq40;
+  __isr_table[0x29].__int_routine = (__u32)&irq41;
+  __isr_table[0x30].__int_routine = (__u32)&irq42;
+  __isr_table[0x31].__int_routine = (__u32)&irq43;
+  __isr_table[0x32].__int_routine = (__u32)&irq44;
+  __isr_table[0x33].__int_routine = (__u32)&irq45;
+  __isr_table[0x34].__int_routine = (__u32)&irq46;
+  __isr_table[0x35].__int_routine = (__u32)&irq47;
+
+  __isr_table[0x80].__int_routine = (__u32)&isr_syscall128;
+  __isr_table[0xB1].__int_routine = (__u32)&isr_syscall177;
 
   /*
    *
-   * IRQs
+   * Exeptions ISR
    *
    */
 
-  idt_entry(0x20, (__u32)irq0, 0x08, 0x8E);
-  idt_entry(0x21, (__u32)irq1, 0x08, 0x8E);
-  idt_entry(0x22, (__u32)irq2, 0x08, 0x8E);
-  idt_entry(0x23, (__u32)irq3, 0x08, 0x8E);
-  idt_entry(0x24, (__u32)irq4, 0x08, 0x8E);
-  idt_entry(0x25, (__u32)irq5, 0x08, 0x8E);
-  idt_entry(0x26, (__u32)irq6, 0x08, 0x8E);
-  idt_entry(0x27, (__u32)irq7, 0x08, 0x8E);
-  idt_entry(0x28, (__u32)irq8, 0x08, 0x8E);
-  idt_entry(0x29, (__u32)irq9, 0x08, 0x8E);
-  idt_entry(0x30, (__u32)irq10, 0x08, 0x8E);
-  idt_entry(0x31, (__u32)irq11, 0x08, 0x8E);
-  idt_entry(0x32, (__u32)irq12, 0x08, 0x8E);
-  idt_entry(0x33, (__u32)irq13, 0x08, 0x8E);
-  idt_entry(0x34, (__u32)irq14, 0x08, 0x8E);
-  idt_entry(0x35, (__u32)irq15, 0x08, 0x8E);
+  idt_entry(0x00, __isr_table[0].__int_routine, 0x08, 0x8E);
+  idt_entry(0x01, __isr_table[1].__int_routine, 0x08, 0x8E);
+  idt_entry(0x02, __isr_table[2].__int_routine, 0x08, 0x8E);
+  idt_entry(0x03, __isr_table[3].__int_routine, 0x08, 0x8E);
+  idt_entry(0x04, __isr_table[4].__int_routine, 0x08, 0x8E);
+  idt_entry(0x05, __isr_table[5].__int_routine, 0x08, 0x8E);
+  idt_entry(0x06, __isr_table[6].__int_routine, 0x08, 0x8E);
+  idt_entry(0x07, __isr_table[7].__int_routine, 0x08, 0x8E);
+  idt_entry(0x08, __isr_table[8].__int_routine, 0x08, 0x8E);
+  idt_entry(0x09, __isr_table[9].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0A, __isr_table[10].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0B, __isr_table[11].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0C, __isr_table[12].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0D, __isr_table[13].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0E, __isr_table[14].__int_routine, 0x08, 0x8E);
+  idt_entry(0x0F, __isr_table[15].__int_routine, 0x08, 0x8E);
+  idt_entry(0x10, __isr_table[16].__int_routine, 0x08, 0x8E);
+  idt_entry(0x11, __isr_table[17].__int_routine, 0x08, 0x8E);
+  idt_entry(0x12, __isr_table[18].__int_routine, 0x08, 0x8E);
+  idt_entry(0x13, __isr_table[19].__int_routine, 0x08, 0x8E);
+  idt_entry(0x14, __isr_table[20].__int_routine, 0x08, 0x8E);
+  idt_entry(0x15, __isr_table[21].__int_routine, 0x08, 0x8E);
+  idt_entry(0x16, __isr_table[22].__int_routine, 0x08, 0x8E);
+  idt_entry(0x17, __isr_table[23].__int_routine, 0x08, 0x8E);
+  idt_entry(0x18, __isr_table[24].__int_routine, 0x08, 0x8E);
+  idt_entry(0x19, __isr_table[25].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1A, __isr_table[26].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1B, __isr_table[27].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1C, __isr_table[28].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1D, __isr_table[29].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1E, __isr_table[30].__int_routine, 0x08, 0x8E);
+  idt_entry(0x1F, __isr_table[31].__int_routine, 0x08, 0x8E);
 
   /*
    *
-   * Syscall
+   * IRQs ISR
    *
    */
 
-  idt_entry(0x80, (__u32)irq128, 0x08, 0x8E);
-  idt_entry(0xB1, (__u32)irq177, 0x08, 0x8E);
+  idt_entry(0x20, __isr_table[32].__int_routine, 0x08, 0x8E);
+  idt_entry(0x21, __isr_table[33].__int_routine, 0x08, 0x8E);
+  idt_entry(0x22, __isr_table[34].__int_routine, 0x08, 0x8E);
+  idt_entry(0x23, __isr_table[35].__int_routine, 0x08, 0x8E);
+  idt_entry(0x24, __isr_table[36].__int_routine, 0x08, 0x8E);
+  idt_entry(0x25, __isr_table[37].__int_routine, 0x08, 0x8E);
+  idt_entry(0x26, __isr_table[38].__int_routine, 0x08, 0x8E);
+  idt_entry(0x27, __isr_table[39].__int_routine, 0x08, 0x8E);
+  idt_entry(0x28, __isr_table[40].__int_routine, 0x08, 0x8E);
+  idt_entry(0x29, __isr_table[41].__int_routine, 0x08, 0x8E);
+  idt_entry(0x30, __isr_table[42].__int_routine, 0x08, 0x8E);
+  idt_entry(0x31, __isr_table[43].__int_routine, 0x08, 0x8E);
+  idt_entry(0x32, __isr_table[44].__int_routine, 0x08, 0x8E);
+  idt_entry(0x33, __isr_table[45].__int_routine, 0x08, 0x8E);
+  idt_entry(0x34, __isr_table[46].__int_routine, 0x08, 0x8E);
+  idt_entry(0x35, __isr_table[47].__int_routine, 0x08, 0x8E);
+
+  /*
+   *
+   * Syscall ISR
+   *
+   */
+
+  idt_entry(0x80, __isr_table[128].__int_routine, 0x08, 0x8E);
+  idt_entry(0xB1, __isr_table[177].__int_routine, 0x08, 0x8E);
 
   __asm__ volatile(
     "lidt (%0)\n"
@@ -335,68 +436,15 @@ void idt_init()
   );
 }
 
-void isr_handler(struct InterruptRegisters* __regs_struct__)
+void idt_install_coop_routine(__u8 __index__, void(*__routine__)(struct InterruptRegisters* __regs_struct__))
 {
-  if(__regs_struct__->__interrupt < EXCEPTIONS_NUM)
-  {
-    printf("\nNEKO PANIC! : ");
-    printf(__exceptions_messsagens[__regs_struct__->__interrupt]);
-    printf("\n");
-    
-    __asm__ volatile(
-      ".LExeceptionLoop:"
-      "jmp .LExeceptionLoop\n"
-      :
-      :
-      :
-    );
-  } 
+  if(__index__ > 0x1F)
+    __isr_table[__index__].__coop_routine = __routine__;
 }
 
-void irq_handler(struct InterruptRegisters* __regs_struct__)
-{ 
-  void (*__irq_routine)(struct InterruptRegisters*);
-
-  __irq_routine = __irq_installed_routines[__regs_struct__->__interrupt];
-
-  if(__irq_routine)
-  {
-    __irq_routine(__regs_struct__);
-  }
-  
-  if(__regs_struct__-> __interrupt >= 40)
-  {
-
-    /*
-     *
-     * Enviamos o comando de EOI(End of Interruption) para o PIC Slave caso 
-     * o número da interrupção esteja na faixa do PIC Slave, o EOI serve para
-     * sinalizar ao PIC que a interrupção foi tratada, permitindo que novas interrupções
-     * sejam processadas
-     *
-     */
-
-    outb(SEC_PIC_COMMAND_PORT, 0x20);
-  }
-
-  /*
-   *
-   * Fazemos o mesmo para o PIC Master, já que ele sempre vai ser usado, mesmo quando o PIC
-   * secundário é usado, o PIC secundário passa o IRQ para o PIC primário pela linha IRQ2, 
-   * então temos que sinalizar a ele também
-   *
-   */
-  
-  outb(PRI_PIC_COMMAND_PORT, 0x20);
-}
-
-void irq_install_routine(__u8 __index__, void (*handler)(struct InterruptRegisters*))
+void idt_unistall_coop_routine(__u8 __index__)
 {
-  __irq_installed_routines[__index__] = handler;
-}
-
-void irq_unistall_routine(__u8 __index__)
-{
-  __irq_installed_routines[__index__] = 0x00;
+  if(__index__ > CPU_EXCEPTIONS_NUM)
+    __isr_table[__index__].__coop_routine = 0x00;
 }
 

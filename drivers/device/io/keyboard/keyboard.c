@@ -92,7 +92,7 @@ void keyboard_handler(struct InterruptRegisters*)
 
 void keyboard_init()
 {
-  irq_install_routine(IRQ_KEYBOARD_NUM, &keyboard_handler);
+  idt_install_coop_routine(INT_KEYBOARD_NUM, &keyboard_handler);
 }
 
 void keyboard_switch(struct Keyboard* __new_keyboard__)

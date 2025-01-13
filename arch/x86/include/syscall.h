@@ -3,6 +3,6 @@
 
 #include <sys/kernel.h>
 
-extern void syscall_handler(struct InterruptRegisters*);
+extern void syscall_init();
 
 #endif

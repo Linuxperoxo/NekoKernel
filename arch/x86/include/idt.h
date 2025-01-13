@@ -72,8 +72,14 @@ struct idt_ptr {
  *
  */
 
+struct isrInterrupt
+{
+  __u32 __int_routine;
+  void (*__coop_routine)(struct InterruptRegisters*);
+};
+
 extern void idt_init(); 
-extern void irq_install_routine(__u8, void(*)(struct InterruptRegisters*));
-extern void irq_unistall_routine(__u8);
+extern void idt_install_coop_routine(__u8 __index__, void(*__routine__)(struct InterruptRegisters*));
+extern void idt_unistall_coop_routine(__u8 __index__);
 
 #endif
