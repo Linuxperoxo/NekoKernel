@@ -1,55 +1,93 @@
-/===========================================================================================O
-|                                                                                           |
-| ** O que é o NekoKernel?                                                                  |
-|                                                                                           |
-| O NekoKernel é um projeto que eu estava a muito tempo querendo fazer, um                  |
-| kernel do 0, lógico que ele não vai ser um linux, mas a ideia é aprender                  |
-| os fundamentos e como funciona um sistema operacional. O NekoKernel tem                   |
-| seu próprio bootloader, o NekoNest. No começo, eu não iria fazer um bootloader,           |
-| mas a curiosidade de entender como ele funciona não deixou isso acontecer :),             |
-| então eu decidi que iria estudar mais sobre e tentar fazer o meu do 0, e finalmente       |
-| consegui fazer um driver para um controlador ATA que vai carregar a image do kernel,      |
-| ele também carrega uma GDT temporária, apenas para mudar do modo real para o modo         |
-| protegido, também tive que fazer uma stack temporária para chamadas de funções do próprio |
-| bootloader. Contudo, esse projeto é meu queridinho, estou colocando muito amor nele, quem |
-| sabe ele seja um futuro linux :D.                                                         |
-|                                                                                           |
-| ** Funcionalidades:                                                                       |
-|                                                                                           |
-| # O NekoKernel, atualmente, conta com algumas funcionalidades como:                       |
-|                                                                                           |
-| * GDT completo, com 5 segmentos, Null Seg, Kernel Code, Kernel Data,                      |
-|   User Code e User Data;                                                                  |
-| * Driver para o Vga;                                                                      |                          
-| * Driver para controlador ATA CHS;                                                        |
-| * Lib std.                                                                                |
-|                                                                                           |
-| # Pretendo implementar várias outras coisas, Algumas delas são:                           |
-|                                                                                           |
-| * TSS;                                                                                    |
-| * IDT;                                                                                    |
-| * Driver para teclado;                                                                    |
-| * Shell;                                                                                  |
-| * File System;                                                                            |
-| * Rodar programas.                                                                        |
-|                                                                                           |
-|                                                                                           |
-| ** Compilação:                                                                            |
-|                                                                                           |
-| # Para compilar e executar o projeto você vai precisar de:                                |
-|                                                                                           |
-| * QEMU i386;                                                                              |
-| * NASM;                                                                                   |
-| * GCC;                                                                                    |
-|                                                                                           |
-| # Se você já tem tudo, pode executar os comandos abaixo:                                  |
-|                                                                                           |
-| * git clone https://github.com/Linuxperoxo/NekoKernel                                     |
-| * cd ./NekoKernel                                                                         |
-| * make clean                                                                              |
-| * make kernel                                                                             |
-| * make bootloader                                                                         |
-| * make image                                                                              |
-| * make run                                                                                |
-|                                                                                           |
-O===========================================================================================/
+=============================================================================================
+NekoKernel
+
+O que é o NekoKernel?
+
+O NekoKernel é um projeto pessoal que eu sempre quis realizar: a criação de um kernel do zero. 
+Claro que ele não será um sistema operacional completo como o Linux, mas o objetivo principal é 
+aprender os fundamentos de como um sistema operacional funciona.
+
+O NekoKernel vem acompanhado do seu próprio bootloader, o NekoNest. Inicialmente, eu não planejava 
+desenvolver um bootloader, mas a curiosidade sobre como ele funciona me levou a estudar e criar o 
+meu próprio. Durante esse processo, aprendi a implementar um driver para um controlador ATA, que carrega 
+a imagem do kernel e também uma GDT temporária, essencial para realizar a transição do modo real para o 
+modo protegido. Para isso, também foi necessário desenvolver uma stack temporária para as chamadas de funções 
+do bootloader.
+
+Esse projeto é muito especial para mim, e estou dedicando muito tempo e amor a ele. Quem sabe, no futuro, o 
+NekoKernel não se torne algo maior, como uma versão própria de um sistema operacional baseado em Linux! :D
+
+Funcionalidades Atuais
+
+Atualmente, o NekoKernel oferece algumas funcionalidades, incluindo:
+
+- GDT Completa, com 3 segmentos:
+    - Null Segment
+    - Kernel Code
+    - Kernel Data
+- Driver para VGA (para exibição de vídeo)
+- Driver para Controlador ATA (CHS)
+- Biblioteca Padrão (Lib std)
+- Driver para teclado
+- Terminal
+- Multitask
+- IDT
+- Um simples shell temporário
+- Syscall 0x80 0xB1
+
+Funcionalidades Futuras
+
+Estou planejando implementar várias outras funcionalidades no NekoKernel, incluindo:
+
+- Sistema de arquivos (File System)
+- Execução de programas
+- Melhoria geral no código
+- Paging
+- User mode
+
+Compilação
+
+Para compilar e executar o NekoKernel, você precisará dos seguintes requisitos:
+
+- QEMU (i386)
+- NASM (Assembler)
+- GCC (Compilador)
+
+Passos para compilar
+
+1. Clone o repositório:
+    git clone https://github.com/Linuxperoxo/NekoKernel
+
+2. Acesse a pasta do projeto:
+    cd ./NekoKernel
+
+3. Compile o kernel:
+    make clean
+    make kernel
+
+4. Compile o bootloader:
+    make bootloader
+
+5. Crie a imagem do sistema:
+    make image
+
+6. Execute o kernel:
+    make run
+
+Para Debug
+
+Se você deseja realizar debug, você vai precisar do GDB instalado. Para isso, siga os comandos 
+abaixo:
+
+1. Compile para debug:
+    make debug
+
+2. Inicie o GDB:
+    make gdb
+
+Contribuições
+
+Este é um projeto em desenvolvimento e todo feedback é bem-vindo! Se você quiser contribuir 
+ou tem sugestões, fique à vontade para abrir uma issue ou pull request no repositório.
+=============================================================================================
+
