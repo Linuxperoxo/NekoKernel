@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 12/01/2025                    |
+#    |  SRC MOD   : 13/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -23,35 +23,35 @@ QEMUFLAGSDEBUG = -drive file=$(DEBUG_FILE),format=raw -m 4G -s -S
 INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
 # Kernel Files
-KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel.c
+KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel/kernel.c
 KERNEL_OBJ = $(OBJ_DIR)/kernel.o
 KERNEL_BIN = $(BIN_DIR)/kernel.bin
 
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_BOOT_DIR)/loader.o
 
-TERMINAL_SRC = $(KERNEL_SRC_DIR)/terminal.c
+TERMINAL_SRC = $(KERNEL_SRC_DIR)/sys/terminal.c
 TERMINAL_OBJ = $(OBJ_DIR)/terminal.o
 
-SHELL_SRC = $(KERNEL_SRC_DIR)/shell.c
+SHELL_SRC = $(KERNEL_SRC_DIR)/sh/shell.c
 SHELL_OBJ = $(OBJ_DIR)/shell.o
 
-GDT_SRC = $(KERNEL_SRC_DIR)/gdt.c
+GDT_SRC = $(KERNEL_SRC_DIR)/cpu/gdt.c
 GDT_OBJ = $(OBJ_DIR)/gdt.o
 
-IDT_SRC = $(KERNEL_SRC_DIR)/idt.c
+IDT_SRC = $(KERNEL_SRC_DIR)/cpu/idt.c
 IDT_OBJ = $(OBJ_DIR)/idt.o
 
-TASK_SRC = $(KERNEL_SRC_DIR)/task.c
+TASK_SRC = $(KERNEL_SRC_DIR)/sys/task.c
 TASK_OBJ = $(OBJ_DIR)/task.o
 
-ISR_SRC = $(KERNEL_SRC_DIR)/isr.s
+ISR_SRC = $(KERNEL_SRC_DIR)/cpu/isr.s
 ISR_OBJ = $(OBJ_DIR)/isr.o
 
-SYSCALL_SRC = $(KERNEL_SRC_DIR)/syscall.c
+SYSCALL_SRC = $(KERNEL_SRC_DIR)/sys/syscall.c
 SYSCALL_OBJ = $(OBJ_DIR)/syscall.o
 
-TIMER_SRC = $(KERNEL_SRC_DIR)/timer.c
+TIMER_SRC = $(KERNEL_SRC_DIR)/sys/timer.c
 TIMER_OBJ = $(OBJ_DIR)/timer.o
 
 BOOTLOADER_SRC = ./arch/x86/boot/nekonest.s
@@ -78,8 +78,8 @@ IMG_DIR        = $(BUILD_DIR)/img
 
 BOOT_DIR = ./arch/x86/boot
 
-KERNEL_SRC_DIR = ./arch/x86/kernel
-KERNEL_INCLUDE = ./arch/x86/include
+KERNEL_SRC_DIR = ./arch/x86/
+KERNEL_INCLUDE = ./include/neko
 KERNEL_DRIVERS = drivers
 STD_INCLUDE = include
 
