@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keyboard.c                    |
- *    |  SRC MOD   : 02/01/2025                    |
+ *    |  SRC MOD   : 13/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -81,7 +81,7 @@ void keyboard_handler(struct InterruptRegisters*)
                                 KEYBOARD->__char >= KEY_NUM_ASCII_INIT && KEYBOARD->__char <= KEY_NUM_ASCII_END ? KEYBOARD->__flags | 0x04 : KEYBOARD->__flags & 0xFB;
 
   if(KEYBOARD_BUFFER_ENABLE)
-    KEYBOARD->__buffer_func(KEYBOARD->__code);
+    KEYBOARD->__func_key_handler(KEYBOARD->__code);
 }
 
 /*

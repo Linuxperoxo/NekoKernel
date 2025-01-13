@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : terminal.h                    |
- *    |  SRC MOD   : 02/01/2025                    | 
+ *    |  SRC MOD   : 13/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -53,11 +53,11 @@ struct Terminal
 };
 
 extern void terminal_init();
-extern void terminal_out(const char);
-extern void terminal_in(const __u8);
+extern void terminal_out(const char __ch__);
+extern void terminal_in(const char __ch__);
 extern void terminal_cln_flag();
-extern void terminal_set_flag(const __u8);
+extern void terminal_set_flag(const __u8 __flag__);
 extern __u8 terminal_sts_flag();
-extern void terminal_cpy_in(void*, __u16);
+extern void terminal_cpy_in(void* __dest__, __u16 __byte_to_cpy__);
 
 #endif

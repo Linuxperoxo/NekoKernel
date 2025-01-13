@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 12/01/2025                    |
+ *    |  SRC MOD   : 13/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -71,5 +71,21 @@ void k_main()
 
   printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
 
+  const char* __sla = "Hello, World!\n";
+
+  /*
+  
+  __asm__ volatile(
+    "movl $0x10, %%eax\n" // sys_write
+    "movl $0x00, %%ebx\n" // stdout 
+    "movl %0, %%esi\n"    // Ponteiro para o conteúdo de escrita
+    "movl $0x0E, %%edi\n" // Bytes a ser escritos
+    "int $0x80\n"         // syscall
+    :
+    :"p"(__sla)
+    :"%eax", "%ebx", "%esi", "%edi"
+  );
+
+  */
   shell_init();
 }

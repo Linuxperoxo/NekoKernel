@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keryboard.h                   |
- *    |  SRC MOD   : 02/01/2025                    |
+ *    |  SRC MOD   : 13/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -99,7 +99,7 @@ struct Keyboard {
   __u8 __char; // Caractere a ser impresso
   __u8 __flags; // Flags da tecla
 
-  void (*__buffer_func)(const __u8);
+  void (*__func_key_handler)(const __u8);
 };
 
 /*

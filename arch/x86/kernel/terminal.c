@@ -1,14 +1,14 @@
 /*
  * 
  *
- *    /--------------------------------------------O
+ *    /--------------------------------------------o
  *    |                                            |
- *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
- *    |  AUTHOR    : Linuxperoxo                   |
- *    |  FILE      : terminal.c                    |
- *    |  SRC MOD   : 02/01/2025                    | 
+ *    |  copyright : (c) 2024 per linuxperoxo.     |
+ *    |  author    : linuxperoxo                   |
+ *    |  file      : terminal.c                    |
+ *    |  src mod   : 13/01/2025                    | 
  *    |                                            |
- *    O--------------------------------------------/
+ *    o--------------------------------------------/
  *    
  *
  */
@@ -93,6 +93,74 @@ __attribute__((always_inline)) inline void terminal_mov_ptr(__u8 __row__, __u8 _
 
 /*
  *
+ * Essa função é responsável por manipular os inputs do teclado no terminal
+ *
+ */
+
+void terminal_keyboard_handler(const __u8 __key_code__)
+{
+  if(KEY_IS_PRESS)
+  {
+    switch(__key_code__)
+    {
+      case KEY_ENTER:
+
+        /*
+         *
+         * Caso a tecla pressionada seja Enter, vamos sinalizar que o buffer está pronto
+         * e quebrar a linha
+         *
+         */
+
+        TERMINAL_IN_OFFSET = 0x00; // Limpando o buffer
+        TERMINAL->__flags |= 0x10; // Levantando a flag que representa que o buffer está pronto 
+
+        terminal_out('\n'); // Quebrando a linha
+      break;
+
+      case KEY_BACK:
+
+        /*
+         *
+         * Aqui fazemos uma lógica para apagar apenas caracteres de input
+         *
+         */
+
+        if(TERMINAL_IN_OFFSET > 0x00)
+        {
+          if(TERMINAL_VGA.__current_col > 0x00)
+          {
+            TERMINAL_VGA.__current_col -= 1;
+          }
+          else
+          {
+            if(TERMINAL_VGA.__current_row > 0x00)
+            {
+              TERMINAL_VGA.__current_col  = DEFAULT_WIDTH - 1; // Como __current_col é um array devemos usando o '- 1', já que seu índice começa do 0
+              TERMINAL_VGA.__current_row -= 1;
+            }
+          }
+          
+          terminal_out('\0'); // Imprimindo caractere nulo na tela
+          
+          TERMINAL_VGA.__current_col                   -= 1; // Voltando uma coluna já que o caractere foi apagado, eixo X
+          TERMINAL_OUT_OFFSET                          -= 1; // Como apagamos um out temos que decrementar o offset out
+          TERMINAL->__in_buffer[--TERMINAL_IN_OFFSET]   = 0x00; // Aqui limpamos o caractere de input, isso serve para que o caractere deixe de existir em funções como scanf
+
+          terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col); // Atualizando o ponteiro para o novo lugar
+        }
+      break;
+      
+      default:
+        terminal_in(TERMINAL_KB.__char);
+      break;
+    }
+  }
+}
+
+
+/*
+ *
  * ==========================
  *
  *  Functions terminal.h
@@ -135,9 +203,9 @@ void terminal_init()
    *
    */
 
-  TERMINAL_KB.__scan        = 0x00;
-  TERMINAL_KB.__code        = 0x00;
-  TERMINAL_KB.__char        = 0x00;
+  TERMINAL_KB.__scan = 0x00;
+  TERMINAL_KB.__code = 0x00;
+  TERMINAL_KB.__char = 0x00;
 
   /*
    *
@@ -146,7 +214,7 @@ void terminal_init()
    *
    */
 
-  TERMINAL_KB.__flags       = 0x08;
+  TERMINAL_KB.__flags = 0x08;
 
   /*
    *
@@ -154,7 +222,7 @@ void terminal_init()
    *
    */
 
-  TERMINAL_KB.__buffer_func = &terminal_in; 
+  TERMINAL_KB.__func_key_handler = &terminal_keyboard_handler; 
 
   /*
    *
@@ -216,80 +284,18 @@ void terminal_out(const char __ch__)
   }  
 }
 
-/*
- *
- * Essa função é responsável por manipular os inputs no terminal
- *
- */
-
-void terminal_in(const __u8 __key_code__)
+void terminal_in(const char __ch__)
 {
-  if(KEY_IS_PRESS)
-  {
-    switch(__key_code__)
-    {
-      case KEY_ENTER:
+  TERMINAL_IN_OFFSET = TERMINAL_IN_OFFSET >= MAX_IN_BUFFER_SIZE ? 0 : TERMINAL_IN_OFFSET; 
 
-        /*
-         *
-         * Caso a tecla pressionada seja Enter, vamos sinalizar que o buffer está pronto
-         * e quebrar a linha
-         *
-         */
+  if(TERMINAL_BUFFER_IS_READY)
+    memset(TERMINAL->__in_buffer, 0x00, MAX_IN_BUFFER_SIZE);  
 
-        TERMINAL_IN_OFFSET = 0x00; // Limpando o buffer
-        TERMINAL->__flags |= 0x10; // Levantando a flag que representa que o buffer está pronto 
+  TERMINAL->__in_buffer[TERMINAL_IN_OFFSET++] = KEY_IS_VISIBLE ? TERMINAL_KB.__char : TERMINAL_KB.__code;
+  TERMINAL->__flags                          &= 0xEF; // Desabilitando a flag de buffer ready
 
-        terminal_out('\n'); // Quebrando a linha
-      break;
-
-      case KEY_BACK:
-
-        /*
-         *
-         * Aqui fazemos uma lógica para apagar apenas caracteres de input
-         *
-         */
-
-        if(TERMINAL_IN_OFFSET > 0x00)
-        {
-          if(TERMINAL_VGA.__current_col > 0x00)
-          {
-            TERMINAL_VGA.__current_col -= 1;
-          }
-          else
-          {
-            if(TERMINAL_VGA.__current_row > 0x00)
-            {
-              TERMINAL_VGA.__current_col  = DEFAULT_WIDTH - 1; // Como __current_col é um array devemos usando o '- 1', já que seu índice começa do 0
-              TERMINAL_VGA.__current_row -= 1;
-            }
-          }
-          
-          terminal_out('\0'); // Imprimindo caractere nulo na tela
-          
-          TERMINAL_VGA.__current_col                   -= 1; // Voltando uma coluna já que o caractere foi apagado, eixo X
-          TERMINAL_OUT_OFFSET                          -= 1; // Como apagamos um out temos que decrementar o offset out
-          TERMINAL->__in_buffer[--TERMINAL_IN_OFFSET]   = 0x00; // Aqui limpamos o caractere de input, isso serve para que o caractere deixe de existir em funções como scanf
-
-          terminal_mov_ptr(TERMINAL_VGA.__current_row, TERMINAL_VGA.__current_col); // Atualizando o ponteiro para o novo lugar
-        }
-      break;
-      
-      default:
-        TERMINAL_IN_OFFSET = TERMINAL_IN_OFFSET >= MAX_IN_BUFFER_SIZE ? 0 : TERMINAL_IN_OFFSET; 
-
-        if(TERMINAL_BUFFER_IS_READY)
-          memset(TERMINAL->__in_buffer, 0x00, MAX_IN_BUFFER_SIZE);  
-
-        TERMINAL->__in_buffer[TERMINAL_IN_OFFSET++] = KEY_IS_VISIBLE ? TERMINAL_KB.__char : TERMINAL_KB.__code;
-        TERMINAL->__flags                          &= 0xEF; // Desabilitando a flag de buffer ready
-
-        if(KEY_IS_VISIBLE && !TERMINAL_INV_INPUT)
-          terminal_out(TERMINAL_KB.__char);
-      break;
-    }
-  }
+  if(KEY_IS_VISIBLE && !TERMINAL_INV_INPUT)
+    terminal_out(__ch__);
 }
 
 void terminal_cln_flag()
