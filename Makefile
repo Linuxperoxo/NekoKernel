@@ -13,81 +13,81 @@
 #
 #
 
+# ----------
 # Flags
-CFLAGS = -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
-ASMFLAGSBIN = -f bin
-ASMFLAGSELF = -g -f elf32
-LDFLAGS = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
-QEMUFLAGS = -drive file=$(NEKO_OS_IMG),format=raw -m 4G
+# ----------
+CFLAGS         = -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
+ASMFLAGSBIN    = -f bin
+ASMFLAGSELF    = -g -f elf32
+LDFLAGS        = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
+QEMUFLAGS      = -drive file=$(NEKO_OS_IMG),format=raw -m 4G
 QEMUFLAGSDEBUG = -drive file=$(DEBUG_FILE),format=raw -m 4G -s -S
-INCLUDES = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
+INCLUDES       = -I $(STD_INCLUDE) -I $(KERNEL_INCLUDE) -I $(KERNEL_DRIVERS)  
 
+# ----------
 # Kernel Files
-KERNEL_SRC = $(KERNEL_SRC_DIR)/kernel/kernel.c
-KERNEL_OBJ = $(OBJ_DIR)/kernel.o
-KERNEL_BIN = $(BIN_DIR)/kernel.bin
-
+# ----------
+KERNEL_SRC        = ./init/kernel.c
+KERNEL_OBJ        = $(OBJ_DIR)/kernel.o
+KERNEL_BIN        = $(BIN_DIR)/kernel.bin
 KERNEL_LOADER_SRC = $(BOOT_DIR)/loader.s
 KERNEL_LOADER_OBJ = $(OBJ_BOOT_DIR)/loader.o
+TERMINAL_SRC      = $(SYS_DIR)/terminal.c
+TERMINAL_OBJ      = $(OBJ_DIR)/terminal.o
+SHELL_SRC         = $(SH_DIR)/shell.c
+SHELL_OBJ         = $(OBJ_DIR)/shell.o
+GDT_SRC           = $(CPU_DIR)/gdt.c
+GDT_OBJ           = $(OBJ_DIR)/gdt.o
+IDT_SRC           = $(CPU_DIR)/idt.c
+IDT_OBJ           = $(OBJ_DIR)/idt.o
+TASK_SRC          = $(SYS_DIR)/task.c
+TASK_OBJ          = $(OBJ_DIR)/task.o
+ISR_SRC           = $(CPU_DIR)/isr.s
+ISR_OBJ           = $(OBJ_DIR)/isr.o
+SYSCALL_SRC       = $(SYS_DIR)/syscall.c
+SYSCALL_OBJ       = $(OBJ_DIR)/syscall.o
+TIMER_SRC         = $(SYS_DIR)/timer.c
+TIMER_OBJ         = $(OBJ_DIR)/timer.o
+BOOTLOADER_SRC    = $(BOOT_DIR)/nekonest.s
+BOOTLOADER_BIN    = $(BIN_DIR)/nekonest.bin
+NEKO_OS_IMG       = $(IMG_DIR)/NekoOS.img
+DEBUG_FILE        = $(BIN_DIR)/debug.bin
+LINKER_FILE       = linker.ld
 
-TERMINAL_SRC = $(KERNEL_SRC_DIR)/sys/terminal.c
-TERMINAL_OBJ = $(OBJ_DIR)/terminal.o
-
-SHELL_SRC = $(KERNEL_SRC_DIR)/sh/shell.c
-SHELL_OBJ = $(OBJ_DIR)/shell.o
-
-GDT_SRC = $(KERNEL_SRC_DIR)/cpu/gdt.c
-GDT_OBJ = $(OBJ_DIR)/gdt.o
-
-IDT_SRC = $(KERNEL_SRC_DIR)/cpu/idt.c
-IDT_OBJ = $(OBJ_DIR)/idt.o
-
-TASK_SRC = $(KERNEL_SRC_DIR)/sys/task.c
-TASK_OBJ = $(OBJ_DIR)/task.o
-
-ISR_SRC = $(KERNEL_SRC_DIR)/cpu/isr.s
-ISR_OBJ = $(OBJ_DIR)/isr.o
-
-SYSCALL_SRC = $(KERNEL_SRC_DIR)/sys/syscall.c
-SYSCALL_OBJ = $(OBJ_DIR)/syscall.o
-
-TIMER_SRC = $(KERNEL_SRC_DIR)/sys/timer.c
-TIMER_OBJ = $(OBJ_DIR)/timer.o
-
-BOOTLOADER_SRC = ./arch/x86/boot/nekonest.s
-BOOTLOADER_BIN = $(BIN_DIR)/nekonest.bin
-
-NEKO_OS_IMG = $(IMG_DIR)/NekoOS.img
-DEBUG_FILE  = $(BIN_DIR)/debug.bin
-
-LINKER_FILE = linker.ld
-
+# ----------
 # Drivers
+# ----------
 KEYBOARD_DRIVER_SRC = $(KERNEL_DRIVERS)/device/io/keyboard/keyboard.c
 KEYBOARD_DRIVER_OBJ = $(OBJ_DRIVER_DIR)/keyboard.o
-ATA_DRIVER_SRC = $(KERNEL_DRIVERS)/media/ata.c
-ATA_DRIVER_OBJ = $(OBJ_DRIVER_DIR)/ata.o
+ATA_DRIVER_SRC      = $(KERNEL_DRIVERS)/media/ata.c
+ATA_DRIVER_OBJ      = $(OBJ_DRIVER_DIR)/ata.o
 
+# ----------
 # Dirs
+# ----------
+SYS_DIR        = ./sys
+MM_DIR         = ./mm
+CPU_DIR        = ./cpu
+INIT_DIR       = ./init
+SH_DIR         = ./sh
 BUILD_DIR      = build
 BIN_DIR        = $(BUILD_DIR)/bin
 OBJ_DIR        = $(BUILD_DIR)/obj
 OBJ_DRIVER_DIR = $(OBJ_DIR)/drivers
 OBJ_BOOT_DIR   = $(OBJ_DIR)/boot
 IMG_DIR        = $(BUILD_DIR)/img
-
-BOOT_DIR = ./arch/x86/boot
-
-KERNEL_SRC_DIR = ./arch/x86/
+BOOT_DIR       = ./boot
 KERNEL_INCLUDE = ./include/neko
 KERNEL_DRIVERS = drivers
-STD_INCLUDE = include
+STD_INCLUDE    = include
 
+# ----------
 # Exec
-LD = /usr/bin/ld
-ASM = /usr/bin/nasm
-CC = /usr/bin/gcc
-QEMU = /usr/bin/qemu-system-i386
+# ----------
+LD    = /usr/bin/ld
+ASM   = /usr/bin/nasm
+CC    = /usr/bin/gcc
+QEMU  = /usr/bin/qemu-system-i386
 STRIP = /usr/bin/strip
 
 # ==============================================
