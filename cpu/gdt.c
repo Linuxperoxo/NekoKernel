@@ -16,9 +16,10 @@
 #include <gdt.h>
 #include <std/int.h>
 
-#define GDT_ENTRIES_TOTAL  0x08
-#define GDT_K_CODE_SEGMENT 0b00001000
-#define GDT_K_DATA_SEGMENT 0b00010000
+#define GDT_ENTRIES_TOTAL   0x08
+#define GDT_K_CODE_SEGMENT  0b00001000
+#define GDT_K_DATA_SEGMENT  0b00010000
+#define GDT_K_STACK_SEGMENT 0b00011000
 
 static struct gdtEntry __gdt_entries[GDT_ENTRIES_TOTAL];
 static struct gdtPtr   __gdt_ptr;
@@ -58,16 +59,6 @@ void gdt_init()
    *
    */
   
-  gdt_entry(0x03, 0x00, 0xFFFFF, 0xC0, 0xFA); // User code segment
-
-  /*
-   *
-   * Definir a quinta entrada -  Segmento de dados de usuário (4GB)
-   *
-   */
-
-  gdt_entry(0x04, 0x00, 0xFFFFFF, 0xC0, 0xF2); // User data segment
-
   __asm__ volatile(
 
     /*
@@ -96,8 +87,8 @@ void gdt_init()
      */
 
     "movw %2, %%ax\n"
-    "movw %%ax, %%ds\n"
     "movw %%ax, %%ss\n"
+    "movw %%ax, %%ds\n"
     "movw %%ax, %%es\n"
     "movw %%ax, %%fs\n"
     "movw %%ax, %%gs\n"
@@ -117,11 +108,13 @@ void gdt_init()
 
 void gdt_entry(__u8 __gdt_index__, __u32 __base__, __u32 __limit_20bits__, __u8 __gran__, __u8 __access__)
 {
-  __gdt_entries[__gdt_index__].__seg_limit_low  = (__u16)(__limit_20bits__);
-  __gdt_entries[__gdt_index__].__base_low       = (__u16)(__base__ & 0xFFFF);
-  __gdt_entries[__gdt_index__].__base_mid       = (__u8)((__base__ >> 16) & 0xFF);
-  __gdt_entries[__gdt_index__].__access         = (__u8)(__access__);
-  __gdt_entries[__gdt_index__].__seg_limit_high = (__u8)((__limit_20bits__ >> 16) & 0x0F);
-  __gdt_entries[__gdt_index__].__gran           = (__u8)(__gran__ & 0x0F);
-  __gdt_entries[__gdt_index__].__base_high      = (__u8)((__base__ >> 24) & 0xFF);
+  __gdt_entries[__gdt_index__].__seg_limit_low  = __limit_20bits__;
+  __gdt_entries[__gdt_index__].__seg_limit_high = (__limit_20bits__ >> 16) & 0x0F;
+  
+  __gdt_entries[__gdt_index__].__base_low       = __base__ & 0xFFFF;
+  __gdt_entries[__gdt_index__].__base_mid       = (__base__ >> 16) & 0xFF;
+  __gdt_entries[__gdt_index__].__base_high      = (__base__ >> 24) & 0xFF;
+  
+  __gdt_entries[__gdt_index__].__access         = __access__;
+  __gdt_entries[__gdt_index__].__gran           = __gran__ & 0x0F;
 }

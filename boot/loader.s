@@ -13,7 +13,7 @@
 ;
 ;
 
-%define STACK_ADDRS 0x2FFFFFFF
+%define STACK_ADDRS 0xFFFF
 
 SECTION .text
   GLOBAL k_loader

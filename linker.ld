@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : linker.ld                     |
- *    |  SRC MOD   : 08/01/2025                    |
+ *    |  SRC MOD   : 13/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -26,7 +26,7 @@ SECTIONS
    * de algo dos seus códigos, ou usando a farramenta readelf ou objdumb 
    *
    * OBS: O GCC não leva em consideração o início do arquivo, e sim o início
-   * do código, então se eu colocar isso em 0x100000 vai acontecer um bug. 
+   * do código, então se eu colocar isso em 0x10000 vai acontecer um bug. 
    * 
    */
 
@@ -36,7 +36,7 @@ SECTIONS
    *
    */
 
-  . = 0x10001000;
+  . = 0x11000;
 
   .text : 
   {
