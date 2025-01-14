@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.h                         |
- *    |  SRC MOD   : 18/12/2024                    | 
+ *    |  SRC MOD   : 14/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -120,5 +120,9 @@ struct VGAState{
   __u8 __ch_color;
   __u8 __last_put;
 };
+
+extern void vga_screen_up(struct VGAState* __vga__);
+extern void vga_put_char(struct VGAState* __vga__, const char __ch__);
+extern void vga_mov_ptr(const __u8 __row__, const __u8 __col__);
 
 #endif

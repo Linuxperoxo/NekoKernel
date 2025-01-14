@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 13/01/2025                    |
+#    |  SRC MOD   : 14/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -48,6 +48,8 @@ SYSCALL_SRC       = $(SYS_DIR)/syscall.c
 SYSCALL_OBJ       = $(OBJ_DIR)/syscall.o
 TIMER_SRC         = $(SYS_DIR)/timer.c
 TIMER_OBJ         = $(OBJ_DIR)/timer.o
+PAGING_SRC        = $(MM_DIR)/paging.c
+PAGING_OBJ        = $(OBJ_DIR)/paging.o
 BOOTLOADER_SRC    = $(BOOT_DIR)/nekonest.s
 BOOTLOADER_BIN    = $(BIN_DIR)/nekonest.bin
 NEKO_OS_IMG       = $(IMG_DIR)/NekoOS.img
@@ -61,6 +63,8 @@ KEYBOARD_DRIVER_SRC = $(KERNEL_DRIVERS)/device/io/keyboard/keyboard.c
 KEYBOARD_DRIVER_OBJ = $(OBJ_DRIVER_DIR)/keyboard.o
 ATA_DRIVER_SRC      = $(KERNEL_DRIVERS)/media/ata.c
 ATA_DRIVER_OBJ      = $(OBJ_DRIVER_DIR)/ata.o
+VGA_DRIVER_SRC      = $(KERNEL_DRIVERS)/video/vga/vga.c
+VGA_DRIVER_OBJ      = $(OBJ_DRIVER_DIR)/vga.o
 
 # ----------
 # Dirs
@@ -99,8 +103,10 @@ $(BUILD_DIR):
 
 # === KERNEL_BIN
 
-$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TIMER_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ) $(SYSCALL_OBJ) $(TASK_OBJ)
+$(KERNEL_BIN): $(KERNEL_LOADER_OBJ) $(KERNEL_OBJ) $(VGA_DRIVER_OBJ) $(KEYBOARD_DRIVER_OBJ) $(ATA_DRIVER_OBJ) $(GDT_OBJ) $(IDT_OBJ) $(ISR_OBJ) $(TIMER_OBJ) $(TERMINAL_OBJ) $(SHELL_OBJ) $(SYSCALL_OBJ) $(TASK_OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
+$(PAGING_OBJ):
+	$(CC) $(CFLAGS) $(PAGING_SRC) -c -o $@
 $(TASK_OBJ):
 	$(CC) $(CFLAGS) $(TASK_SRC) -c -o $@
 $(SYSCALL_OBJ):
@@ -121,6 +127,8 @@ $(ATA_DRIVER_OBJ):
 	$(CC) $(CFLAGS) $(ATA_DRIVER_SRC) -c -o $@
 $(KEYBOARD_DRIVER_OBJ):
 	$(CC) $(CFLAGS) $(KEYBOARD_DRIVER_SRC) -c -o $@
+$(VGA_DRIVER_OBJ):
+	$(CC) $(CFLAGS) $(VGA_DRIVER_SRC) -c -o $@
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@
 $(KERNEL_LOADER_OBJ):
