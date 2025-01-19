@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : int.h                         |
- *    |  SRC MOD   : 18/12/2024                    | 
+ *    |  SRC MOD   : 18/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -47,16 +47,5 @@ typedef signed char int8_t;
 typedef signed short int16_t;
 typedef signed long int int32_t;
 typedef signed long long int int64_t;
-
-/*
- *
- * Bool Types (SOME C!)
- *
- */
-
-typedef __u8 bool;
-
-#define true 1
-#define false 0
 
 #endif

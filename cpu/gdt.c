@@ -13,7 +13,7 @@
  *
  */
 
-#include <gdt.h>
+#include <neko/gdt.h>
 #include <std/int.h>
 
 #define GDT_ENTRIES_TOTAL   0x08

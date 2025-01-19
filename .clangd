@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: 
+    - -I/home/tux/kernel/include
+    - -I/home/tux/kernel/drivers

@@ -13,12 +13,13 @@
  *
  */
 
-#include <sys/kernel.h>
-#include <terminal.h>
-#include <idt.h>
+#include <neko/kernel.h>
+#include <sys/tty.h>
+#include <neko/idt.h>
 
 void sys_write()
 {
+  /*
   __asm__ volatile(
     "cmp $0x00, %%ebx\n"
     "jz .Lstdout\n"
@@ -62,6 +63,7 @@ void sys_write()
     :
     :
   );
+  */
 }
 
 void syscall128(struct InterruptRegisters*)

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 12/01/2025                    |
+ *    |  SRC MOD   : 14/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -14,15 +14,19 @@
  */
 
 
-#include <idt.h>
+#include <neko/idt.h>
 #include <std/utils.h>
 #include <std/int.h>
 #include <std/io.h>
 #include <sys/ports.h>
-#include <sys/kernel.h>
+#include <neko/kernel.h>
 
 #define CPU_EXCEPTIONS_NUM 32
-#define IDT_ENTRIES        256
+#define IDT_ENTRIES 256
+
+#define ISR(INT_NUM) extern void isr##INT_NUM()
+#define IRQ(INT_NUM) extern void irq##INT_NUM()
+#define SYSCALL(INT_NUM) extern void isr_syscall##INT_NUM()
 
 /*
  *
@@ -30,56 +34,58 @@
  *
  */
 
-extern void isr0();
-extern void isr1();
-extern void isr2();
-extern void isr3();
-extern void isr4();
-extern void isr5();
-extern void isr6();
-extern void isr7();
-extern void isr8();
-extern void isr9();
-extern void isr10();
-extern void isr11();
-extern void isr12();
-extern void isr13();
-extern void isr14();
-extern void isr15();
-extern void isr16();
-extern void isr17();
-extern void isr18();
-extern void isr19();
-extern void isr20();
-extern void isr21();
-extern void isr22();
-extern void isr23();
-extern void isr24();
-extern void isr25();
-extern void isr26();
-extern void isr27();
-extern void isr28();
-extern void isr29();
-extern void isr30();
-extern void isr31();
-extern void irq32();
-extern void irq33();
-extern void irq34();
-extern void irq35();
-extern void irq36();
-extern void irq37();
-extern void irq38();
-extern void irq39();
-extern void irq40();
-extern void irq41();
-extern void irq42();
-extern void irq43();
-extern void irq44();
-extern void irq45();
-extern void irq46();
-extern void irq47();
-extern void isr_syscall128();
-extern void isr_syscall177();
+ISR(0);
+ISR(1);
+ISR(2);
+ISR(3);
+ISR(4);
+ISR(5);
+ISR(6);
+ISR(7);
+ISR(8);
+ISR(9);
+ISR(10);
+ISR(11);
+ISR(12);
+ISR(13);
+ISR(14);
+ISR(15);
+ISR(16);
+ISR(17);
+ISR(18);
+ISR(19);
+ISR(20);
+ISR(21);
+ISR(22);
+ISR(23);
+ISR(24);
+ISR(25);
+ISR(26);
+ISR(27);
+ISR(28);
+ISR(29);
+ISR(30);
+ISR(31);
+
+IRQ(32);
+IRQ(33);
+IRQ(34);
+IRQ(35);
+IRQ(36);
+IRQ(37);
+IRQ(38);
+IRQ(39);
+IRQ(40);
+IRQ(41);
+IRQ(42);
+IRQ(43);
+IRQ(44);
+IRQ(45);
+IRQ(46);
+IRQ(47);
+
+SYSCALL(128);
+SYSCALL(177);
 
 /*
  *

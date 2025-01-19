@@ -17,7 +17,7 @@
 #define __K_IDT__
 
 #include <std/int.h>
-#include <sys/kernel.h>
+#include <neko/kernel.h>
 
 struct idt_entry {
   __u16 __base_low;     // Parte baixa do endereço do ISR

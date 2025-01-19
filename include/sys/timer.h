@@ -18,7 +18,7 @@
 
 #include <std/int.h>
 
-extern void timer_init();
-extern void sleep_for(__u32);
+void timer_init();
+void sleep_for(__u32 __ms__);
 
 #endif

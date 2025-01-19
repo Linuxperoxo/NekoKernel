@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.h                          |
- *    |  SRC MOD   : 12/01/2025                    | 
+ *    |  SRC MOD   : 19/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -17,27 +17,11 @@
 #define __STD_IO__
 
 #include <std/int.h>
-#include <std/utils.h>
-#include <timer.h>
-#include <terminal.h>
+#include <sys/tty.h>
 
-inline __attribute__((always_inline)) void printf(const char* __text__) 
-{
-  while(*__text__ != '\0')
-  {
-    terminal_out(*__text__++);
-  }
-}
+#define BUFFER_SIZE 512
 
-inline __attribute__((always_inline)) void scanf(char* __dest__, __u16 __size__)
-{
-  terminal_cln_flag();
-
-  while(!TERMINAL_BUFFER_IS_READY)
-  {
-    sleep_for(10);
-  }
-  terminal_cpy_in(__dest__, __size__);
-}
+void printf(const char* __text__, ...); 
+void scanf(char* __dest__, __u16 __size__);
 
 #endif

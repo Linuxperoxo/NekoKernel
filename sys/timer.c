@@ -6,19 +6,19 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : timer.c                       |
- *    |  SRC MOD   : 10/01/2025                    |
+ *    |  SRC MOD   : 18/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <timer.h>
+#include <sys/timer.h>
 #include <std/int.h>
-#include <idt.h>
+#include <neko/idt.h>
 #include <std/io.h>
-#include <task.h>
-#include <sys/kernel.h>
+#include <sys/task.h>
+#include <neko/kernel.h>
 #include <sys/ports.h>
 
 #define FREQUENCY 1000
@@ -45,7 +45,7 @@ void timer_handler(struct InterruptRegisters* __regs__)
   __sys_clock += 1;
   __chrono    += 1;
 
-  task_switch(__regs__);
+//  task_switch(__regs__);
 }
 
 void timer_init()

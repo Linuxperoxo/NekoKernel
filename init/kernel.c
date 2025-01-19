@@ -6,32 +6,39 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 13/01/2025                    |
+ *    |  SRC MOD   : 18/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <gdt.h>
-#include <idt.h>
+#include <neko/gdt.h>
+#include <neko/idt.h>
 #include <std/io.h>
 #include <sys/ports.h>
-#include <terminal.h>
+#include <sys/tty.h>
 #include <std/str.h>
-#include <sys/kernel.h>
+#include <neko/kernel.h>
 #include <media/ata.h>
-#include <shell.h>
-#include <timer.h>
-#include <task.h>
-#include <syscall.h>
+#include <sys/shell.h>
+#include <sys/timer.h>
+#include <sys/task.h>
+#include <sys/syscall.h>
+#include <sys/vfs.h>
+#include <sys/kmem.h>
 #include <device/io/keyboard/keyboard.h>
 #include <video/vga/vga.h>
 
 void k_init()
 {
-  terminal_init();
-  keyboard_init();
+  vfs_init();
+  vga_init();
+  tty_init();
+
+  keyboard_t* __keyboard = (keyboard_t*)kmalloc(sizeof(keyboard_t));
+  keyboard_init(__keyboard);
+
   idt_init();
   gdt_init();
   syscall_init();
@@ -95,6 +102,6 @@ void k_main()
     :"p"(__sla)
     :"%eax", "%ebx", "%esi", "%edi"
   );
-
+  
   */
 }

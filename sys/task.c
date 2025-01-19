@@ -6,19 +6,21 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.c                        |
- *    |  SRC MOD   : 12/01/2025                    |
+ *    |  SRC MOD   : 17/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <task.h>
-#include <sys/kernel.h>
+#include <sys/task.h>
+#include <neko/kernel.h>
 #include <std/int.h>
 #include <std/utils.h>
 #include <std/io.h>
-#include <timer.h>
+#include <sys/timer.h>
+#include <sys/vfs.h>
+#include <sys/kmem.h>
 
 /*
  *
@@ -34,15 +36,8 @@
  *
  */
 
-#define TASK_BLOCKED  0b0010
-#define TASK_SLEEPING 0b0001
-#define TASK_DEAD     0b0000
-
-struct
-{
-  struct Task* __current_task;
-  struct Task* __root_task;
-}__TaskList;
+static task_t* __current_task;
+static task_t* __root_task;
 
 /*
  *
@@ -75,8 +70,15 @@ void task2_code()
 
 void task_init()
 {
-  __TaskList.__current_task = NULL;
-  __TaskList.__root_task    = NULL;
+  __root_task = (task_t*)kmalloc(sizeof(task_t));
+
+  __root_task->__prev_task = NULL;
+  __root_task->__next_task = NULL;
+  __root_task->__uid       = 0x00;
+  __root_task->__state     = TASK_RUNNING;
+  __root_task->__tid       = 0x00;
+
+  __current_task = __root_task;
 }
 
 void task_save(struct InterruptRegisters* __int_regs__)
@@ -88,12 +90,12 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__eax = __int_regs__->__eax;
-  __TaskList.__current_task->__ebx = __int_regs__->__ebx;
-  __TaskList.__current_task->__ecx = __int_regs__->__ecx;
-  __TaskList.__current_task->__edx = __int_regs__->__edx;
-  __TaskList.__current_task->__edi = __int_regs__->__edi;
-  __TaskList.__current_task->__esi = __int_regs__->__esi;
+  __current_task->__eax = __int_regs__->__eax;
+  __current_task->__ebx = __int_regs__->__ebx;
+  __current_task->__ecx = __int_regs__->__ecx;
+  __current_task->__edx = __int_regs__->__edx;
+  __current_task->__edi = __int_regs__->__edi;
+  __current_task->__esi = __int_regs__->__esi;
   
   /*
    *
@@ -101,8 +103,8 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  //__TaskList.__current_task->__esp = __int_regs__->__esp;
-  //__TaskList.__current_task->__ebp = __int_regs__->__ebp;
+  //__current_task->__esp = __int_regs__->__esp;
+  //__current_task->__ebp = __int_regs__->__ebp;
   
   /*
    *
@@ -111,7 +113,7 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__eip = __int_regs__->__eip;
+  __current_task->__eip = __int_regs__->__eip;
   
   /*
    *
@@ -119,11 +121,11 @@ void task_save(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__cs = __int_regs__->__cs;
-  __TaskList.__current_task->__ds = __int_regs__->__ds;
-  __TaskList.__current_task->__ss = __int_regs__->__ss;
-  __TaskList.__current_task->__gs = __int_regs__->__gs;
-  __TaskList.__current_task->__fs = __int_regs__->__fs;
+  __current_task->__cs = __int_regs__->__cs;
+  __current_task->__ds = __int_regs__->__ds;
+  __current_task->__ss = __int_regs__->__ss;
+  __current_task->__gs = __int_regs__->__gs;
+  __current_task->__fs = __int_regs__->__fs;
 }
 
 void task_load(struct InterruptRegisters* __int_regs__)
@@ -135,12 +137,12 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __int_regs__->__eax = __TaskList.__current_task->__eax;
-  __int_regs__->__ebx = __TaskList.__current_task->__ebx;
-  __int_regs__->__ecx = __TaskList.__current_task->__ecx;
-  __int_regs__->__edx = __TaskList.__current_task->__edx;
-  __int_regs__->__edi = __TaskList.__current_task->__edi;
-  __int_regs__->__esi = __TaskList.__current_task->__esi;
+  __int_regs__->__eax = __current_task->__eax;
+  __int_regs__->__ebx = __current_task->__ebx;
+  __int_regs__->__ecx = __current_task->__ecx;
+  __int_regs__->__edx = __current_task->__edx;
+  __int_regs__->__edi = __current_task->__edi;
+  __int_regs__->__esi = __current_task->__esi;
 
   /*
    *
@@ -148,8 +150,8 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  //__int_regs__->__esp = __TaskList.__current_task->__esp;
-  //__int_regs__->__ebp = __TaskList.__current_task->__ebp;
+  //__int_regs__->__esp = __current_task->__esp;
+  //__int_regs__->__ebp = __current_task->__ebp;
 
   /*
    *
@@ -157,7 +159,7 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __int_regs__->__eip = __TaskList.__current_task->__eip;
+  __int_regs__->__eip = __current_task->__eip;
 
   /*
    *
@@ -165,11 +167,11 @@ void task_load(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __int_regs__->__cs = __TaskList.__current_task->__cs;
-  __int_regs__->__ds = __TaskList.__current_task->__ds;
-  __int_regs__->__ss = __TaskList.__current_task->__ss;
-  __int_regs__->__gs = __TaskList.__current_task->__gs;
-  __int_regs__->__fs = __TaskList.__current_task->__fs;
+  __int_regs__->__cs = __current_task->__cs;
+  __int_regs__->__ds = __current_task->__ds;
+  __int_regs__->__ss = __current_task->__ss;
+  __int_regs__->__gs = __current_task->__gs;
+  __int_regs__->__fs = __current_task->__fs;
 }
 
 void task_switch(struct InterruptRegisters* __int_regs__)
@@ -190,13 +192,13 @@ void task_switch(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  if(__TaskList.__current_task == NULL)
+  if(__current_task == NULL)
   {
-    if(__TaskList.__root_task == NULL)
+    if(__root_task == NULL)
     {
       return;
     }
-    __TaskList.__current_task = __TaskList.__root_task;
+    __current_task = __root_task;
   }
 
   /*
@@ -215,15 +217,17 @@ void task_switch(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  __TaskList.__current_task->__task_state = TASK_SLEEPING;
+  __current_task->__state = TASK_SLEEPING;
 
-  while(__TaskList.__current_task->__next_task != NULL)
+  while(__current_task->__next_task != NULL)
   {
-    __TaskList.__current_task = __TaskList.__current_task->__next_task;
+    __current_task = __current_task->__next_task;
     
-    if(__TaskList.__current_task->__task_state == TASK_SLEEPING)
+    if(__current_task->__state == TASK_SLEEPING)
       break;
   }
+
+  __current_task->__state = TASK_RUNNING;
 
   /*
    *
@@ -234,3 +238,7 @@ void task_switch(struct InterruptRegisters* __int_regs__)
   task_load(__int_regs__);
 }
 
+vfs_t* task_fd(__u8 __fd__)
+{
+  return (__current_task->__fd[__fd__].__is_open) ? __current_task->__fd[__fd__].__vfs_file : NULL;
+}
