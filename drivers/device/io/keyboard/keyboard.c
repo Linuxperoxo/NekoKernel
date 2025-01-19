@@ -6,32 +6,27 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keyboard.c                    |
- *    |  SRC MOD   : 13/01/2025                    |
+ *    |  SRC MOD   : 19/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <idt.h>
+#include <neko/idt.h>
 #include <std/io.h>
 #include <std/int.h>
 #include <sys/ports.h>
-#include <sys/kernel.h>
-#include <terminal.h>
+#include <sys/vfs.h>
+#include <neko/kernel.h>
+#include <sys/kmem.h>
+#include <sys/tty.h>
+#include <std/utils.h>
 #include <device/io/keyboard/keyboard.h>
 
-/*
- *
- * Macros
- *
- */
+extern void tty_keyboard_in(keyboard_t* __keyboard__);
 
-#define KEYBOARD __current_keyboard
-
-static struct Keyboard* KEYBOARD = NULL;
-
-__u8 __keyboard_layout[] = {
+static char __keyboard_layout[61] = {
   '\0',
   '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\0',
   '\0', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\0',
@@ -40,20 +35,22 @@ __u8 __keyboard_layout[] = {
   '\0', '\0', '\0',               ' ',              '\0', '\0', '\0'
 };
 
+static keyboard_t* __keyboard = NULL;
+
 /*
  *
- * Funções internas
+ *  Internal Functions
  *
  */
 
 void keyboard_handler(struct InterruptRegisters*) 
 {
-  if(KEYBOARD == NULL)
+  if(__keyboard == NULL)
     return;
 
-  KEYBOARD->__scan = inb(KEYBOARD_IN_PORT);
-  KEYBOARD->__code = KEYBOARD->__scan & 0x7F; 
-  KEYBOARD->__char = __keyboard_layout[KEYBOARD->__code];
+  __keyboard->__scan = inb(KEYBOARD_IN_PORT);
+  __keyboard->__code = __keyboard->__scan & 0x7F; 
+  __keyboard->__char = __keyboard_layout[__keyboard->__code];
   
   /*
    *
@@ -61,7 +58,7 @@ void keyboard_handler(struct InterruptRegisters*)
    *
    */
 
-  KEYBOARD->__flags = ((KEYBOARD->__scan & 0x80) >> 7) == 0x00 ? KEYBOARD->__flags | 0x01 : KEYBOARD->__flags & 0xFE;
+  __keyboard->__flags = ((__keyboard->__scan & 0x80) >> 7) == 0x00 ? __keyboard->__flags | 0x01 : __keyboard->__flags & 0xFE;
   
   /*
    *
@@ -69,7 +66,7 @@ void keyboard_handler(struct InterruptRegisters*)
    *
   */
 
-  KEYBOARD->__flags = KEYBOARD->__char != '\0' ? KEYBOARD->__flags | 0x02 : KEYBOARD->__flags & 0xFD;
+  __keyboard->__flags = __keyboard->__char != '\0' ? __keyboard->__flags | 0x02 : __keyboard->__flags & 0xFD;
   
   /*
    *
@@ -77,30 +74,40 @@ void keyboard_handler(struct InterruptRegisters*)
    *
    */
   
-  KEYBOARD->__flags = KEYBOARD->__char >= KEY_LOW_ALPHA_ASCII_INIT && KEYBOARD->__char <= KEY_LOW_ALPHA_ASCII_END ||
-                                KEYBOARD->__char >= KEY_NUM_ASCII_INIT && KEYBOARD->__char <= KEY_NUM_ASCII_END ? KEYBOARD->__flags | 0x04 : KEYBOARD->__flags & 0xFB;
+  __keyboard->__flags = __keyboard->__char >= KEY_LOW_ALPHA_ASCII_INIT && __keyboard->__char <= KEY_LOW_ALPHA_ASCII_END ||
+                                __keyboard->__char >= KEY_NUM_ASCII_INIT && __keyboard->__char <= KEY_NUM_ASCII_END ? __keyboard->__flags | 0x04 : __keyboard->__flags & 0xFB;
 
-  if(KEYBOARD_BUFFER_ENABLE)
-    KEYBOARD->__func_key_handler(KEYBOARD->__code);
+  tty_keyboard_in(__keyboard);
+}
+
+__u8 keyboard_read(offset_t __offset, void* __dest__)
+{
+  
+  /*
+   *
+   * Fazer com base nas flags habilitadas da struct keyboard_t
+   *
+   */
+
+  return __keyboard->__scan;
 }
 
 /*
  *
- * Funções keyboard.h
+ *  Functions keyboard.h
  *
  */
 
-void keyboard_init()
+void keyboard_init(keyboard_t* __keyboard__)
 {
+  __keyboard = (keyboard_t*)kmalloc(sizeof(keyboard_t));
+
+  vfs_mkchfile("/dev/input0", ROOT_UID, ROOT_GID, READ_O | WRITE_O, &keyboard_read, NULL);
   idt_install_coop_routine(INT_KEYBOARD_NUM, &keyboard_handler);
 }
 
-void keyboard_switch(struct Keyboard* __new_keyboard__)
+void keyboard_switch(keyboard_t* __keyboard__)
 {
-  KEYBOARD = __new_keyboard__;
+  __keyboard = __keyboard__;
 }
 
-__u8 keyboard_flags()
-{
-  return KEYBOARD != NULL ? KEYBOARD->__flags : 0x00;
-}

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keryboard.h                   |
- *    |  SRC MOD   : 13/01/2025                    |
+ *    |  SRC MOD   : 19/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -44,7 +44,6 @@
 #define KEY_SUB    0x0C
 #define KEY_EQU    0x0D
 #define KEY_BACK   0x0E
-
 #define KEY_TAB    0x0F
 #define KEY_Q      0x10
 #define KEY_W      0x11
@@ -87,20 +86,26 @@
  *
  */
 
-#define KEYBOARD_KEY_FLAGS_STATUS ( keyboard_flags() & 0xFF)
-#define KEY_IS_PRESS (KEYBOARD_KEY_FLAGS_STATUS & 0x01)
-#define KEY_IS_VISIBLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x02) >> 1)
-#define KEY_IS_ESPECIAL ((KEYBOARD_KEY_FLAGS_STATUS & 0x04) >> 2)
-#define KEYBOARD_BUFFER_ENABLE ((KEYBOARD_KEY_FLAGS_STATUS & 0x08) >> 3)
+#define KEY_IS_PRESS(__keyboard__) (((__keyboard__)->__flags & 0xFF) & 0x01)
+#define KEY_IS_VISIBLE(__keyboard__) ((((__keyboard__)->__flags & 0xFF) & 0x02) >> 1)
+#define KEY_IS_ESPECIAL(__keyboard__) ((((__keyboard__)->__flags & 0xFF) & 0x04) >> 2)
+#define KEYBOARD_HANDLER_ENABLE(__keyboard__) ((((__keyboard__)->__flags & 0xFF) & 0x08) >> 4)
 
-struct Keyboard {
-  __u8 __scan; // Tem todo o scan da instrução IN
-  __u8 __code; // Tecla que foi pressionada
-  __u8 __char; // Caractere a ser impresso
-  __u8 __flags; // Flags da tecla
+typedef struct keyboard_t keyboard_t;
+typedef void (*key_handler_t)(keyboard_t*);
+typedef __u8 key_flag_t;
+typedef __u8 key_scan_t;
+typedef __u8 key_t;
 
-  void (*__func_key_handler)(const __u8);
-};
+typedef struct keyboard_t 
+{
+  char          __char;    // Caractere a ser impresso
+  key_flag_t    __flags;   // Flags da tecla
+  key_scan_t    __scan;    // Tem todo o scan da instrução IN
+  key_t         __code;    // Tecla que foi pressionada
+  key_handler_t __handler; // Função de manipulação
+}keyboard_t;
+
 
 /*
  * __full_scan:
@@ -124,14 +129,13 @@ struct Keyboard {
  *  * bit 2: É um caractere especial ou não, 1 para especial, 0 para não especial
  *  * bit 3: Buffer Habilitado, 1 para sim, 0 para não
  *
- * __buffer_func:
+ * __handler:
  *
  *  * A cada interrupção se o bit 3 de flags estiver habilitado, esssa função será chamada
  *
  */
 
-extern void keyboard_init();
-extern void keyboard_switch(struct Keyboard*);
-extern __u8 keyboard_flags();
+void keyboard_init();
+void keyboard_switch(keyboard_t* __keyboard__);
 
 #endif
