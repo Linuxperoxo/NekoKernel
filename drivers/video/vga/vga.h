@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.h                         |
- *    |  SRC MOD   : 14/01/2025                    | 
+ *    |  SRC MOD   : 18/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -112,17 +112,8 @@
 #define VGA_CTRL_PORT 0x3D4 // Porta de controle
 #define VGA_DATA_PORT 0x3D5 // Porta de dados
 
-struct VGAState{
-  __u8* __framebuffer;
-  __u8 __current_row;
-  __u8 __current_col;
-  __u8 __bc_color;
-  __u8 __ch_color;
-  __u8 __last_put;
-};
-
-extern void vga_screen_up(struct VGAState* __vga__);
-extern void vga_put_char(struct VGAState* __vga__, const char __ch__);
-extern void vga_mov_ptr(const __u8 __row__, const __u8 __col__);
+void vga_init();
+void vga_screen_down();
+void vga_mov_ptr(const __u8 __row__, const __u8 __col__);
 
 #endif

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.c                         |
- *    |  SRC MOD   : 14/01/2025                    | 
+ *    |  SRC MOD   : 18/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -15,30 +15,47 @@
 
 #include <video/vga/vga.h>
 #include <std/int.h>
+#include <std/utils.h>
 #include <sys/ports.h>
+#include <sys/vfs.h>
 
-void vga_screen_down(struct VGAState* __vga__)
+/*
+ *
+ * Internal Functions
+ *
+ */
+
+__u8 vga_write(offset_t __offset__, void* __ch__)
+{
+  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__] = *((char*)__ch__);
+  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__ + 1] = ((DEFAULT_BC_COLOR << 4) & 0x70) | (DEFAULT_CHAR_COLOR | 0x0F);
+}
+
+/*
+ *
+ * vga.h Functions
+ *
+ */
+
+void vga_init()
+{
+  vfs_mkchfile("/dev/video", ROOT_UID, ROOT_GID, READ_O | WRITE_O, NULL, &vga_write);
+}
+
+void vga_screen_down()
 {
   for(__u16 __y = 0; __y < DEFAULT_HEIGHT; __y++)
   {
     for(__u16 __x = 0; __x < DEFAULT_WIDTH; __x++)
     {
-      __vga__->__framebuffer[((__y - 1) * DEFAULT_WIDTH * 2) + (__x * 2)] = __vga__->__framebuffer[(__y * DEFAULT_WIDTH * 2) + (__x * 2)];
+      ((__u8*)VGA_FRAMEBUFFER_ADDRS)[((__y - 1) * DEFAULT_WIDTH * 2) + (__x * 2)] = ((__u8*)VGA_FRAMEBUFFER_ADDRS)[(__y * DEFAULT_WIDTH * 2) + (__x * 2)];
     }
   }
 
   for(__u16 __x = 0; __x < DEFAULT_WIDTH; __x++)
   {
-    __vga__->__framebuffer[((DEFAULT_HEIGHT - 1) * DEFAULT_WIDTH * 2) + (__x * 2)] = 0x00;
+    ((__u8*)VGA_FRAMEBUFFER_ADDRS)[((DEFAULT_HEIGHT - 1) * DEFAULT_WIDTH * 2) + (__x * 2)] = 0x00;
   }
-}
-
-void vga_put_char(struct VGAState* __vga__, const char __ch__)
-{
-  __vga__->__framebuffer[(DEFAULT_WIDTH * __vga__->__current_row * 2) + (__vga__->__current_col * 2)] = __ch__;
-  __vga__->__framebuffer[(DEFAULT_WIDTH * __vga__->__current_row * 2) + ((__vga__->__current_row * 2) + 1)] = ((__vga__->__bc_color << 4) & 0x70) | (__vga__->__ch_color & 0x0F);
-  __vga__->__last_put = __ch__;
-  __vga__->__current_col += 1;
 }
 
 void vga_mov_ptr(const __u8 __row__, const __u8 __col__)
