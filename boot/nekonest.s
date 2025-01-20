@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : nekonest.s                    |
-;    |  SRC MOD   : 15/01/2025                    |
+;    |  SRC MOD   : 20/01/2025                    |
 ;    |  VERSION   : 1.0-1                         |
 ;    |                                            |
 ;    O--------------------------------------------/
@@ -150,7 +150,7 @@
 ;
 
 %define KERNEL_DEST            0x10000
-%define KERNEL_FILE_SIZE       512 * 49
+%define KERNEL_FILE_SIZE       512 * 52
 %define KERNEL_K_LOADER_OFFSET 0x1000
 
 ;
