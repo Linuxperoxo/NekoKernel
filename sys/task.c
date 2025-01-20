@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.c                        |
- *    |  SRC MOD   : 17/01/2025                    |
+ *    |  SRC MOD   : 19/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -41,47 +41,11 @@ static task_t* __root_task;
 
 /*
  *
- * Toda a parte comentada foi usada para testes, caso queira usar 
- * é so descomentar :)
+ * Internal Functions
  *
  */
 
-/*
-
-void task1_code()
-{
-  while(1)
-  {
-    printf("Running Task1... ");
-    sleep_for(1000);
-  }
-}
-
-void task2_code()
-{
-  while(1)
-  {
-    printf("Running Task2... ");
-    sleep_for(1000);
-  }
-}
-
-*/
-
-void task_init()
-{
-  __root_task = (task_t*)kmalloc(sizeof(task_t));
-
-  __root_task->__prev_task = NULL;
-  __root_task->__next_task = NULL;
-  __root_task->__uid       = 0x00;
-  __root_task->__state     = TASK_RUNNING;
-  __root_task->__tid       = 0x00;
-
-  __current_task = __root_task;
-}
-
-void task_save(struct InterruptRegisters* __int_regs__)
+static void task_save(struct InterruptRegisters* __int_regs__)
 {
   
   /*
@@ -128,7 +92,7 @@ void task_save(struct InterruptRegisters* __int_regs__)
   __current_task->__fs = __int_regs__->__fs;
 }
 
-void task_load(struct InterruptRegisters* __int_regs__)
+static void task_load(struct InterruptRegisters* __int_regs__)
 {
   
   /*
@@ -172,6 +136,25 @@ void task_load(struct InterruptRegisters* __int_regs__)
   __int_regs__->__ss = __current_task->__ss;
   __int_regs__->__gs = __current_task->__gs;
   __int_regs__->__fs = __current_task->__fs;
+}
+
+/*
+ *
+ * task.h Functions
+ *
+ */
+
+void task_init()
+{
+  __root_task = (task_t*)kmalloc(sizeof(task_t));
+
+  __root_task->__prev_task = NULL;
+  __root_task->__next_task = NULL;
+  __root_task->__uid       = 0x00;
+  __root_task->__state     = TASK_RUNNING;
+  __root_task->__tid       = 0x00;
+
+  __current_task = __root_task;
 }
 
 void task_switch(struct InterruptRegisters* __int_regs__)
@@ -238,7 +221,3 @@ void task_switch(struct InterruptRegisters* __int_regs__)
   task_load(__int_regs__);
 }
 
-vfs_t* task_fd(__u8 __fd__)
-{
-  return (__current_task->__fd[__fd__].__is_open) ? __current_task->__fd[__fd__].__vfs_file : NULL;
-}

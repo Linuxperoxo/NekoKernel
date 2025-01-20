@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.h                        |
- *    |  SRC MOD   : 16/01/2025                    |
+ *    |  SRC MOD   : 19/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -16,10 +16,10 @@
 #ifndef __K_TASK__
 #define __K_TASK__
 
-#define TASK_RUNNING    0b0011
-#define TASK_BLOCKED    0b0010
-#define TASK_SLEEPING   0b0001
-#define TASK_DEAD       0b0000
+#define TASK_RUNNING 0b0011
+#define TASK_BLOCKED 0b0010
+#define TASK_SLEEPING 0b0001
+#define TASK_DEAD 0b0000
 
 #define FD_FOR_TASK 0x0A
 
@@ -81,7 +81,7 @@ typedef struct task_t
 }task_t;
 
 void task_init();
-void task_switch();
+void task_switch(struct InterruptRegisters* __int_regs__);
 // void task_create(reg_t __eip__, __8 __user_id);
 // void task_kill(__u8 __task_id__);
 

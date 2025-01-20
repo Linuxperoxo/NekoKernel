@@ -18,11 +18,10 @@
 
 #include <std/int.h>
 
-#define INT_KEYBOARD_NUM 0x21
-
-#define KEYBOARD_IN_PORT 0x60
-#define KEYBOARD_COMMAND_PORT 0x64
+#define KEYBOARD_COMMAND_PORT  0x64
 #define KEYBOARD_RESET_COMMAND 0xFF
+#define KEYBOARD_INT_NUM       0x21
+#define KEYBOARD_IN_PORT       0x60
 
 /*
  *
@@ -99,13 +98,11 @@ typedef __u8 key_t;
 
 typedef struct keyboard_t 
 {
-  char          __char;    // Caractere a ser impresso
-  key_flag_t    __flags;   // Flags da tecla
-  key_scan_t    __scan;    // Tem todo o scan da instrução IN
-  key_t         __code;    // Tecla que foi pressionada
-  key_handler_t __handler; // Função de manipulação
+  char       __char;  // Caractere a ser impresso
+  key_flag_t __flags; // Flags da tecla
+  key_scan_t __scan;  // Tem todo o scan da instrução IN
+  key_t      __code;  // Tecla que foi pressionada
 }keyboard_t;
-
 
 /*
  * __full_scan:
@@ -128,10 +125,6 @@ typedef struct keyboard_t
  *  * bit 1: Representa se a tecla é visível, 1 para visível e 0 para não visível (caracteres)
  *  * bit 2: É um caractere especial ou não, 1 para especial, 0 para não especial
  *  * bit 3: Buffer Habilitado, 1 para sim, 0 para não
- *
- * __handler:
- *
- *  * A cada interrupção se o bit 3 de flags estiver habilitado, esssa função será chamada
  *
  */
 

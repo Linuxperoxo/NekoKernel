@@ -1,5 +1,4 @@
-* Fazer o kmalloc(temp) para continuar o vfs
-* Continuar vfs file
+* Melhorar a parte de escrita e leitura de arquivos ch e bc
 * Adicionar mais funcionalidades para o printf
 * Corrigir a parte do buffer de entrada que não está sendo limpa após pressionar enter
 * Fazer o malloc

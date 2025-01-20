@@ -3,8 +3,8 @@
 
 #include <std/int.h>
 
-#define PAGE_SIZE   4096
 #define NUM_ENTRIES 1024
+#define PAGE_SIZE 4096
 
 struct page_table_entry_t
 {

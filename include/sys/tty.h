@@ -18,9 +18,9 @@
 
 #include <std/int.h>
 
-#define TTY_BF_SIZE 1024
 #define TTY_WIDTH 80
 #define TTY_HEIGHT 25
+#define TTY_BF_SIZE 1024
 #define TYY_DF_CH_COLOR 0x0F
 #define TTY_DF_BC_COLOR 0x00
 #define TTY_DF_COLOR (((TTY_DF_BC_COLOR << 4) & 0x70) | (TTY_DF_CH_COLOR & 0x0F))

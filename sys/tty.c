@@ -6,7 +6,7 @@
  *    |  copyright : (c) 2024 per linuxperoxo.     |
  *    |  author    : linuxperoxo                   |
  *    |  file      : tty.c                         |
- *    |  src mod   : 18/01/2025                    | 
+ *    |  src mod   : 19/01/2025                    | 
  *    |                                            |
  *    o--------------------------------------------/
  *    
@@ -31,9 +31,9 @@
 
 static tty_t* __tty = NULL; 
 
-__u8 tty_write(offset_t __offset__, void* __ch__)
+static __u8 tty_write(offset_t __offset__, void* __buffer__)
 {
-  switch(*((char*)__ch__))
+  switch(*((char*)__buffer__))
   {
     case '\n':
       __tty->__win.__row += 0x01;
@@ -67,17 +67,38 @@ __u8 tty_write(offset_t __offset__, void* __ch__)
         __tty->__win.__col = 0x00;
       }
       
-      vfs_write("/dev/video", (__tty->__win.__row * DEFAULT_WIDTH * 2) + (__tty->__win.__col * 2), (char*)__ch__);
+      vfs_write("/dev/video", (__tty->__win.__row * DEFAULT_WIDTH * 2) + (__tty->__win.__col * 2), __buffer__);
       __tty->__win.__col += 0x01;
     break;
   }
   vga_mov_ptr(__tty->__win.__row, __tty->__win.__col);   
-  return 1;
+  return 0;
 }
 
-__u8 tty_read(offset_t __offset, void* __dest__)
+static __u8 tty_read(offset_t __offset, void* __dest__)
 {
-  return 1;
+  return 0;
+}
+
+void tty_keyboard_in(keyboard_t* __keyboard__)
+{
+  if(KEY_IS_PRESS(__keyboard__))
+  {
+    switch(__keyboard__->__code)
+    {
+      case KEY_ENTER:
+        tty_write(0x00, (char*)"\n");
+      break;
+
+      case KEY_BACK:
+      break;
+
+      default:
+        if(KEY_IS_VISIBLE(__keyboard__))
+          tty_write(0x00, (char*)&__keyboard__->__char);
+      break;
+    }
+  }
 }
 
 /*
@@ -97,29 +118,6 @@ void tty_init()
   __tty->__win.__col = 0x00;
 
   vfs_mkbcfile("/dev/tty", ROOT_UID, ROOT_GID, READ_O | WRITE_O, &tty_read, &tty_write);
-}
-
-void tty_keyboard_in(keyboard_t* __keyboard__)
-{
-  if(KEY_IS_PRESS(__keyboard__))
-  {
-    switch(__keyboard__->__code)
-    {
-      case KEY_ENTER:
-        tty_write(0x00, (char*)"\n");
-      break;
-
-      case KEY_BACK:
-      break;
-
-      default:
-        if(KEY_IS_VISIBLE(__keyboard__))
-        {
-          tty_write(0x00, (char*)&__keyboard__->__char);
-        }
-      break;
-    }
-  }
 }
 
 void tty_switch(tty_t* __tty__)

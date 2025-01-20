@@ -43,7 +43,7 @@ static keyboard_t* __keyboard = NULL;
  *
  */
 
-void keyboard_handler(struct InterruptRegisters*) 
+static void keyboard_handler(struct InterruptRegisters*) 
 {
   if(__keyboard == NULL)
     return;
@@ -80,16 +80,10 @@ void keyboard_handler(struct InterruptRegisters*)
   tty_keyboard_in(__keyboard);
 }
 
-__u8 keyboard_read(offset_t __offset, void* __dest__)
+static __u8 keyboard_read(offset_t __offset, void* __buffer__)
 {
-  
-  /*
-   *
-   * Fazer com base nas flags habilitadas da struct keyboard_t
-   *
-   */
-
-  return __keyboard->__scan;
+  memcpy(__buffer__, __keyboard, sizeof(keyboard_t));
+  return 0;
 }
 
 /*
@@ -98,12 +92,12 @@ __u8 keyboard_read(offset_t __offset, void* __dest__)
  *
  */
 
-void keyboard_init(keyboard_t* __keyboard__)
+void keyboard_init()
 {
   __keyboard = (keyboard_t*)kmalloc(sizeof(keyboard_t));
 
   vfs_mkchfile("/dev/input0", ROOT_UID, ROOT_GID, READ_O | WRITE_O, &keyboard_read, NULL);
-  idt_install_coop_routine(INT_KEYBOARD_NUM, &keyboard_handler);
+  idt_install_coop_routine(KEYBOARD_INT_NUM, &keyboard_handler);
 }
 
 void keyboard_switch(keyboard_t* __keyboard__)

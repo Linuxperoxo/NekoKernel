@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : timer.c                       |
- *    |  SRC MOD   : 18/01/2025                    |
+ *    |  SRC MOD   : 19/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -40,13 +40,25 @@ static __u32 __divisor   = DIVISOR_NUM / FREQUENCY; // Gera interrupção a cada
 static __u32 __sys_clock = 0x00;
 static __u16 __chrono    = 0x00;
 
-void timer_handler(struct InterruptRegisters* __regs__)
+/*
+ *
+ * Internal Functions
+ *
+ */
+
+static void timer_handler(struct InterruptRegisters* __regs__)
 {
   __sys_clock += 1;
   __chrono    += 1;
 
 //  task_switch(__regs__);
 }
+
+/*
+ *
+ * timer.h Functions
+ *
+ */
 
 void timer_init()
 {
@@ -85,11 +97,9 @@ void sleep_for(__u32 __ms__)
     "movl %0, %%eax\n"
 
     ".loop:\n"
-    "cmp %%eax, %%ebx\n"
-    "movl (%1), %%ebx\n"
-    "nop\n"
-    "nop\n"
-    "jnz .loop\n"
+      "cmp %%eax, %%ebx\n"
+      "movl (%1), %%ebx\n"
+      "jnz .loop\n"
     :
     :"m"(__ms__), "p"(&__chrono)
     :"%eax", "%ebx"

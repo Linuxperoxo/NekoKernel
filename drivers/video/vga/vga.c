@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.c                         |
- *    |  SRC MOD   : 18/01/2025                    | 
+ *    |  SRC MOD   : 19/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -25,10 +25,10 @@
  *
  */
 
-__u8 vga_write(offset_t __offset__, void* __ch__)
+static __u8 vga_write(offset_t __offset__, void* __buffer__)
 {
-  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__] = *((char*)__ch__);
-  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__ + 1] = ((DEFAULT_BC_COLOR << 4) & 0x70) | (DEFAULT_CHAR_COLOR | 0x0F);
+  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__] = *((char*)__buffer__);
+  return 0;
 }
 
 /*

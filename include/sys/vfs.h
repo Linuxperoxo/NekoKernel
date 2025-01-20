@@ -20,17 +20,17 @@
 
 #define MAX_NAME 256
 
-#define DIR_TYPE   0x01
-#define FILE_TYPE  0x02
+#define DIR_TYPE 0x01
+#define FILE_TYPE 0x02
 #define BLOCK_TYPE 0x04
-#define CHAR_TYPE  0x08
+#define CHAR_TYPE 0x08
 
 #define ROOT_UID 0x00
 #define ROOT_GID 0x00
 
-#define READ_O  0x03
+#define READ_O 0x03
 #define WRITE_O 0x02
-#define EXEC_O  0x01
+#define EXEC_O 0x01
 
 #define IS_DIR(__vfs) (__vfs->__type & DIR_TYPE)
 #define IS_FILE(__vfs) ((__vfs->__type & FILE_TYPE) >> 1)
@@ -60,8 +60,8 @@ typedef struct vfs_t
   char      __name[MAX_NAME + 1];
   uid_t     __uid;
   gid_t     __gid;
-  mode_t    __permission;
-  type_t    __type;
+  mode_t    __permission : 4;
+  type_t    __type       : 4;
   child_t   __child;
   brother_t __brother;
   parent_t  __parent;
@@ -93,6 +93,7 @@ typedef struct fd_t
 
 void vfs_init();
 __u8 vfs_exist(const char* __file__);
+__u8 vfs_type(const char* __file__);
 __u8 vfs_mkdir(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__);
 __u8 vfs_mkfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__);
 __u8 vfs_mkchfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__, read_t __read__, write_t __write__);

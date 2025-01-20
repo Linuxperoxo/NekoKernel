@@ -1,3 +1,18 @@
+/*
+ *
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : kmem.c                        |
+ *    |  SRC MOD   : 19/01/2025                    |
+ *    |                                            |
+ *    O--------------------------------------------/
+ *
+ *
+ */
+
 #include <kmem.h>
 #include <std/int.h>
 #include <sys/cdefs.h>

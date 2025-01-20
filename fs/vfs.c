@@ -28,7 +28,7 @@ static vfs_t* __root_dir    = NULL;
  *
  */
 
-void vfs_ls(const char* __param__)
+static void vfs_ls(const char* __param__)
 {
   vfs_t* __tmp = __current_dir->__child;
   
@@ -41,7 +41,7 @@ void vfs_ls(const char* __param__)
 }
 
 __attribute__((always_inline)) 
-inline uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const char** __restrict__ __dir_cmp__)
+inline static uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const char** __restrict__ __dir_cmp__)
 {
   if(*__vfs_name__ == '\0' || **__dir_cmp__ == '\0')
     return 1;
@@ -81,7 +81,7 @@ inline uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const char** _
 }
 
 __attribute__((always_inline))
-inline vfs_t* vfs_search(const char* __file__)
+inline static vfs_t* vfs_search(const char* __file__)
 {
   vfs_t* __tmp = __current_dir;
 
@@ -123,26 +123,27 @@ inline vfs_t* vfs_search(const char* __file__)
 }
 
 __attribute__((always_inline))
-inline __u8 vfs_create(const char* __file__, uid_t __uid__, 
-                gid_t __gid__, mode_t __perm__, type_t __type__, read_t __read__, 
-                write_t __write__, exec_t __exec__)
+inline static __u8 vfs_create(const char* __file__, uid_t __uid__, 
+                              gid_t __gid__, mode_t __perm__, type_t __type__, read_t __read__, 
+                              write_t __write__, exec_t __exec__)
 {
   if(vfs_search(__file__) != NULL)
     return 1;
+  
+  __u32  __size = strlen(__file__);  
 
-  __u32 __size = strlen(__file__);  
-  char* __buffer  = (char*)kmalloc(__size + 1);
-  char* __file_name = (char*)kmalloc(sizeof(char*) * MAX_NAME); 
-  char* __end_ptr = __buffer + (__size - 1);
+  vfs_t** __interator = NULL;
+  vfs_t*  __parent    = NULL;
+
+  char*  __buffer    = (char*)kmalloc(__size + 1);
+  char*  __file_name = (char*)kmalloc(sizeof(char*) * MAX_NAME); 
+  char*  __end_ptr   = __buffer + (__size - 1);
 
   memset(__buffer, 0x00, __size + 1);
   memcpy(__buffer, (void*)__file__, __size);
 
   while(*__end_ptr == '/')
-  {
-    *__end_ptr = '\0';
-    --__end_ptr;
-  }
+    *__end_ptr-- = '\0';
 
   while(*__end_ptr != '/' && *__end_ptr != '\0')
     --__end_ptr;
@@ -152,12 +153,14 @@ inline __u8 vfs_create(const char* __file__, uid_t __uid__,
 
   memset(__end_ptr + 1, 0x00, __size);
 
-  vfs_t* __parent = vfs_search(__buffer);
+  __parent = vfs_search(__buffer);
+
+  kfree(__buffer);
 
   if(__parent == NULL || __parent->__type != DIR_TYPE)
     return 1;
 
-  vfs_t** __interator = &__parent->__child;
+  __interator = &__parent->__child;
 
   while(*__interator != NULL)
     __interator = &(*__interator)->__brother;
@@ -169,6 +172,8 @@ inline __u8 vfs_create(const char* __file__, uid_t __uid__,
 
   memset(*__interator, 0x00, sizeof(vfs_t));
   memcpy(&(*__interator)->__name, __file_name, MAX_NAME);
+
+  kfree(__file_name);
 
   (*__interator)->__uid        = __uid__;
   (*__interator)->__gid        = __gid__;
@@ -212,6 +217,13 @@ __u8 vfs_exist(const char* __file__)
   return vfs_search(__file__) == NULL ? 0 : 1;
 }
 
+__u8 vfs_type(const char* __file__)
+{
+  vfs_t* __vfs = vfs_search(__file__);
+
+  return __vfs != NULL ? __vfs->__type : 0;
+}
+
 __u8 vfs_mkdir(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__)
 {
   if(__file__ == NULL)
@@ -237,6 +249,14 @@ __u8 vfs_mkfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __per
 __u8 vfs_mkchfile(const char* __file__, uid_t __uid__, gid_t __gid__, 
                   mode_t __perm__, read_t __read__, write_t __write__)
 {
+
+  /*
+   *
+   * Criando um arquivo do tipo char, arquivos do tipo char normalmente recebem e 
+   * enviam apenas char
+   *
+   */
+
   if(__file__ == NULL)
     return 1;
   return vfs_create(__file__, __uid__, __gid__, __perm__, CHAR_TYPE, __read__, __write__, NULL);
@@ -245,25 +265,33 @@ __u8 vfs_mkchfile(const char* __file__, uid_t __uid__, gid_t __gid__,
 __u8 vfs_mkbcfile(const char* __file__, uid_t __uid__, gid_t __gid__, 
                   mode_t __perm__, read_t __read__, write_t __write__)
 {
+  
+  /*
+   *
+   * Criando um arquivo do tipo block, arquivos do tipo block normalmente recebem e 
+   * enviam strings
+   *
+   */
+
   if(__file__ == NULL)
     return 1;
   return vfs_create(__file__, __uid__, __gid__, __perm__, BLOCK_TYPE, __read__, __write__, NULL);
 }
 
-__u8 vfs_write(const char* __file__, offset_t __offset__, void* __dest__)
+__u8 vfs_write(const char* __file__, offset_t __offset__, void* __buffer__)
 {
   vfs_t* __vfs_file = vfs_search(__file__);
 
   if(__vfs_file == NULL)
     return 1;
-  return __vfs_file->__write(__offset__, __dest__);
+  return __vfs_file->__write(__offset__, __buffer__);
 }
 
-__u8 vfs_read(const char* __file__, offset_t __offset__, void* __dest__)
+__u8 vfs_read(const char* __file__, offset_t __offset__, void* __buffer__)
 {
   vfs_t* __vfs_file = vfs_search(__file__);
 
   if(__vfs_file == NULL || __vfs_file->__type == DIR_TYPE || __vfs_file->__read == NULL)
     return 1;
-  return __vfs_file->__read(__offset__, __dest__);
+  return __vfs_file->__read(__offset__, __buffer__);
 }

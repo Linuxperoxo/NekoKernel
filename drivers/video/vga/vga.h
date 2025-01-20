@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vga.h                         |
- *    |  SRC MOD   : 18/01/2025                    | 
+ *    |  SRC MOD   : 19/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
