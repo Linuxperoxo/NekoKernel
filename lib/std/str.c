@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : str.c                         |
- *    |  SRC MOD   : 19/01/2024                    | 
+ *    |  SRC MOD   : 20/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -15,6 +15,7 @@
 
 #include <std/str.h>
 #include <std/int.h>
+#include <sys/kmem.h>
 
 __u32 strlen(const char* __src__)
 {
@@ -48,13 +49,19 @@ void strcpy(char* __restrict __dest__, const char* __restrict __src__)
     *__dest__++ = *__src__++;
 }
 
-void strcat(char* __restrict __dest__, const char* __restrict __to_cat__)
+char* strcat(const char* __restrict __str1__, const char* __restrict __str2__)
 {
-  char* __tmp = __dest__ + strlen(__dest__);
+  __u32 __str1_size = strlen(__str1__);
+  __u32 __str2_size = strlen(__str2__);
 
-  while(*__to_cat__ != '\0')
-    *__tmp++ = *__to_cat__++;
-  *__tmp = '\0';
+  char* __buffer = (char*)kmalloc(__str1_size + __str2_size + 1);
+
+  strcpy(__buffer, __str1__);
+  strcpy(__buffer + __str1_size, __str2__);
+
+  __buffer[__str1_size + __str2_size] = '\0';
+
+  return __buffer;
 }
 
 
