@@ -6,7 +6,7 @@
  *    |  copyright : (c) 2024 per linuxperoxo.     |
  *    |  author    : linuxperoxo                   |
  *    |  file      : tty.c                         |
- *    |  src mod   : 20/01/2025                    | 
+ *    |  src mod   : 21/01/2025                    | 
  *    |                                            |
  *    o--------------------------------------------/
  *    
@@ -78,11 +78,11 @@ void tty_keyboard_in(keyboard_t* __keyboard__)
     {
       case KEY_ENTER:
         TTY_ENABLE_BF_READY_BIT(__tty);
-        TTY_IF_ROW_IN_COLISION(__tty);
         
         __tty->__win.__row += 0x01;
         __tty->__win.__col  = 0x00;
-
+        
+        TTY_IF_ROW_IN_COLISION(__tty);
         TTY_UPDATE_PTR(__tty);
       break;
 

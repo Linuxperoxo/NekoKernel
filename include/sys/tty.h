@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : tty.h                         |
- *    |  SRC MOD   : 20/01/2025                    | 
+ *    |  SRC MOD   : 21/01/2025                    | 
  *    |                                            |
  *    O--------------------------------------------/
  *    
@@ -49,7 +49,7 @@
                                         vga_screen_down(); \
                                       }
 
-#define TTY_IF_COL_IN_COLISION(__tty) if(TTY_ROW_IN_COLISION(__tty)) \
+#define TTY_IF_COL_IN_COLISION(__tty) if(TTY_COL_IN_COLISION(__tty)) \
                                       { \
                                         __tty->__win.__row += 0x01; \
                                         __tty->__win.__col  = 0x00; \
