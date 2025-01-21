@@ -32,7 +32,7 @@ Atualmente, o NekoKernel oferece algumas funcionalidades, incluindo:
 - Terminal
 - Multitask
 - IDT
-- Um simples shell temporário
+- Virtual File System
 - Syscall 0x80 0xB1
 
 Funcionalidades Futuras
@@ -44,7 +44,7 @@ Estou planejando implementar várias outras funcionalidades no NekoKernel, inclu
 - Melhoria geral no código
 - Paging
 - User mode
-- malloc() free()
+- Shell
 
 Compilação
 
