@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : io.c                          |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -82,5 +82,5 @@ void printf(const char* __text__, ...)
 
 void scanf(char* __dest__, __u16 __size__)
 {
-
+  vfs_read("/dev/tty", __size__, __dest__);
 }

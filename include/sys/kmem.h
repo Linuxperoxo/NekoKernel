@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kmem.h                        |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -21,7 +21,7 @@
 #define ALIGNED(__aligned) __attribute__((aligned(__aligned)))
 
 #define BLOCK_SIZE 4096
-#define BLOCKS 16384
+#define BLOCKS 524288
 
 #define B_FLAG_ALLOC 0x01
 

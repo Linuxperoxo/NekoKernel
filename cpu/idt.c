@@ -6,13 +6,12 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.c                         |
- *    |  SRC MOD   : 14/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
-
 
 #include <neko/idt.h>
 #include <std/utils.h>
@@ -105,9 +104,9 @@ SYSCALL(177);
 #define SEC_PIC_COMMAND_PORT 0xA0
 #define SEC_PIC_DATA_PORT    0xA1
 
-struct idt_entry __idt_entries[IDT_ENTRIES];
-struct idt_ptr __idt_ptr;
-struct isrInterrupt __isr_table[IDT_ENTRIES];
+struct idt_entry_t __idt_entries[IDT_ENTRIES];
+struct idt_ptr_t   __idt_ptr;
+struct isr_t       __isr_table[IDT_ENTRIES];
 
 /* 
  *
@@ -213,7 +212,7 @@ void idt_entry(__u8 __num__, __u32 __base__, __u16 __seg_selector__, __u8 __flag
   __idt_entries[__num__].__flags = __flags__ | 0x60;
 }
 
-void isr_handler(struct InterruptRegisters* __regs_struct__)
+void isr_handler(int_regs_t* __regs_struct__)
 {
   if(__regs_struct__->__interrupt < CPU_EXCEPTIONS_NUM)
   {
@@ -231,10 +230,10 @@ void isr_handler(struct InterruptRegisters* __regs_struct__)
   } 
 }
 
-void irq_handler(struct InterruptRegisters* __regs_struct__)
+void irq_handler(int_regs_t* __regs_struct__)
 {
-  if(__isr_table[__regs_struct__->__interrupt].__coop_routine)
-    __isr_table[__regs_struct__->__interrupt].__coop_routine(__regs_struct__);
+  if(__isr_table[__regs_struct__->__interrupt].__routine)
+    __isr_table[__regs_struct__->__interrupt].__routine(__regs_struct__);
   
   if(__regs_struct__-> __interrupt >= 40)
   {
@@ -262,16 +261,16 @@ void irq_handler(struct InterruptRegisters* __regs_struct__)
   outb(PRI_PIC_COMMAND_PORT, 0x20);
 }
 
-void syscall_handler(struct InterruptRegisters* __regs_struct__)
+void syscall_handler(int_regs_t* __regs_struct__)
 {
-  if(__isr_table[__regs_struct__->__interrupt].__coop_routine)
-    __isr_table[__regs_struct__->__interrupt].__coop_routine(__regs_struct__);
+  if(__isr_table[__regs_struct__->__interrupt].__routine)
+    __isr_table[__regs_struct__->__interrupt].__routine(__regs_struct__);
 }
 
 void idt_init() 
 {
-  __idt_ptr.__limit = sizeof(struct idt_entry) * IDT_ENTRIES - 1;
-  __idt_ptr.__idt_first_entry = (__u32)&__idt_entries;
+  __idt_ptr.__limit = sizeof(idt_entry_t) * IDT_ENTRIES - 1;
+  __idt_ptr.__idt_first_entry = (idt_entry_t*)&__idt_entries;
 
   /*
    *
@@ -309,58 +308,58 @@ void idt_init()
   outb(PRI_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC primário
   outb(SEC_PIC_DATA_PORT, 0x00); // Libera as interrupções no PIC secundário
 
-  __isr_table[0x00].__int_routine = (__u32)&isr0;
-  __isr_table[0x01].__int_routine = (__u32)&isr1;
-  __isr_table[0x02].__int_routine = (__u32)&isr2;
-  __isr_table[0x03].__int_routine = (__u32)&isr3;
-  __isr_table[0x04].__int_routine = (__u32)&isr4;
-  __isr_table[0x05].__int_routine = (__u32)&isr5;
-  __isr_table[0x06].__int_routine = (__u32)&isr6;
-  __isr_table[0x07].__int_routine = (__u32)&isr7;
-  __isr_table[0x08].__int_routine = (__u32)&isr8;
-  __isr_table[0x09].__int_routine = (__u32)&isr9;
-  __isr_table[0x0A].__int_routine = (__u32)&isr10;
-  __isr_table[0x0B].__int_routine = (__u32)&isr11;
-  __isr_table[0x0C].__int_routine = (__u32)&isr12;
-  __isr_table[0x0D].__int_routine = (__u32)&isr13;
-  __isr_table[0x0E].__int_routine = (__u32)&isr14;
-  __isr_table[0x0F].__int_routine = (__u32)&isr15;
-  __isr_table[0x10].__int_routine = (__u32)&isr16;
-  __isr_table[0x11].__int_routine = (__u32)&isr17;
-  __isr_table[0x12].__int_routine = (__u32)&isr18;
-  __isr_table[0x13].__int_routine = (__u32)&isr19;
-  __isr_table[0x14].__int_routine = (__u32)&isr20;
-  __isr_table[0x15].__int_routine = (__u32)&isr21;
-  __isr_table[0x16].__int_routine = (__u32)&isr22;
-  __isr_table[0x17].__int_routine = (__u32)&isr23;
-  __isr_table[0x18].__int_routine = (__u32)&isr24;
-  __isr_table[0x19].__int_routine = (__u32)&isr25;
-  __isr_table[0x1A].__int_routine = (__u32)&isr26;
-  __isr_table[0x1B].__int_routine = (__u32)&isr27;
-  __isr_table[0x1C].__int_routine = (__u32)&isr28;
-  __isr_table[0x1D].__int_routine = (__u32)&isr29;
-  __isr_table[0x1E].__int_routine = (__u32)&isr30;
-  __isr_table[0x1F].__int_routine = (__u32)&isr31;
+  __isr_table[0x00].__int = (__u32)&isr0;
+  __isr_table[0x01].__int = (__u32)&isr1;
+  __isr_table[0x02].__int = (__u32)&isr2;
+  __isr_table[0x03].__int = (__u32)&isr3;
+  __isr_table[0x04].__int = (__u32)&isr4;
+  __isr_table[0x05].__int = (__u32)&isr5;
+  __isr_table[0x06].__int = (__u32)&isr6;
+  __isr_table[0x07].__int = (__u32)&isr7;
+  __isr_table[0x08].__int = (__u32)&isr8;
+  __isr_table[0x09].__int = (__u32)&isr9;
+  __isr_table[0x0A].__int = (__u32)&isr10;
+  __isr_table[0x0B].__int = (__u32)&isr11;
+  __isr_table[0x0C].__int = (__u32)&isr12;
+  __isr_table[0x0D].__int = (__u32)&isr13;
+  __isr_table[0x0E].__int = (__u32)&isr14;
+  __isr_table[0x0F].__int = (__u32)&isr15;
+  __isr_table[0x10].__int = (__u32)&isr16;
+  __isr_table[0x11].__int = (__u32)&isr17;
+  __isr_table[0x12].__int = (__u32)&isr18;
+  __isr_table[0x13].__int = (__u32)&isr19;
+  __isr_table[0x14].__int = (__u32)&isr20;
+  __isr_table[0x15].__int = (__u32)&isr21;
+  __isr_table[0x16].__int = (__u32)&isr22;
+  __isr_table[0x17].__int = (__u32)&isr23;
+  __isr_table[0x18].__int = (__u32)&isr24;
+  __isr_table[0x19].__int = (__u32)&isr25;
+  __isr_table[0x1A].__int = (__u32)&isr26;
+  __isr_table[0x1B].__int = (__u32)&isr27;
+  __isr_table[0x1C].__int = (__u32)&isr28;
+  __isr_table[0x1D].__int = (__u32)&isr29;
+  __isr_table[0x1E].__int = (__u32)&isr30;
+  __isr_table[0x1F].__int = (__u32)&isr31;
   
-  __isr_table[0x20].__int_routine = (__u32)&irq32;
-  __isr_table[0x21].__int_routine = (__u32)&irq33;
-  __isr_table[0x22].__int_routine = (__u32)&irq34;
-  __isr_table[0x23].__int_routine = (__u32)&irq35;
-  __isr_table[0x24].__int_routine = (__u32)&irq36;
-  __isr_table[0x25].__int_routine = (__u32)&irq37;
-  __isr_table[0x26].__int_routine = (__u32)&irq38;
-  __isr_table[0x27].__int_routine = (__u32)&irq39;
-  __isr_table[0x28].__int_routine = (__u32)&irq40;
-  __isr_table[0x29].__int_routine = (__u32)&irq41;
-  __isr_table[0x30].__int_routine = (__u32)&irq42;
-  __isr_table[0x31].__int_routine = (__u32)&irq43;
-  __isr_table[0x32].__int_routine = (__u32)&irq44;
-  __isr_table[0x33].__int_routine = (__u32)&irq45;
-  __isr_table[0x34].__int_routine = (__u32)&irq46;
-  __isr_table[0x35].__int_routine = (__u32)&irq47;
+  __isr_table[0x20].__int = (__u32)&irq32;
+  __isr_table[0x21].__int = (__u32)&irq33;
+  __isr_table[0x22].__int = (__u32)&irq34;
+  __isr_table[0x23].__int = (__u32)&irq35;
+  __isr_table[0x24].__int = (__u32)&irq36;
+  __isr_table[0x25].__int = (__u32)&irq37;
+  __isr_table[0x26].__int = (__u32)&irq38;
+  __isr_table[0x27].__int = (__u32)&irq39;
+  __isr_table[0x28].__int = (__u32)&irq40;
+  __isr_table[0x29].__int = (__u32)&irq41;
+  __isr_table[0x30].__int = (__u32)&irq42;
+  __isr_table[0x31].__int = (__u32)&irq43;
+  __isr_table[0x32].__int = (__u32)&irq44;
+  __isr_table[0x33].__int = (__u32)&irq45;
+  __isr_table[0x34].__int = (__u32)&irq46;
+  __isr_table[0x35].__int = (__u32)&irq47;
 
-  __isr_table[0x80].__int_routine = (__u32)&isr_syscall128;
-  __isr_table[0xB1].__int_routine = (__u32)&isr_syscall177;
+  __isr_table[0x80].__int = (__u32)&isr_syscall128;
+  __isr_table[0xB1].__int = (__u32)&isr_syscall177;
 
   /*
    *
@@ -368,38 +367,38 @@ void idt_init()
    *
    */
 
-  idt_entry(0x00, __isr_table[0].__int_routine, 0x08, 0x8E);
-  idt_entry(0x01, __isr_table[1].__int_routine, 0x08, 0x8E);
-  idt_entry(0x02, __isr_table[2].__int_routine, 0x08, 0x8E);
-  idt_entry(0x03, __isr_table[3].__int_routine, 0x08, 0x8E);
-  idt_entry(0x04, __isr_table[4].__int_routine, 0x08, 0x8E);
-  idt_entry(0x05, __isr_table[5].__int_routine, 0x08, 0x8E);
-  idt_entry(0x06, __isr_table[6].__int_routine, 0x08, 0x8E);
-  idt_entry(0x07, __isr_table[7].__int_routine, 0x08, 0x8E);
-  idt_entry(0x08, __isr_table[8].__int_routine, 0x08, 0x8E);
-  idt_entry(0x09, __isr_table[9].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0A, __isr_table[10].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0B, __isr_table[11].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0C, __isr_table[12].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0D, __isr_table[13].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0E, __isr_table[14].__int_routine, 0x08, 0x8E);
-  idt_entry(0x0F, __isr_table[15].__int_routine, 0x08, 0x8E);
-  idt_entry(0x10, __isr_table[16].__int_routine, 0x08, 0x8E);
-  idt_entry(0x11, __isr_table[17].__int_routine, 0x08, 0x8E);
-  idt_entry(0x12, __isr_table[18].__int_routine, 0x08, 0x8E);
-  idt_entry(0x13, __isr_table[19].__int_routine, 0x08, 0x8E);
-  idt_entry(0x14, __isr_table[20].__int_routine, 0x08, 0x8E);
-  idt_entry(0x15, __isr_table[21].__int_routine, 0x08, 0x8E);
-  idt_entry(0x16, __isr_table[22].__int_routine, 0x08, 0x8E);
-  idt_entry(0x17, __isr_table[23].__int_routine, 0x08, 0x8E);
-  idt_entry(0x18, __isr_table[24].__int_routine, 0x08, 0x8E);
-  idt_entry(0x19, __isr_table[25].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1A, __isr_table[26].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1B, __isr_table[27].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1C, __isr_table[28].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1D, __isr_table[29].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1E, __isr_table[30].__int_routine, 0x08, 0x8E);
-  idt_entry(0x1F, __isr_table[31].__int_routine, 0x08, 0x8E);
+  idt_entry(0x00, __isr_table[0].__int, 0x08, 0x8E);
+  idt_entry(0x01, __isr_table[1].__int, 0x08, 0x8E);
+  idt_entry(0x02, __isr_table[2].__int, 0x08, 0x8E);
+  idt_entry(0x03, __isr_table[3].__int, 0x08, 0x8E);
+  idt_entry(0x04, __isr_table[4].__int, 0x08, 0x8E);
+  idt_entry(0x05, __isr_table[5].__int, 0x08, 0x8E);
+  idt_entry(0x06, __isr_table[6].__int, 0x08, 0x8E);
+  idt_entry(0x07, __isr_table[7].__int, 0x08, 0x8E);
+  idt_entry(0x08, __isr_table[8].__int, 0x08, 0x8E);
+  idt_entry(0x09, __isr_table[9].__int, 0x08, 0x8E);
+  idt_entry(0x0A, __isr_table[10].__int, 0x08, 0x8E);
+  idt_entry(0x0B, __isr_table[11].__int, 0x08, 0x8E);
+  idt_entry(0x0C, __isr_table[12].__int, 0x08, 0x8E);
+  idt_entry(0x0D, __isr_table[13].__int, 0x08, 0x8E);
+  idt_entry(0x0E, __isr_table[14].__int, 0x08, 0x8E);
+  idt_entry(0x0F, __isr_table[15].__int, 0x08, 0x8E);
+  idt_entry(0x10, __isr_table[16].__int, 0x08, 0x8E);
+  idt_entry(0x11, __isr_table[17].__int, 0x08, 0x8E);
+  idt_entry(0x12, __isr_table[18].__int, 0x08, 0x8E);
+  idt_entry(0x13, __isr_table[19].__int, 0x08, 0x8E);
+  idt_entry(0x14, __isr_table[20].__int, 0x08, 0x8E);
+  idt_entry(0x15, __isr_table[21].__int, 0x08, 0x8E);
+  idt_entry(0x16, __isr_table[22].__int, 0x08, 0x8E);
+  idt_entry(0x17, __isr_table[23].__int, 0x08, 0x8E);
+  idt_entry(0x18, __isr_table[24].__int, 0x08, 0x8E);
+  idt_entry(0x19, __isr_table[25].__int, 0x08, 0x8E);
+  idt_entry(0x1A, __isr_table[26].__int, 0x08, 0x8E);
+  idt_entry(0x1B, __isr_table[27].__int, 0x08, 0x8E);
+  idt_entry(0x1C, __isr_table[28].__int, 0x08, 0x8E);
+  idt_entry(0x1D, __isr_table[29].__int, 0x08, 0x8E);
+  idt_entry(0x1E, __isr_table[30].__int, 0x08, 0x8E);
+  idt_entry(0x1F, __isr_table[31].__int, 0x08, 0x8E);
 
   /*
    *
@@ -407,22 +406,22 @@ void idt_init()
    *
    */
 
-  idt_entry(0x20, __isr_table[32].__int_routine, 0x08, 0x8E);
-  idt_entry(0x21, __isr_table[33].__int_routine, 0x08, 0x8E);
-  idt_entry(0x22, __isr_table[34].__int_routine, 0x08, 0x8E);
-  idt_entry(0x23, __isr_table[35].__int_routine, 0x08, 0x8E);
-  idt_entry(0x24, __isr_table[36].__int_routine, 0x08, 0x8E);
-  idt_entry(0x25, __isr_table[37].__int_routine, 0x08, 0x8E);
-  idt_entry(0x26, __isr_table[38].__int_routine, 0x08, 0x8E);
-  idt_entry(0x27, __isr_table[39].__int_routine, 0x08, 0x8E);
-  idt_entry(0x28, __isr_table[40].__int_routine, 0x08, 0x8E);
-  idt_entry(0x29, __isr_table[41].__int_routine, 0x08, 0x8E);
-  idt_entry(0x30, __isr_table[42].__int_routine, 0x08, 0x8E);
-  idt_entry(0x31, __isr_table[43].__int_routine, 0x08, 0x8E);
-  idt_entry(0x32, __isr_table[44].__int_routine, 0x08, 0x8E);
-  idt_entry(0x33, __isr_table[45].__int_routine, 0x08, 0x8E);
-  idt_entry(0x34, __isr_table[46].__int_routine, 0x08, 0x8E);
-  idt_entry(0x35, __isr_table[47].__int_routine, 0x08, 0x8E);
+  idt_entry(0x20, __isr_table[32].__int, 0x08, 0x8E);
+  idt_entry(0x21, __isr_table[33].__int, 0x08, 0x8E);
+  idt_entry(0x22, __isr_table[34].__int, 0x08, 0x8E);
+  idt_entry(0x23, __isr_table[35].__int, 0x08, 0x8E);
+  idt_entry(0x24, __isr_table[36].__int, 0x08, 0x8E);
+  idt_entry(0x25, __isr_table[37].__int, 0x08, 0x8E);
+  idt_entry(0x26, __isr_table[38].__int, 0x08, 0x8E);
+  idt_entry(0x27, __isr_table[39].__int, 0x08, 0x8E);
+  idt_entry(0x28, __isr_table[40].__int, 0x08, 0x8E);
+  idt_entry(0x29, __isr_table[41].__int, 0x08, 0x8E);
+  idt_entry(0x30, __isr_table[42].__int, 0x08, 0x8E);
+  idt_entry(0x31, __isr_table[43].__int, 0x08, 0x8E);
+  idt_entry(0x32, __isr_table[44].__int, 0x08, 0x8E);
+  idt_entry(0x33, __isr_table[45].__int, 0x08, 0x8E);
+  idt_entry(0x34, __isr_table[46].__int, 0x08, 0x8E);
+  idt_entry(0x35, __isr_table[47].__int, 0x08, 0x8E);
 
   /*
    *
@@ -430,8 +429,8 @@ void idt_init()
    *
    */
 
-  idt_entry(0x80, __isr_table[128].__int_routine, 0x08, 0x8E);
-  idt_entry(0xB1, __isr_table[177].__int_routine, 0x08, 0x8E);
+  idt_entry(0x80, __isr_table[128].__int, 0x08, 0x8E);
+  idt_entry(0xB1, __isr_table[177].__int, 0x08, 0x8E);
 
   __asm__ volatile(
     "lidt (%0)\n"
@@ -442,15 +441,14 @@ void idt_init()
   );
 }
 
-void idt_install_coop_routine(__u8 __index__, void(*__routine__)(struct InterruptRegisters* __regs_struct__))
+void idt_install_coop_routine(__u8 __index__, isr_routine_t __routine__)
 {
   if(__index__ > 0x1F)
-    __isr_table[__index__].__coop_routine = __routine__;
+    __isr_table[__index__].__routine = __routine__;
 }
 
 void idt_unistall_coop_routine(__u8 __index__)
 {
   if(__index__ > CPU_EXCEPTIONS_NUM)
-    __isr_table[__index__].__coop_routine = 0x00;
+    __isr_table[__index__].__routine = 0x00;
 }
-

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.h                      |
- *    |  SRC MOD   : 10/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -17,16 +17,15 @@
 #define __KERNEL__
 
 #include <std/int.h>
-#include <std/io.h>
 
 /*
  *
  * Struct que armazena o estado dos registradores 
- * antes de uma ISR ocorrer
+ * quando ocorre uma interrupção
  *
  */
 
-struct InterruptRegisters 
+typedef struct int_regs_t 
 {
 
   /*
@@ -66,37 +65,8 @@ struct InterruptRegisters
   __u32 __eip;
   __u32 __cs;
   __u32 __eflags;
-}__attribute__((packed));
+}__attribute__((packed)) int_regs_t;
 
-__attribute__((always_inline)) inline void sys_cpu(char* __cpu_id_dest__)
-{
-  __asm__ volatile(
-    "movl $0x80000002, %%eax\n"
-    "cpuid\n"
-    "movl %%eax, (%0)\n"
-    "movl %%ebx, 4(%0)\n"
-    "movl %%ecx, 8(%0)\n"
-    "movl %%edx, 12(%0)\n"
-
-    "movl $0x80000003, %%eax\n"
-    "cpuid\n"
-    "movl %%eax, 16(%0)\n"
-    "movl %%ebx, 20(%0)\n"
-    "movl %%ecx, 24(%0)\n"
-    "movl %%edx, 28(%0)\n"
-    
-    "movl $0x80000004, %%eax\n"
-    "cpuid\n"
-    "movl %%eax, 32(%0)\n"
-    "movl %%ebx, 36(%0)\n"
-    "movl %%ecx, 40(%0)\n"
-    "movl %%edx, 44(%0)\n"
-
-    "movl $0x00, 48(%0)\n"
-    :
-    : "p"(__cpu_id_dest__)
-    : "%eax", "%ebx", "%ecx", "%edx"
-  );
-}
+void sys_cpu(char* __cpu_id_dest__);
 
 #endif

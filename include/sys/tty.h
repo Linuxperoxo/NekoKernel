@@ -25,6 +25,7 @@
 #define TTY_DF_CH_COLOR 0x0F
 #define TTY_DF_BC_COLOR 0x00
 #define TTY_DF_COLOR (((TTY_DF_BC_COLOR << 4) & 0x70) | (TTY_DF_CH_COLOR & 0x0F))
+#define TTY_DF_FLAG 0x00
 
 #define TTY_INV_OUT_BIT 0x01
 #define TTY_BF_READY_BIT 0x10

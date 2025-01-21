@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : keyboard.c                    |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -43,7 +43,7 @@ static keyboard_t* __keyboard = NULL;
  *
  */
 
-static void keyboard_handler(struct InterruptRegisters*) 
+static void keyboard_handler(int_regs_t*) 
 {
   if(__keyboard == NULL)
     return;

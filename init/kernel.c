@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -39,8 +39,8 @@ void k_init()
   idt_init();
   gdt_init();
   syscall_init();
-  task_init();
-  timer_init();
+//  task_init();
+//  timer_init();
 
   printf("==========================================\n");
   printf("==          Neko Operating System       ==\n");

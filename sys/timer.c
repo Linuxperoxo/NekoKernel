@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : timer.c                       |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -46,12 +46,12 @@ static __u16 __chrono    = 0x00;
  *
  */
 
-static void timer_handler(struct InterruptRegisters* __regs__)
+static void timer_handler(int_regs_t* __regs__)
 {
   __sys_clock += 1;
   __chrono    += 1;
 
-//  task_switch(__regs__);
+  task_switch(__regs__);
 }
 
 /*

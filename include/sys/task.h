@@ -81,8 +81,8 @@ typedef struct task_t
 }task_t;
 
 void task_init();
-void task_switch(struct InterruptRegisters* __int_regs__);
-// void task_create(reg_t __eip__, __8 __user_id);
-// void task_kill(__u8 __task_id__);
+void task_switch(int_regs_t* __int_regs__);
+void task_create(const char* __file__, reg_t __eip__, __u8 __user_id);
+void task_kill(__u8 __task_id__);
 
 #endif

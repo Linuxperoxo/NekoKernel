@@ -118,9 +118,8 @@ void tty_init()
 {
   __tty = (tty_t*)kmalloc(sizeof(tty_t));
 
-  __tty->__flags  = 0x00;
+  __tty->__flags  = TTY_DF_FLAG;
   __tty->__offset = 0x00;
-  __tty->__flags  = 0x01;
   
   __tty->__win.__row   = 0x00;
   __tty->__win.__col   = 0x00;

@@ -27,7 +27,8 @@
 
 static __u8 vga_write(offset_t __offset__, void* __buffer__)
 {
-  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__] = *((char*)__buffer__);
+  ((__u8*)VGA_FRAMEBUFFER_ADDRS)[__offset__] = *((__u8*)__buffer__);
+  
   return 0;
 }
 

@@ -6,26 +6,20 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kmem.c                        |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <kmem.h>
+#include <sys/kmem.h>
 #include <std/int.h>
-#include <sys/cdefs.h>
+#include <std/utils.h>
 
 #define KBLOCKS_INIT_ADDRS 0x20000000
 
 static kmem_t* __kblocks = (kmem_t*)KBLOCKS_INIT_ADDRS;
-
-/*
- *
- * Funçẽs temporárias
- *
- */
 
 void* kmalloc(kmem_size_t __size__)
 {
@@ -33,7 +27,7 @@ void* kmalloc(kmem_size_t __size__)
 
   for(__u32 __i = 0; __i < BLOCKS; __i++)
   {
-    if(B_IS_FREE(&__kblocks[__i]))
+    if(B_IS_ALLOC(((kmem_t*)&__kblocks[__i])))
     {
       __block_free           = &__kblocks[__i];
       __block_free->__size   = __size__;

@@ -16,6 +16,7 @@
 #include <neko/kernel.h>
 #include <sys/tty.h>
 #include <neko/idt.h>
+#include <std/io.h>
 
 void sys_write()
 {
@@ -66,8 +67,9 @@ void sys_write()
   */
 }
 
-void syscall128(struct InterruptRegisters*)
+void syscall128(int_regs_t*)
 {
+  /*
   __asm__ volatile(
     "cmp $0x10, %%eax\n"
     "jz .Lsys_write\n"
@@ -78,9 +80,10 @@ void syscall128(struct InterruptRegisters*)
     :
     : "%eax", "%ebx", "%esi", "%edi"
   );
+  */
 }
 
-void syscall177(struct InterruptRegisters*)
+void syscall177(int_regs_t*)
 {
   printf("syscall177\n");
 }

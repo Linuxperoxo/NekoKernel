@@ -36,8 +36,9 @@
  *
  */
 
-static task_t* __current_task;
-static task_t* __root_task;
+static task_t*   __current_task = NULL;
+static task_t*   __root_task    = NULL;
+static task_id_t __current_id   = 0x00;
 
 /*
  *
@@ -45,7 +46,7 @@ static task_t* __root_task;
  *
  */
 
-static void task_save(struct InterruptRegisters* __int_regs__)
+static void task_save(int_regs_t* __int_regs__)
 {
   
   /*
@@ -92,7 +93,7 @@ static void task_save(struct InterruptRegisters* __int_regs__)
   __current_task->__fs = __int_regs__->__fs;
 }
 
-static void task_load(struct InterruptRegisters* __int_regs__)
+static void task_load(int_regs_t* __int_regs__)
 {
   
   /*
@@ -146,8 +147,7 @@ static void task_load(struct InterruptRegisters* __int_regs__)
 
 void task_init()
 {
-  __root_task = (task_t*)kmalloc(sizeof(task_t));
-
+  __root_task              = (task_t*)kmalloc(sizeof(task_t));
   __root_task->__prev_task = NULL;
   __root_task->__next_task = NULL;
   __root_task->__uid       = 0x00;
@@ -157,7 +157,7 @@ void task_init()
   __current_task = __root_task;
 }
 
-void task_switch(struct InterruptRegisters* __int_regs__)
+void task_switch(int_regs_t* __int_regs__)
 {
 
   /*
@@ -175,13 +175,10 @@ void task_switch(struct InterruptRegisters* __int_regs__)
    *
    */
 
-  if(__current_task == NULL)
+  if(__current_task->__next_task == NULL)
   {
-    if(__root_task == NULL)
-    {
-      return;
-    }
     __current_task = __root_task;
+    return; 
   }
 
   /*
@@ -221,3 +218,7 @@ void task_switch(struct InterruptRegisters* __int_regs__)
   task_load(__int_regs__);
 }
 
+void task_create(const char* __file__, reg_t __eip__, __u8 __user_id)
+{
+  
+}

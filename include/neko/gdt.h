@@ -137,8 +137,8 @@ struct gdtEntry
 
 struct gdtPtr
 {
-  __u16 __gdt_size; // Tamanho do GDT
-  __u32 __gdt_entry // Endereço base do GDT
+  __u16 __gdt_size;  // Tamanho do GDT
+  __u32 __gdt_entry; // Endereço base do GDT
 }__attribute__((packed));
 
 /*

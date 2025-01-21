@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : idt.h                         |
- *    |  SRC MOD   : 03/01/2025                    |
+ *    |  SRC MOD   : 20/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -19,67 +19,89 @@
 #include <std/int.h>
 #include <neko/kernel.h>
 
-struct idt_entry {
-  __u16 __base_low;     // Parte baixa do endereço do ISR
-  __u16 __seg_selector; // Valor do seletor de segmento que esrá utilizando para acessar o código do ISR 
-  __u8 __always0;       // Sempre 0
-  
-  /*
-   *
-   * FLAGS:
-   *
-   * Flags que controlam como o processador deve tratar a interrupção, incluindo aspectos
-   * como:
-   *
-   * * Tipo de interrupção (se é uma interrupção de software, hardware, etc);
-   * * Privacidade (DPL): Define o nível de privilégio (nível do anel) que pode
-   *                      disparar a interrupção
-   * * Present (P): Indica se a interrupção está presente e válida
-   *
-   * __u8 __flags -> 0000 0000
-   *
-   * (bit 7): Present Bit
-   * (bit 6-5): DPL
-   * (bit 4): Sempre 0
-   * (bit 3-0): Gate Type
-   */
-
-  __u8 __flags;      // Flags para controlar como o processador trata a interrupção, Tipo de interrupção Hardware ou Software, Privacidade 
-  __u16 __base_high; // Parte alta do endereço do ISR
-}__attribute__((packed));
-
-struct idt_ptr {
-  __u16 __limit;           // Tamanho da IDT em Bytes (16 bits)
-  __u32 __idt_first_entry; // Endereço para o ínicio do nosso array de idt_entry (32 bits)  
-}__attribute__((packed));
+typedef __u16 idt_base_low;
+typedef __u16 idt_seg_selec;
+typedef __u8  idt_always0;
+typedef __u8 idt_flags;
+typedef __u16 idt_base_high;
+typedef __u16 idt_limit_t;
+typedef __u32 isr_int_t;
+typedef void(*isr_routine_t)(int_regs_t*);
 
 /*
  *
- * struct idt_ptr Membros:
+ * 1. __base_low: Parte baixa do endereço do ISR (Interrupt Service Routine).
+ *  Representa os 16 bits menos significativos do endereço onde o manipulador de interrupção está localizado.
  *
- * 1. __limit: Tamanho do IDT em Bytes.
+ * 2. __seg_selector: Seletor de segmento do descritor de segmento de código.
+ *  Contém o seletor de segmento usado para acessar o código do ISR na tabela de segmentos.
  *
- * EXEMPLO:
- *  Se temos 3 segmentos, ou seja, 3 structs idt_entry, o __limit vai ser o seguinte: 
+ * 3. __always0: Este campo deve ser sempre 0.
+ *  É reservado e não tem impacto no funcionamento da interrupção.
  *
- *  __idt_prt.__limit = sizeof(gdt_entry) * 3 - 1;
+ * 4. __flags: Flags que controlam como o processador deve tratar a interrupção.
+ *  Inclui o tipo de interrupção (hardware/software), nível de privilégio (DPL) e a presença da interrupção (bit P).
  *
- *  - 1 pois começamos no índice 0, igual um array
+ * - Tipo de interrupção (se é uma interrupção de software, hardware, etc);
+ * - Privacidade (DPL): Define o nível de privilégio (nível do anel) que pode
+ *                      disparar a interrupção
+ * -Present (P): Indica se a interrupção está presente e válida
  *
- * 2. __idt_first_entry: Ponteiro para o início do array de idt_entry
+ * __u8 __flags -> 0000 0000
  *
- * Para entender melhor veja o arquivo idt.c
+ * (bit 7): Present Bit
+ * (bit 6-5): DPL
+ * (bit 4): Sempre 0
+ * (bit 3-0): Gate Type
+ *
+ * 5. __base_high: Parte alta do endereço do ISR.
+ *    Representa os 16 bits mais significativos do endereço do manipulador de interrupção.
  *
  */
 
-struct isrInterrupt
+typedef struct idt_entry_t
 {
-  __u32 __int_routine;
-  void (*__coop_routine)(struct InterruptRegisters*);
-};
+  idt_base_low  __base_low;
+  idt_seg_selec __seg_selector;
+  idt_always0   __always0;
+  idt_flags     __flags;
+  idt_base_high __base_high;
+}__attribute__((packed)) idt_entry_t;
+
+/*
+ *
+ * 1. __limit: Tamanho da IDT em Bytes (16 bits).
+ *    Representa o tamanho total da tabela de descritores de interrupção (IDT). 
+ *    O valor é expresso em bytes e é usado para definir o limite da IDT para o processador.
+ *
+ * 2. __idt_first_entry: Endereço para o início do nosso array de idt_entry (32 bits).
+ *    Ponteiro para o primeiro elemento (entrada) da tabela de descritores de interrupção.
+ *    Esse campo aponta para o local onde a IDT começa, fornecendo ao processador o endereço base da tabela.
+ *
+ */
+
+typedef struct idt_ptr_t
+{
+  idt_limit_t  __limit;
+  idt_entry_t* __idt_first_entry;
+}__attribute__((packed)) idt_ptr_t;
+
+/*
+ *
+ * 1. __int: Número da interrupção
+ * 
+ * 2. __routine: Rotina para essa interrupção
+ *
+ */
+
+typedef struct isr_t
+{
+  isr_int_t     __int;
+  isr_routine_t __routine;
+}isr_t;
 
 extern void idt_init(); 
-extern void idt_install_coop_routine(__u8 __index__, void(*__routine__)(struct InterruptRegisters*));
+extern void idt_install_coop_routine(__u8 __index__, isr_routine_t __routine__);
 extern void idt_unistall_coop_routine(__u8 __index__);
 
 #endif
