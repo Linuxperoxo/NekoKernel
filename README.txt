@@ -86,6 +86,9 @@ abaixo:
 2. Inicie o GDB:
     make gdb
 
+3. Conecte-se ao QEMU:
+  (gdb) target remote localhost:1234
+
 Contribuições
 
 Este é um projeto em desenvolvimento e todo feedback é bem-vindo! Se você quiser contribuir 
