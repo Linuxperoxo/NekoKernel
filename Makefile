@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 19/01/2025                    |
+#    |  SRC MOD   : 21/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -71,7 +71,7 @@ STR_OBJ   = $(OBJ_STD_DIR)/str.o
 # ----------
 # SYSLIB FILES
 # ----------
-KMEM_SRC = $(SYS_SRC_DIR)/kmem.c
+KMEM_SRC = $(MM_DIR)/kmem.c
 KMEM_OBJ = $(OBJ_SYS_DIR)/kmem.o
 
 # ----------
