@@ -6,7 +6,7 @@
 #    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 #    |  AUTHOR    : Linuxperoxo                   |
 #    |  FILE      : Makefile                      |
-#    |  SRC MOD   : 21/01/2025                    |
+#    |  SRC MOD   : 23/01/2025                    |
 #    |                                            |
 #    O--------------------------------------------/
 #
@@ -16,7 +16,7 @@
 # ----------
 # Flags
 # ----------
-CFLAGS         = -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
+CFLAGS         = -freport-bug -Wall -Wextra -g -ffreestanding -v -nostdlib -nostartfiles -fno-stack-protector -fno-builtin -m32 -O0 $(INCLUDES)
 ASMFLAGSBIN    = -f bin
 ASMFLAGSELF    = -g -f elf32
 LDFLAGS        = -z noexecstack -nostdlib -m elf_i386 -T $(LINKER_FILE)
@@ -147,7 +147,7 @@ $(ISR_OBJ):
 $(IDT_OBJ):
 	$(CC) $(CFLAGS) $(IDT_SRC) -c -o $@
 $(GDT_OBJ):
-	$(CC) $(CFLAGS) -c -o $@ $(GDT_SRC) 
+	$(CC) $(CFLAGS) $(GDT_SRC) -c -o $@ 
 $(ATA_DRIVER_OBJ): 
 	$(CC) $(CFLAGS) $(ATA_DRIVER_SRC) -c -o $@
 $(KEYBOARD_DRIVER_OBJ):
@@ -157,7 +157,7 @@ $(VGA_DRIVER_OBJ):
 $(KERNEL_OBJ):
 	$(CC) $(CFLAGS) $(KERNEL_SRC) -c -o $@
 $(KERNEL_LOADER_OBJ):
-	$(ASM) $(ASMFLAGSELF) $(KERNEL_LOADER_SRC) -o $@
+	$(CC) $(CFLAGS) $(KERNEL_LOADER_SRC) -c -o $@
 
 # --------
 # STDLIB

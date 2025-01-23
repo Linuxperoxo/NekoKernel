@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kmem.h                        |
- *    |  SRC MOD   : 21/01/2025                    |
+ *    |  SRC MOD   : 23/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -42,5 +42,6 @@ typedef struct kmem_t
 
 void* kmalloc(kmem_size_t __size__);
 void kfree(void* __block__);
+void mem_show();
 
 #endif

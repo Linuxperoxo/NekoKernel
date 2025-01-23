@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 20/01/2025                    |
+ *    |  SRC MOD   : 23/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -61,4 +61,6 @@ void k_main()
   printf(" (    |    )\n\n");
 
   printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
+
+  mem_show();
 }

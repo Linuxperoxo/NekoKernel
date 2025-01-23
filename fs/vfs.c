@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : vfs.c                         |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 23/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -28,20 +28,7 @@ static vfs_t* __root_dir    = NULL;
  *
  */
 
-static void vfs_ls(const char* __param__)
-{
-  vfs_t* __tmp = __current_dir->__child;
-  
-  while(__tmp)
-  {
-    printf("%s ", __tmp->__name);
-    __tmp = __tmp->__brother;
-  }
-  printf("\n");
-}
-
-__attribute__((always_inline)) 
-inline static uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const char** __restrict__ __dir_cmp__)
+static uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const char** __restrict__ __dir_cmp__)
 {
   if(*__vfs_name__ == '\0' || **__dir_cmp__ == '\0')
     return 1;
@@ -80,8 +67,7 @@ inline static uint8_t vfs_way_cmp(const char* __restrict__ __vfs_name__, const c
   return 0;  
 }
 
-__attribute__((always_inline))
-inline static vfs_t* vfs_search(const char* __file__)
+static vfs_t* vfs_search(const char* __file__)
 {
   vfs_t* __tmp = __current_dir;
 
@@ -114,18 +100,16 @@ inline static vfs_t* vfs_search(const char* __file__)
       break;
 
       case 0:
-        goto EXIT;
+        return __tmp;
       break;
     }
   }
-  EXIT:
   return __tmp;
 }
 
-__attribute__((always_inline))
-inline static __u8 vfs_create(const char* __file__, uid_t __uid__, 
-                              gid_t __gid__, mode_t __perm__, type_t __type__, read_t __read__, 
-                              write_t __write__, exec_t __exec__)
+static __u8 vfs_create(const char* __file__, uid_t __uid__, 
+                       gid_t __gid__, mode_t __perm__, type_t __type__, read_t __read__, 
+                       write_t __write__, exec_t __exec__)
 {
   if(vfs_search(__file__) != NULL)
     return 1;
@@ -212,9 +196,9 @@ void vfs_init()
   vfs_mkdir("/sys", ROOT_UID, ROOT_GID, READ_O | WRITE_O);
 }
 
-__u8 vfs_exist(const char* __file__)
+vfs_t* vfs_exist(const char* __file__)
 {
-  return vfs_search(__file__) == NULL ? 0 : 1;
+  return vfs_search(__file__);
 }
 
 __u8 vfs_type(const char* __file__)
@@ -231,7 +215,7 @@ __u8 vfs_mkdir(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm
   return vfs_create(__file__, __uid__, __gid__, __perm__, DIR_TYPE, NULL, NULL, NULL);
 }
 
-__u8 vfs_mkfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__)
+__u8 vfs_mkfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __perm__, exec_t __exec__)
 {
   if(__file__ == NULL)
     return 1;
@@ -243,7 +227,7 @@ __u8 vfs_mkfile(const char* __file__, uid_t __uid__, gid_t __gid__, mode_t __per
    *
    */
 
-  return vfs_create(__file__, __uid__, __gid__, __perm__, FILE_TYPE, NULL, NULL, NULL);
+  return vfs_create(__file__, __uid__, __gid__, __perm__, FILE_TYPE, NULL, NULL, __exec__);
 }
 
 __u8 vfs_mkchfile(const char* __file__, uid_t __uid__, gid_t __gid__, 
@@ -295,3 +279,14 @@ __u8 vfs_read(const char* __file__, offset_t __offset__, void* __buffer__)
     return 1;
   return __vfs_file->__read(__offset__, __buffer__);
 }
+
+__u8 vfs_exec(const char* __file__, const char* __param__)
+{
+  vfs_t* __vfs_file = vfs_search(__file__);
+
+  if(__vfs_file == NULL || __vfs_file->__type == DIR_TYPE || 
+    __vfs_file->__exec == NULL || !IS_EXEC(__vfs_file))
+    return 1;
+  return __vfs_file->__exec(__param__);
+}
+
