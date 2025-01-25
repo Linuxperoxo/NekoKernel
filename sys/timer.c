@@ -21,10 +21,9 @@
 #include <sys/task.h>
 #include <sys/timer.h>
 
-#define FREQUENCY                                                              \
-  1000 // Queremos interrupções a cada 1ms (Frequência de 1000 Hz)
 #define PIT_INT_NUM 0x20
-#define DIVISOR_NUM 1193180
+#define FREQUENCY_BASE 1193180
+#define FREQUENCY_INT 1000
 
 #define TIMER_CHANNEL_0_PORT 0x40
 #define TIMER_CHANNEL_1_PORT 0x41
@@ -37,7 +36,7 @@
  *
  */
 
-static __u32 __divisor = DIVISOR_NUM / FREQUENCY; // Gera interrupção a cada 1ms
+static __u32 __divisor = FREQUENCY_BASE / FREQUENCY_INT;
 static __u32 __sys_clock = 0x00;
 static __u32 __chrono = 0x00;
 
@@ -66,7 +65,7 @@ static void timer_handler(int_regs_t *__regs__) {
    *
    */
 
-  if (__sys_clock % 1000 == 0)
+  if (__sys_clock % 2 == 0)
     task_switch(__regs__);
 }
 
@@ -105,8 +104,8 @@ void timer_init() {
    * O divisor serve para falar ao PIT quantos Hz ele deve
    * gerar interrupção. Exemplo:
    *
-   * 1193180 / 1000 = 1193 Hz, ou seja ele vai trabalha a uma frequência de
-   * 1193 Hz, 1193 interrupções por segundo
+   * 1193180 / 1000 = 1193Hz, ou seja a cada 1193 ciclos
+   * vamos gerar 1 interrupção
    *
    */
 
