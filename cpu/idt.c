@@ -13,8 +13,6 @@
  *
  */
 
-#pragma optimize("", off);
-
 #include <neko/idt.h>
 #include <std/utils.h>
 #include <std/int.h>
@@ -455,4 +453,3 @@ void idt_unistall_coop_routine(__u8 __index__)
     __isr_table[__index__].__routine = 0x00;
 }
 
-#pragma optimize("", on);

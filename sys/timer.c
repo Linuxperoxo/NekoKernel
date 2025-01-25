@@ -46,7 +46,7 @@ static __u32 __chrono = 0x00;
  *
  */
 
-static void timer_handler(int_regs_t *__regs__) {
+static void timer_handler(int_regs_t *__int_regs__) {
 
   /*
    *
@@ -66,7 +66,7 @@ static void timer_handler(int_regs_t *__regs__) {
    */
 
   if (__sys_clock % 2 == 0)
-    task_switch(__regs__);
+    task_switch(__int_regs__);
 }
 
 /*

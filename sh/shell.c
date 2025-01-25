@@ -6,42 +6,37 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : shell.c                       |
- *    |  SRC MOD   : 19/01/2025                    |
+ *    |  SRC MOD   : 25/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
  *
  */
 
-#include <sys/shell.h>
-#include <std/str.h>
 #include <std/io.h>
-#include <sys/tty.h>
+#include <std/str.h>
 #include <std/utils.h>
+#include <sys/kmem.h>
+#include <sys/shell.h>
+#include <sys/tty.h>
 #include <sys/vfs.h>
 
-__attribute__((always_inline)) 
-inline static void decode_buffer(shell_t* __sh__)
-{
+static shell_t *__sh = NULL;
 
-}
-__attribute__((always_inline)) 
-inline static void decode_command(shell_t* __sh__)
-{ 
+__attribute__((always_inline)) inline static void
+decode_buffer(shell_t *__sh__) {}
+__attribute__((always_inline)) inline static void
+decode_command(shell_t *__sh__) {}
 
-}
-
-void shell_init()
-{
-  shell_t __sh;
-  
-  for(;;)
-  {
-    printf("$ ");
-    scanf((char*)&__sh.__buffer, SH_BUFFER_SIZE);
-    memset((char*)&__sh.__buffer, 0x00, SH_BUFFER_SIZE);
-    memset((char*)&__sh.__command, 0x00, SH_COMMAND_BUFFER_SIZE);
-    memset((char*)&__sh.__param, 0x00, SH_PARAM_BUFFER_SIZE);
+__u8 shell_exec(const char *__param__) {
+  for (;;) {
+    printf("Dentro do shell!\n");
   }
+  return 0;
 }
 
+void shell_init() {
+  __sh = (shell_t *)kmalloc(sizeof(shell_t));
+  vfs_mkfile("/bin/sh", ROOT_UID, ROOT_GID, READ_O | WRITE_O | EXEC_O,
+             &shell_exec);
+}

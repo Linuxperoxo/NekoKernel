@@ -1,7 +1,6 @@
 * Melhorar a parte de escrita e leitura de arquivos ch e bc
 * Adicionar mais funcionalidades para o printf
 * Corrigir a parte do buffer de entrada que não está sendo limpa após pressionar enter
-* Fazer o malloc
 * Continuar o sh, fazendo a struct de comandos, linkar o código do bin no vfs_t, isso se for um exec
 * Configurar os segmentos certinho
 * Adicionar syscall
