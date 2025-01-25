@@ -6,7 +6,7 @@
 ;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
 ;    |  AUTHOR    : Linuxperoxo                   |
 ;    |  FILE      : isr.s                         |
-;    |  SRC MOD   : 12/01/2025                    |
+;    |  SRC MOD   : 25/01/2025                    |
 ;    |                                            |
 ;    O--------------------------------------------/
 ;
@@ -28,7 +28,7 @@ extern syscall_handler
 
   isr%1:
     CLI          ; No Interruptions :)
-    
+
     PUSH LONG %2 ; Send Error Code to InterruptRegisters struct 
     PUSH LONG %1 ; Interrupt Number to InterruptRegisters struct
     
@@ -40,7 +40,8 @@ extern syscall_handler
 
   irq%1:
     CLI            ; No Interruptions :)
-    
+
+    PUSH LONG ESP
     PUSH LONG 0x00 ; Send Error Code to InterruptRegisters struct 
     PUSH LONG %1   ; Interrupt Number to InterruptRegisters struct
     
@@ -135,7 +136,7 @@ isr_calling:
   POP ESI
   POP EDI
   
-  ADD ESP, 8
+  ADD ESP, 12
 
   STI  ; Habilitando as interrupções novamente
   IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)
@@ -197,10 +198,26 @@ irq_calling:
   POP EBX
   POP ECX
   POP EDX
+  
+  MOV EDI, [ESP + 16]
+
+  MOV ESI, [ESP + 20]
+  MOV [EDI], LONG ESI
+  ADD EDI, 4
+
+  MOV ESI, [ESP + 24]
+  MOV [EDI], LONG ESI
+  ADD EDI, 4
+  
+  MOV ESI, [ESP + 28]
+  MOV [EDI], LONG ESI
+
   POP ESI
   POP EDI
 
   ADD ESP, 8
+  
+  MOV ESP, [ESP]
 
   STI  ; Habilitando as interrupções novamente
   IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)
@@ -265,7 +282,7 @@ syscall_calling:
   POP ESI
   POP EDI
 
-  ADD ESP, 8
+  ADD ESP, 12
 
   STI  ; Habilitando as interrupções novamente
   IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)

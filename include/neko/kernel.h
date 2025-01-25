@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.h                      |
- *    |  SRC MOD   : 20/01/2025                    |
+ *    |  SRC MOD   : 25/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -20,13 +20,12 @@
 
 /*
  *
- * Struct que armazena o estado dos registradores 
+ * Struct que armazena o estado dos registradores
  * quando ocorre uma interrupção
  *
  */
 
-typedef struct int_regs_t 
-{
+typedef struct int_regs_t {
 
   /*
    *
@@ -45,16 +44,16 @@ typedef struct int_regs_t
   __u32 __edx;
   __u32 __esi;
   __u32 __edi;
- 
+
   /*
    *
-   * Armazena o número da interrupção e o código de erro 
+   * Armazena o número da interrupção e o código de erro
    *
    */
 
   __u32 __interrupt;
   __u32 __errcode;
-  
+
   /*
    *
    * Registradores que são empilhados automaticamente
@@ -62,11 +61,12 @@ typedef struct int_regs_t
    *
    */
 
+  __u32 __esp;
   __u32 __eip;
   __u32 __cs;
   __u32 __eflags;
-}__attribute__((packed)) int_regs_t;
+} __attribute__((packed)) int_regs_t;
 
-void sys_cpu(char* __cpu_id_dest__);
+void sys_cpu(char *__cpu_id_dest__);
 
 #endif
