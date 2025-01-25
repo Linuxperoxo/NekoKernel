@@ -30,7 +30,7 @@ decode_command(shell_t *__sh__) {}
 
 __u8 shell_exec(const char *__param__) {
   for (;;) {
-    printf("Dentro do shell!\n");
+    printf("In shell!\n");
   }
   return 0;
 }
