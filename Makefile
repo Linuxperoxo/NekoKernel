@@ -143,7 +143,7 @@ $(TTY_OBJ):
 $(TIMER_OBJ):
 	$(CC) $(CFLAGS) $(TIMER_SRC) -c -o $@
 $(ISR_OBJ):
-	$(ASM) $(ASMFLAGSELF) $(ISR_SRC) -o $@
+	$(CC) $(CFLAGS) $(ISR_SRC) -c -o $@
 $(IDT_OBJ):
 	$(CC) $(CFLAGS) $(IDT_SRC) -c -o $@
 $(GDT_OBJ):

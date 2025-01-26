@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.c                      |
- *    |  SRC MOD   : 25/01/2025                    |
+ *    |  SRC MOD   : 26/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *

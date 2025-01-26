@@ -1,345 +1,455 @@
-;
-;
-;
-;    /--------------------------------------------O
-;    |                                            |
-;    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
-;    |  AUTHOR    : Linuxperoxo                   |
-;    |  FILE      : isr.s                         |
-;    |  SRC MOD   : 25/01/2025                    |
-;    |                                            |
-;    O--------------------------------------------/
-;
-;
-;
+/* 
+ *
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : isr.s                         |
+ *    |  SRC MOD   : 26/01/2025                    |
+ *    |                                            |
+ *    O--------------------------------------------/
+ *
+ *
+ */
 
-[BITS 32]
+.extern isr_handler
+.extern irq_handler
+.extern syscall_handler
 
-%define KERNEL_CODE_SEG  0x08
-%define KERNEL_DATA_SEG  0x10
-%define KERNEL_STACK_SEG 0x10
+.equ KERNEL_CODE_SEG, 0x08
+.equ KERNEL_DATA_SEG, 0x10
+.equ KERNEL_STACK_SEG, 0x10
 
-extern isr_handler
-extern irq_handler
-extern syscall_handler
+.macro isr_exception interrupt, error
+  .global isr\interrupt
 
-%macro ISR_EXCEPTION 2
-  global isr%1
-
-  isr%1:
-    CLI          ; No Interruptions :)
-
-    PUSH LONG %2 ; Send Error Code to InterruptRegisters struct 
-    PUSH LONG %1 ; Interrupt Number to InterruptRegisters struct
+  isr\interrupt:
+    cli
     
-    JMP isr_calling
-%endmacro
-
-%macro ISR_IRQ 1
-  global irq%1:
-
-  irq%1:
-    CLI            ; No Interruptions :)
-
-    PUSH LONG ESP
-    PUSH LONG 0x00 ; Send Error Code to InterruptRegisters struct 
-    PUSH LONG %1   ; Interrupt Number to InterruptRegisters struct
+    pushl $0x00
+    pushl $\error
+    pushl $\interrupt
     
-    JMP irq_calling
-%endmacro
+    jmp isr_calling
+.endm
 
-%macro ISR_SYSCALL 1
-  global isr_syscall%1
+.macro isr_irq interrupt
+  .global irq\interrupt
 
-  isr_syscall%1:
-    CLI            ; No Interruptions :)
+  irq\interrupt:
+    cli
     
-    PUSH LONG 0x00 ; Send Error Code to InterruptRegisters struct 
-    PUSH LONG %1   ; Interrupt Number to InterruptRegisters struct
-    
-    JMP syscall_calling
-%endmacro
+    pushl %esp
+    pushl $0x00
+    pushl $\interrupt
 
-;
-; Ambas as routines abaixo servem para montar a
-; struct do tipo InterruptRegisters na stack, e
-; depois passar o ponteiro dessa struct montada na
-; stack para a função de handler da interrupção, se for
-; uma exception do processador vamos chamar a isr_handler, se for
-; uma request vamos chamar irq_handler, ambas recebem esse ponteiro
-;
+    jmp irq_calling
+.endm
 
-isr_calling:
+.macro isr_syscall interrupt
+  .global isr_syscall\interrupt
 
-  ;
-  ; Montando a struct na stack
-  ;
+  isr_syscall\interrupt:
+    cli
 
-  PUSH EDI
-  PUSH ESI
-  PUSH EDX
-  PUSH ECX
-  PUSH EBX
-  PUSH EAX
+    pushl %esp
+    pushl $0x00
+    pushl $\interrupt
 
-  MOV AX, GS
-  PUSH AX
+    jmp syscall_calling
+.endm
 
-  MOV AX, ES
-  PUSH AX
+.align 4
+.section .text
+  isr_calling:
 
-  MOV AX, FS
-  PUSH AX
+    /*
+     *
+     * Aqui vamos empilhar os registradores para montar
+     * a struct regs_int_t, olhe o arquivo include/neko/kernel.h 
+     * 
+     * Precisamos empilhar a struct dos membros mais baixos até os mais altos,
+     * se você observou, os membros __eip, __cs e __eflags não estão sendo empilhados,
+     * isso acontece pois o processador empilha esses 3 registradores automaticamente
+     * quando ocorre uma interrupção
+     * 
+     */
 
-  MOV AX, SS
-  PUSH AX
+    pushl %edi
+    pushl %esi
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+    pushl %eax
 
-  MOV AX, DS
-  PUSH AX
+    movw %gs, %ax
+    pushl %eax
+    movw %es, %ax
+    pushl %eax
+    movw %fs, %ax
+    pushl %eax
+    movw %ss, %ax
+    pushl %eax
+    movw %ds, %ax
+    pushl %eax
 
-  MOV AX, KERNEL_CODE_SEG
-  MOV CS, AX
+    /*
+     *
+     * Agora que montamos a struct corretamente seguindo a ordem, vamos mudar para
+     * os segmentos do kernel para poder manipular a interrupção no kernel mode 
+     * 
+     */ 
 
-  MOV AX, KERNEL_DATA_SEG
-  MOV DS, AX
-  MOV SS, AX
+    movw $KERNEL_CODE_SEG, %ax
+    movw %ax, %cs
 
-  PUSH ESP ; Parâmetro para a função irq_handler(struct InterruptRegisters*)
+    movw $KERNEL_DATA_SEG, %ax
+    movw %ax, %ds
+    movw %ax, %ss
+    movw %ax, %es
+    movw %ax, %gs
+    movw %ax, %fs
 
-  CALL isr_handler
+    /*
+     *
+     * Se você percebeu, o registrador esp empilhado agora pode parecer meio confuso,
+     * já que o esp é o 4 membro de baixo pra cima da struct, mas quando empilhamos esse
+     * registrador não estamos passando para a struct, até pq ela já está montada, estamos 
+     * na verdade passando o parâmetro para a função, que no caso é um int_regs_t*, como 
+     * montamos a struct na stack, basta passar o esp como parâmetro 
+     * 
+     */
 
-  POP ESP
+    pushl %esp 
 
-  ;
-  ; Agora vamos restaurar todos os registradores
-  ;
-  
-  POP AX
-  MOV DS, AX
+    call isr_handler
 
-  POP AX
-  MOV SS, AX
-   
-  POP AX
-  MOV FS, AX
+    popl %esp
 
-  POP AX
-  MOV ES, AX
+    /*
+     *
+     * Restaurando todos os registradores, dessa vez dos membros mais altos aos mais baixos
+     * 
+     */
 
-  POP AX
-  MOV GS, AX
+    popl %eax
+    movw %ax, %ds
+    popl %eax
+    movw %ax, %ss
+    popl %eax
+    movw %ax, %fs
+    popl %eax
+    movw %ax, %es
+    popl %eax
+    movw %ax, %gs
 
-  POP EAX
-  POP EBX
-  POP ECX
-  POP EDX
-  POP ESI
-  POP EDI
-  
-  ADD ESP, 12
+    popl %eax
+    popl %ebx
+    popl %ecx
+    popl %edx
+    popl %esi
+    popl %edi
 
-  STI  ; Habilitando as interrupções novamente
-  IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)
+    addl $0x0C, %esp
 
-irq_calling:
-  
-  ;
-  ; Montando a struct na stack
-  ;
-  
-  PUSH EDI
-  PUSH ESI
-  PUSH EDX
-  PUSH ECX
-  PUSH EBX
-  PUSH EAX
+    sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
+    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
+  irq_calling:
 
-  MOV AX, GS
-  PUSH AX
+    /*
+     *
+     * Aqui vamos empilhar os registradores para montar
+     * a struct regs_int_t, olhe o arquivo include/neko/kernel.h 
+     * 
+     * Precisamos empilhar a struct dos membros mais baixos até os mais altos,
+     * se você observou, os membros __eip, __cs e __eflags não estão sendo empilhados,
+     * isso acontece pois o processador empilha esses 3 registradores automaticamente
+     * quando ocorre uma interrupção
+     *
+     */
 
-  MOV AX, ES
-  PUSH AX
+    pushl %edi
+    pushl %esi
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+    pushl %eax
 
-  MOV AX, FS
-  PUSH AX
+    movw %gs, %ax
+    pushl %eax
+    movw %es, %ax
+    pushl %eax
+    movw %fs, %ax
+    pushl %eax
+    movw %ss, %ax
+    pushl %eax
+    movw %ds, %ax
+    pushl %eax
 
-  MOV AX, SS
-  PUSH AX
+    /*
+     *
+     * Agora que montamos a struct corretamente seguindo a ordem, vamos mudar para
+     * os segmentos do kernel para poder manipular a interrupção no kernel mode 
+     *
+     */
 
-  MOV AX, DS
-  PUSH AX
+    movw $KERNEL_CODE_SEG, %ax
+    movw %ax, %cs
 
-  PUSH ESP ; Parâmetro para a função irq_handler(struct InterruptRegisters*)
+    movw $KERNEL_DATA_SEG, %ax
+    movw %ax, %ds
+    movw %ax, %ss
+    movw %ax, %es
+    movw %ax, %gs
+    movw %ax, %fs
 
-  CALL irq_handler
+    /*
+     *
+     * se você percebeu, o registrador esp empilhado agora pode parecer meio confuso,
+     * já que o esp é o 4 membro de baixo pra cima da struct, mas quando empilhamos esse
+     * registrador não estamos passando para a struct, até pq ela já está montada, estamos 
+     * na verdade passando o parâmetro para a função, que no caso é um int_regs_t*, como 
+     * montamos a struct na stack, basta passar o esp como parâmetro 
+     *
+     */
 
-  POP ESP
+    pushl %esp
 
-  ;
-  ; Agora vamos restaurar todos os registradores
-  ;
+    call irq_handler
 
-  POP AX
-  MOV DS, AX
+    popl %esp
 
-  POP AX
-  MOV SS, AX
-    
-  POP AX
-  MOV FS, AX
+    /*
+     *
+     * Restaurando todos os registradores, dessa vez dos membros mais altos aos mais baixos
+     *
+     */
 
-  POP AX
-  MOV ES, AX
+    popl %eax
+    movw %ax, %ds
+    popl %eax
+    movw %ax, %ss
+    popl %eax
+    movw %ax, %fs
+    popl %eax
+    movw %ax, %es
+    popl %eax
+    movw %ax, %gs
 
-  POP AX
-  MOV GS, AX
+    popl %eax
+    popl %ebx
+    popl %ecx
+    popl %edx
 
-  POP EAX
-  POP EBX
-  POP ECX
-  POP EDX
-  
-  MOV EDI, [ESP + 16]
+    /*
+     *
+     * Aqui acontece uma coisa exclusiva para o irq
+     *
+     * O irq 20 é o irq que vem do PIT. O PIT e um clock, que gera
+     * interrupções a cada uma certa quantidade de ciclos, para entender
+     * melhor veja o arquivo sys/timer.c.
+     *
+     * Nesse timer, vamos ter a troca de contexto do kernel, que por uma série
+     * de motivos configuramos um timer para ficar trocando de contexto, cada 
+     * contexto é um processo, e cada processo vai ter seus registradores que estavam
+     * sendo usados durante ele, e quando uma interrupção do PIT ocorre, salvamos o estado
+     * do contexto atual, e carregamos outro contexto que está esperando a atenção do kernel,
+     * veja o arquivo include/sys/task.h e sys/task.c. Então como temos que trocar a task, temos
+     * que carregar o estado da nova terefa nos registradores, e essa parte serve para trocar o 
+     * registrador esp (stack) do contexto, não é tão simples assim pq precisamos da stack para 
+     * restaurar o estado de alguns registradores antes da interrupção, então precisamos copiar
+     * os dados de __eip, __cs e __eflags para a nova stack, e ai sim dar o iret para o processador
+     * restaurar os registradores para a nova task e modificar o esp para o esp da nova task 
+     *
+     */
 
-  MOV ESI, [ESP + 20]
-  MOV [EDI], LONG ESI
-  ADD EDI, 4
+    movl 16(%esp), %edi # Pegando o ponteiro para a nova stack
 
-  MOV ESI, [ESP + 24]
-  MOV [EDI], LONG ESI
-  ADD EDI, 4
-  
-  MOV ESI, [ESP + 28]
-  MOV [EDI], LONG ESI
+    movl 20(%esp), %esi # Pegando o __eip da stack antiga
+    movl %esi, (%edi)   # Copiando __eip para a stack nova
+    addl $0x04, %edi    # Avançando para __cs
 
-  POP ESI
-  POP EDI
+    movl 24(%esp), %esi # Pegando o __cs da stack antiga
+    movl %esi, (%edi)   # Copiando __cs para a stack nova
+    addl $0x04, %edi    # Avançando para __eflags
 
-  ADD ESP, 8
-  
-  MOV ESP, [ESP]
+    movl 28(%esp), %esi # Pegando o __eflags da stack antiga
+    movl %esi, (%edi)   # Copiando __eflgs para a stack nova
 
-  STI  ; Habilitando as interrupções novamente
-  IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)
+    popl %esi # Restaurando esi que está na stack antiga antes de configurar a nova stack
+    popl %edi # Restaurando edi que está na stack antiga antes de configurar a nova stack
 
-syscall_calling:
-  
-  ;
-  ; Montando a struct na stack
-  ;
-  
-  PUSH EDI
-  PUSH ESI
-  PUSH EDX
-  PUSH ECX
-  PUSH EBX
-  PUSH EAX
+    movl 8(%esp), %esp # Agora estamos usando a nova stack
 
-  MOV AX, GS
-  PUSH AX
+    sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
+    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
+  syscall_calling:
 
-  MOV AX, ES
-  PUSH AX
+    /*
+     *
+     * Aqui vamos empilhar os registradores para montar
+     * a struct regs_int_t, olhe o arquivo include/neko/kernel.h 
+     * 
+     * Precisamos empilhar a struct dos membros mais baixos até os mais altos,
+     * se você observou, os membros __eip, __cs e __eflags não estão sendo empilhados,
+     * isso acontece pois o processador empilha esses 3 registradores automaticamente
+     * quando ocorre uma interrupção
+     *
+     */
 
-  MOV AX, FS
-  PUSH AX
+    pushl %edi
+    pushl %esi
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+    pushl %eax
 
-  MOV AX, SS
-  PUSH AX
+    movw %gs, %ax
+    pushl %eax
+    movw %es, %ax
+    pushl %eax
+    movw %fs, %ax
+    pushl %eax
+    movw %ss, %ax
+    pushl %eax
+    movw %ds, %ax
+    pushl %eax
 
-  MOV AX, DS
-  PUSH AX
+    /*
+     *
+     * Agora que montamos a struct corretamente seguindo a ordem, vamos mudar para
+     * os segmentos do kernel para poder manipular a interrupção no kernel mode 
+     *
+     */
 
-  PUSH ESP ; Parâmetro para a função irq_handler(struct InterruptRegisters*)
+    movw $KERNEL_CODE_SEG, %ax
+    movw %ax, %cs
 
-  CALL syscall_handler
+    movw $KERNEL_DATA_SEG, %ax
+    movw %ax, %ds
+    movw %ax, %ss
+    movw %ax, %es
+    movw %ax, %gs
+    movw %ax, %fs
 
-  POP ESP
+    /*
+     *
+     * se você percebeu, o registrador esp empilhado agora pode parecer meio confuso,
+     * já que o esp é o 4 membro de baixo pra cima da struct, mas quando empilhamos esse
+     * registrador não estamos passando para a struct, até pq ela já está montada, estamos 
+     * na verdade passando o parâmetro para a função, que no caso é um int_regs_t*, como 
+     * montamos a struct na stack, basta passar o esp como parâmetro 
+     *
+     */
 
-  ;
-  ; Agora vamos restaurar todos os registradores
-  ;
+    pushl %esp
 
-  POP AX
-  MOV DS, AX
+    call syscall_handler
 
-  POP AX
-  MOV SS, AX
-    
-  POP AX
-  MOV FS, AX
+    popl %esp
 
-  POP AX
-  MOV ES, AX
+    /*
+     *
+     * Restaurando todos os registradores, dessa vez dos membros mais altos aos mais baixos
+     *
+     */
 
-  POP AX
-  MOV GS, AX
+    popl %eax
+    movw %ax, %ds
+    popl %eax
+    movw %ax, %ss
+    popl %eax
+    movw %ax, %fs
+    popl %eax
+    movw %ax, %es
+    popl %eax
+    movw %ax, %gs
 
-  POP EAX
-  POP EBX
-  POP ECX
-  POP EDX
-  POP ESI
-  POP EDI
+    popl %eax
+    popl %ebx
+    popl %ecx
+    popl %edx
+    popl %esi
+    popl %edi
 
-  ADD ESP, 12
+    addl $0x0C, %esp
 
-  STI  ; Habilitando as interrupções novamente
-  IRET ; Aqui o processador vai desempilhar o que ele empilhou automaticamente (EIP, CS, EFLAGS)
+    sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
+    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
 
-ISR_EXCEPTION 0, 1 
-ISR_EXCEPTION 1, 2 
-ISR_EXCEPTION 2, 3 
-ISR_EXCEPTION 3, 4 
-ISR_EXCEPTION 4, 5 
-ISR_EXCEPTION 5, 6 
-ISR_EXCEPTION 6, 7 
-ISR_EXCEPTION 7, 8 
-ISR_EXCEPTION 8, 9 
-ISR_EXCEPTION 9, 10 
-ISR_EXCEPTION 10, 11 
-ISR_EXCEPTION 11, 12 
-ISR_EXCEPTION 12, 13 
-ISR_EXCEPTION 13, 14 
-ISR_EXCEPTION 14, 15 
-ISR_EXCEPTION 15, 16 
-ISR_EXCEPTION 16, 17 
-ISR_EXCEPTION 17, 18 
-ISR_EXCEPTION 18, 19 
-ISR_EXCEPTION 19, 20 
-ISR_EXCEPTION 20, 21 
-ISR_EXCEPTION 21, 22 
-ISR_EXCEPTION 22, 23 
-ISR_EXCEPTION 23, 24 
-ISR_EXCEPTION 24, 25 
-ISR_EXCEPTION 25, 26 
-ISR_EXCEPTION 26, 27 
-ISR_EXCEPTION 27, 28 
-ISR_EXCEPTION 28, 29 
-ISR_EXCEPTION 29, 30 
-ISR_EXCEPTION 30, 31 
-ISR_EXCEPTION 31, 32
+  /*
+   *
+   * Aqui fica as interrupções do CPU, ou seja, 
+   * interrupções geradas por software 
+   *
+   */
 
-ISR_IRQ 32
-ISR_IRQ 33
-ISR_IRQ 34
-ISR_IRQ 35
-ISR_IRQ 36
-ISR_IRQ 37
-ISR_IRQ 38
-ISR_IRQ 39
-ISR_IRQ 40
-ISR_IRQ 41
-ISR_IRQ 42
-ISR_IRQ 43
-ISR_IRQ 44
-ISR_IRQ 45
-ISR_IRQ 46
-ISR_IRQ 47
+  isr_exception 0, 1 
+  isr_exception 1, 2 
+  isr_exception 2, 3 
+  isr_exception 3, 4 
+  isr_exception 4, 5 
+  isr_exception 5, 6 
+  isr_exception 6, 7 
+  isr_exception 7, 8 
+  isr_exception 8, 9 
+  isr_exception 9, 10 
+  isr_exception 10, 11 
+  isr_exception 11, 12 
+  isr_exception 12, 13 
+  isr_exception 13, 14 
+  isr_exception 14, 15 
+  isr_exception 15, 16 
+  isr_exception 16, 17 
+  isr_exception 17, 18 
+  isr_exception 18, 19 
+  isr_exception 19, 20 
+  isr_exception 20, 21 
+  isr_exception 21, 22 
+  isr_exception 22, 23 
+  isr_exception 23, 24 
+  isr_exception 24, 25 
+  isr_exception 25, 26 
+  isr_exception 26, 27 
+  isr_exception 27, 28 
+  isr_exception 28, 29 
+  isr_exception 29, 30 
+  isr_exception 30, 31 
+  isr_exception 31, 32
 
-;
-; Syscalls
-;
+  /*
+   *
+   * IRQ são as interrupções que vem do PIC.
+   * 
+   * Do 32-39 são interrupções do PIC primário
+   * Do 40-47 são interrupções do PIC secundário 
+   * 
+   */
 
-ISR_SYSCALL 128
-ISR_SYSCALL 177
+  isr_irq 32
+  isr_irq 33
+  isr_irq 34
+  isr_irq 35
+  isr_irq 36
+  isr_irq 37
+  isr_irq 38
+  isr_irq 39
+  isr_irq 40
+  isr_irq 41
+  isr_irq 42
+  isr_irq 43
+  isr_irq 44
+  isr_irq 45
+  isr_irq 46
+  isr_irq 47
+
+  /*
+   *
+   * Syscall do kernel
+   * 
+   */
+
+  isr_syscall 128
+  isr_syscall 177
+

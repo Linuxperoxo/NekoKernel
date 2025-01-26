@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.h                      |
- *    |  SRC MOD   : 25/01/2025                    |
+ *    |  SRC MOD   : 26/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -33,11 +33,11 @@ typedef struct int_regs_t {
    *
    */
 
-  __u16 __ds;
-  __u16 __ss;
-  __u16 __fs;
-  __u16 __es;
-  __u16 __gs;
+  __u32 __ds;
+  __u32 __ss;
+  __u32 __fs;
+  __u32 __es;
+  __u32 __gs;
   __u32 __eax;
   __u32 __ebx;
   __u32 __ecx;
