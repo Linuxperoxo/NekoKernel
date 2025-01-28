@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : timer.c                       |
- *    |  SRC MOD   : 25/01/2025                    |
+ *    |  SRC MOD   : 27/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -60,12 +60,11 @@ static void timer_handler(int_regs_t *__int_regs__) {
   /*
    *
    * Faço um pequeno delay aqui pra troca de
-   * contexto, isso evita o problema de ficar
-   * preso em apenas uma task
+   * contexto, a cada 5ms o contexto é trocado
    *
    */
 
-  if (__sys_clock % 2 == 0)
+  if (__sys_clock % 5 == 0)
     task_switch(__int_regs__);
 }
 

@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.c                        |
- *    |  SRC MOD   : 25/01/2025                    |
+ *    |  SRC MOD   : 27/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -55,8 +55,8 @@ static void task_save(int_regs_t *__int_regs__) {
    *
    */
 
-  //__current_task->__esp = __int_regs__->__esp;
-  //__current_task->__ebp = __int_regs__->__ebp;
+  __current_task->__esp = __int_regs__->__esp;
+  __current_task->__ebp = __int_regs__->__ebp;
 
   /*
    *
@@ -103,8 +103,16 @@ static void task_load(int_regs_t *__int_regs__) {
    *
    */
 
-  //__int_regs__->__esp = __current_task->__esp;
-  //__int_regs__->__ebp = __current_task->__ebp;
+  /*
+   *
+   * Usamos esse "- 12" pq vamos usar 12 bytes para copiar os registradores
+   * que foram empilhados automaticamente para a nova stack, isso serve para
+   * que conseguimos usar o iret na nova stack
+   *
+   */
+
+  __int_regs__->__esp = __current_task->__esp - 12;
+  __int_regs__->__ebp = __current_task->__ebp;
 
   /*
    *
@@ -166,7 +174,7 @@ void task_switch(int_regs_t *__int_regs__) {
   return;
 }
 
-__i8 task_parent(const char *__file__) {
+__i8 task_parent(const char *__file__, __u32 __stack__) {
   __asm__ volatile("cli\n" : : :);
 
   task_t *__prev = __current_task;
@@ -192,6 +200,7 @@ __i8 task_parent(const char *__file__) {
   __next->__state = TASK_SLEEPING;
   __next->__pid = __current_id++;
   __next->__childs = 0x00;
+  __next->__esp = __stack__;
   __prev->__next = __next;
 
   if (__root_task == NULL) {

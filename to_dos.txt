@@ -1,3 +1,4 @@
+* Fazer o alloc para stack para cada processo
 * Melhorar a parte de escrita e leitura de arquivos ch e bc
 * Adicionar mais funcionalidades para o printf
 * Corrigir a parte do buffer de entrada que não está sendo limpa após pressionar enter

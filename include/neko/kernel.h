@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kernel.h                      |
- *    |  SRC MOD   : 26/01/2025                    |
+ *    |  SRC MOD   : 27/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -44,6 +44,7 @@ typedef struct int_regs_t {
   __u32 __edx;
   __u32 __esi;
   __u32 __edi;
+  __u32 __ebp;
 
   /*
    *
@@ -56,12 +57,19 @@ typedef struct int_regs_t {
 
   /*
    *
+   * A stack também é salva manualmente
+   *
+   */
+
+  __u32 __esp;
+
+  /*
+   *
    * Registradores que são empilhados automaticamente
    * quando ocorre uma interrupção que vai ser atendida
    *
    */
 
-  __u32 __esp;
   __u32 __eip;
   __u32 __cs;
   __u32 __eflags;

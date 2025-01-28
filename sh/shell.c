@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : shell.c                       |
- *    |  SRC MOD   : 25/01/2025                    |
+ *    |  SRC MOD   : 27/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -30,7 +30,8 @@ decode_command(shell_t *__sh__) {}
 
 __u8 shell_exec(const char *__param__) {
   for (;;) {
-    printf("In shell!\n");
+    printf("$ ");
+    scanf((char *)&__sh->__buffer, SH_BUFFER_SIZE);
   }
   return 0;
 }

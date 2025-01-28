@@ -50,8 +50,25 @@ void k_init() {
   printf("==========================================\n");
 }
 
+__u8 task0(const char *__para__) {
+  for (;;) {
+  }
+  return 0;
+}
+
+__u8 task1(const char *__para__) {
+  for (;;) {
+  }
+  return 0;
+}
+
 void k_main() {
   k_init();
+
+  vfs_mkfile("/bin/task0", ROOT_UID, ROOT_GID, READ_O | WRITE_O | EXEC_O,
+             &task0);
+  vfs_mkfile("/bin/task1", ROOT_UID, ROOT_GID, READ_O | WRITE_O | EXEC_O,
+             &task1);
 
   printf("\n=== NEKO WELCOME: \n\n");
 
@@ -63,5 +80,7 @@ void k_main() {
 
   printf("\nNEKO: Welcome to Neko Kernel! :D\n\n");
 
-  __asm__ volatile("sti\n" : : :);
+  task_parent("/bin/sh", 0x90000000);
+
+  return;
 }

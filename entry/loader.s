@@ -6,18 +6,19 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : loader.s                      |
- *    |  SRC MOD   : 23/01/2025                    |
+ *    |  SRC MOD   : 26/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
- *    
+ *
  *
  */
 
 .equ STACK_ADDRS, 0xFFFF
 .extern k_main
-.global k_loader
+
 .section .text
-  
+.global k_loader
+
   /*
    *
    * Como a função k_main é feita em C e está
@@ -26,12 +27,12 @@
    *
    */
 
-k_loader:
-  movl $STACK_ADDRS, %esp # Configurando esp (stack)
-  movl %esp, %ebp         # Configurando ebp
-  cli                     # Ignorando interrupções externas
-  call k_main             # Chamando função principal do kernel 
+  k_loader:
+    movl $STACK_ADDRS, %esp # Configurando esp (stack)
+    movl %esp, %ebp         # Configurando ebp
+    cli                     # Ignorando interrupções externas
+    call k_main             # Chamando função principal do kernel 
   
-  1:
-    jmp 1b               # Loop infinito
+    1:
+      jmp 1b               # Loop infinito
 

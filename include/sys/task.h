@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : task.h                        |
- *    |  SRC MOD   : 24/01/2025                    |
+ *    |  SRC MOD   : 26/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -88,7 +88,7 @@ typedef struct task_t {
 } task_t;
 
 void task_switch(int_regs_t *__int_regs__);
-__i8 task_parent(const char *__file__);
+__i8 task_parent(const char *__file__, __u32 __stack__);
 __i8 task_fork();
 void task_wait(task_pid_t __pid__);
 void task_kill(task_pid_t __pid__);

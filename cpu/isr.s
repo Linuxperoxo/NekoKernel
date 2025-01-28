@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : isr.s                         |
- *    |  SRC MOD   : 26/01/2025                    |
+ *    |  SRC MOD   : 27/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -61,6 +61,11 @@
 .endm
 
 .align 4
+.section .bss
+  __new_stack:
+    .fill 4
+
+.align 4
 .section .text
   isr_calling:
 
@@ -76,6 +81,7 @@
      * 
      */
 
+    pushl %ebp
     pushl %edi
     pushl %esi
     pushl %edx
@@ -150,6 +156,7 @@
     popl %edx
     popl %esi
     popl %edi
+    popl %ebp
 
     addl $0x0C, %esp
 
@@ -169,6 +176,7 @@
      *
      */
 
+    pushl %ebp
     pushl %edi
     pushl %esi
     pushl %edx
@@ -264,23 +272,25 @@
      *
      */
 
-    movl 16(%esp), %edi # Pegando o ponteiro para a nova stack
+    movl 20(%esp), %edi    # Pegando o ponteiro para a nova stack
+    movl %edi, __new_stack # Salvando a nova stack
 
-    movl 20(%esp), %esi # Pegando o __eip da stack antiga
+    movl 24(%esp), %esi # Pegando o __eip da stack antiga
     movl %esi, (%edi)   # Copiando __eip para a stack nova
     addl $0x04, %edi    # Avançando para __cs
 
-    movl 24(%esp), %esi # Pegando o __cs da stack antiga
+    movl 28(%esp), %esi # Pegando o __cs da stack antiga
     movl %esi, (%edi)   # Copiando __cs para a stack nova
     addl $0x04, %edi    # Avançando para __eflags
 
-    movl 28(%esp), %esi # Pegando o __eflags da stack antiga
+    movl 32(%esp), %esi # Pegando o __eflags da stack antiga
     movl %esi, (%edi)   # Copiando __eflgs para a stack nova
 
     popl %esi # Restaurando esi que está na stack antiga antes de configurar a nova stack
     popl %edi # Restaurando edi que está na stack antiga antes de configurar a nova stack
+    popl %ebp
 
-    movl 8(%esp), %esp # Agora estamos usando a nova stack
+    movl __new_stack, %esp # Agora estamos usando a nova stack
 
     sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
     iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
@@ -298,6 +308,7 @@
      *
      */
 
+    pushl %ebp
     pushl %edi
     pushl %esi
     pushl %edx
@@ -372,6 +383,7 @@
     popl %edx
     popl %esi
     popl %edi
+    popl %ebp
 
     addl $0x0C, %esp
 
@@ -452,4 +464,3 @@
 
   isr_syscall 128
   isr_syscall 177
-
