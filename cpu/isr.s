@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : isr.s                         |
- *    |  SRC MOD   : 27/01/2025                    |
+ *    |  SRC MOD   : 28/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -161,7 +161,7 @@
     addl $0x0C, %esp
 
     sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
-    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
+    iret # Retornando da interrupção, isso serve para desempilhar os registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
   irq_calling:
 
     /*
@@ -288,12 +288,12 @@
 
     popl %esi # Restaurando esi que está na stack antiga antes de configurar a nova stack
     popl %edi # Restaurando edi que está na stack antiga antes de configurar a nova stack
-    popl %ebp
+    popl %ebp # Restaurando ebp que está na stack antiga antes de configurar a nova stack, responsável pelas variáveis locais e parâmetros
 
     movl __new_stack, %esp # Agora estamos usando a nova stack
 
     sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
-    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
+    iret # Retornando da interrupção, isso serve para desempilhar os registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
   syscall_calling:
 
     /*
@@ -388,7 +388,7 @@
     addl $0x0C, %esp
 
     sti  # Habilitando as instruções externas, de I/O que são enviados pelo PIC para o processador
-    iret # Retornando da interrupção, isso serve para desempilhar ou registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
+    iret # Retornando da interrupção, isso serve para desempilhar os registradores empilhados pelo processador quando ocorre uma interrupção (EIP, CS, EFLAGS)
 
   /*
    *

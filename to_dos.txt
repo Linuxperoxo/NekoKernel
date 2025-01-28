@@ -1,3 +1,6 @@
+* Começar a fazer os comandos
+* Fazer os syscalls relacionados a task open write read
+* Fazer o file descriptor para cada processo
 * Fazer o alloc para stack para cada processo
 * Melhorar a parte de escrita e leitura de arquivos ch e bc
 * Adicionar mais funcionalidades para o printf
