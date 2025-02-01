@@ -6,7 +6,7 @@
  *    |  COPYRIGHT : (c) 2024 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
  *    |  FILE      : kmem.c                        |
- *    |  SRC MOD   : 23/01/2025                    |
+ *    |  SRC MOD   : 31/01/2025                    |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -60,8 +60,7 @@ void kfree(void *__block__) {
     return;
 
   for (__u32 __i = 0; __i < BLOCKS; __i++) {
-    if (__kblocks[__i].__block == __block__ &&
-        B_IS_ALLOC(((kmem_t *)&__kblocks[__i]))) {
+    if (__kblocks[__i].__block == __block__ && B_IS_ALLOC((&__kblocks[__i]))) {
       __allocs -= 1;
       __used_bytes -= __kblocks[__i].__size;
 
