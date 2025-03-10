@@ -48,4 +48,4 @@ SECTIONS {
     *(.comment*)
     *(.gnu*)
   }
-}
+} 
