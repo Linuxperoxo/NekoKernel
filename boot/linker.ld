@@ -11,6 +11,7 @@
  */
 
 OUTPUT_FORMAT(binary)
+ENTRY(main)
 
 origin_text  = 0x7C00;
 origin_magic = 0x7DFE;
