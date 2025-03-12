@@ -4,25 +4,11 @@
  *    |                                            |
  *    |  COPYRIGHT : (c) 2025 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
- *    |  FILE      : nekonest.s                    |
+ *    |  FILE      : magic.s                       |
  *    |                                            |
  *    O--------------------------------------------/
  *
  */
 
-.include "asm/lib/stdio.s"
-.include "asm/nekonest/gdt.s"
-.include "asm/nekonest/magic.s"
-
-.section .text
-.code16
-.global main
-.type main, @function
-.align 4
-main:
-  cli
-
-  hlt
-
-.section .gdt, "a"
-
+.section .magic, "a"
+.word 0xAA55 # Magic flag MBR boot sector 
