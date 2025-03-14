@@ -10,6 +10,9 @@
  *
  */
 
+.ifndef LIBSTDIO
+  .equ LIBSTDIO, 0
+
 .equ VGA_FRAMEBUFFER, 0xB8000
 .equ VGA_ROW_LEN, 25
 .equ VGA_COL_LEN, 80
@@ -38,7 +41,7 @@ printf:
   xorl %edx, %edx
   xorl %eax, %eax
 
-  movw .vga_status, %bx
+  movw vga_status, %bx
   movb %bl, %al
   movb $VGA_COL_LEN, %dl
   mull %edx
@@ -57,16 +60,16 @@ printf:
 
   2:
     movb (%esi), %al
-    testb 0xFF, %al # if(%al == 0)
-    jz 5f
-    cmpb $BRK_LINE, %al # if(%al == 0xA)
+    cmpb $0x00, %al # if(%al == 0)
+    je 5f
+    cmpb $0x0A, %al # if(%al == 0xA)
     je 4f
     incl %esi
     movw %ax, (%edi, %edx, 2)
     incb %bh
     incl %edx
     jmp 1b
-
+    
   3:
     call 3f
     jmp 2b
@@ -93,7 +96,7 @@ printf:
     jmp 2b 
 
   5:
-    movw %bx, .vga_status
+    movw %bx, vga_status
 
     popl %esi
     popl %edi
@@ -103,11 +106,34 @@ printf:
     popl %eax
     popl %ebp
     ret
+
+.global clearf
+.type clearf, @function
+.align 4
+clearf:
+  pushl %eax
+  pushl %ecx
+  pushl %edi
   
+  movl $VGA_FRAMEBUFFER_LEN, %ecx
+  xorl %eax, %eax
+  movl $VGA_FRAMEBUFFER, %edi
+  rep stosw
+
+  movw %ax, vga_status
+
+  popl %edi
+  popl %ecx
+  popl %eax
+  ret
+
 .section .bss
-.type .vga_status, @object
+.global vga_status
+.type vga_status, @object
 .align 2
-.vga_status:
+vga_status:
   .space 1, 0 # __current_row
   .space 1, 0 # __current_col
-
+.else 
+  .warning "stdio.s is already defined!"
+.endif

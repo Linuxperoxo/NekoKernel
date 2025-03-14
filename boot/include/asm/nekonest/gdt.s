@@ -10,10 +10,17 @@
  *
  */
 
+.global CODE_SEGMENT
+.equ CODE_SEGMENT, 0b00001000
+
+.global DATA_SEGMENT
+.equ DATA_SEGMENT, 0b00010000
+
 .section .gdt, "a"
-.GDT_Kernel_Entries_Start:
+.type .GDT_Entries_Start, @notype
+.align 4
+.GDT_Entries_Start:
   .type .null_segment, @object
-  .align 4
   .null_segment:
     .long 0x00000000
     .long 0x00000000
@@ -26,9 +33,8 @@
   # Gran - 4 bits
   # Base (High) - 8 bits
 
-  .type .kernel_code_segment, @object
-  .align 4
-  .kernel_code_segment:
+  .type .code_segment, @object
+  .code_segment:
     .word 0xFFFF
     .word 0x0000
     .byte 0x00
@@ -36,9 +42,8 @@
     .byte 0b11001111
     .byte 0x00
   
-  .type .kernel_data_segment, @object
-  .align 4
-  .kernel_data_segment:
+  .type .data_segment, @object
+  .data_segment:
     .word 0xFFFF
     .word 0x0000
     .byte 0x00
@@ -46,13 +51,13 @@
     .byte 0b11001111
     .byte 0x00
 
-.type .GDT_Kernel_Entries_End, @notype
-.GDT_Kernel_Entries_End:
+.type .GDT_Entries_End, @notype
+.GDT_Entries_End:
 
 .global GDT_Ptr
-.type GDT_Ptr, @object
+.type .GDT_Ptr, @object
 .align 4
-GDT_Ptr:
-  .word .GDT_Kernel_Entries_End - .GDT_Kernel_Entries_Start - 1
-  .long .GDT_Kernel_Entries_Start
+.GDT_Ptr:
+  .word .GDT_Entries_End - .GDT_Entries_Start - 1
+  .long .GDT_Entries_Start
   

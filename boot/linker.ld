@@ -11,7 +11,8 @@
  */
 
 OUTPUT_FORMAT(binary)
-ENTRY(main)
+OUTPUT(nekonest)
+ENTRY(.main)
 
 origin_text  = 0x7C00;
 origin_magic = 0x7DFE;
@@ -20,8 +21,9 @@ SECTIONS {
   . = origin_text;
 
   .text : {
+    *(.text.main)
     . = ALIGN(4);
-    *(.text)
+    *(.text)    
   }
 
   .data : {
