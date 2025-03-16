@@ -95,6 +95,7 @@
 .include "asm/lib/stdio.s"
 .include "asm/nekonest/gdt.s"
 .include "asm/nekonest/magic.s"
+.include "asm/nekonest/idt.s"
 
 .equ STACK, 0xFFFFFF
 

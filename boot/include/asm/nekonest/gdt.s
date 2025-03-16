@@ -10,6 +10,9 @@
  *
  */
 
+.ifndef GDT
+  .equ GDT, 0
+
 .global CODE_SEGMENT
 .equ CODE_SEGMENT, 0b00001000
 
@@ -60,4 +63,6 @@
 .GDT_Ptr:
   .word .GDT_Entries_End - .GDT_Entries_Start - 1
   .long .GDT_Entries_Start
-  
+.else
+  .warning "include/asm/nekonest/gdt.s is already defined!"
+.endif

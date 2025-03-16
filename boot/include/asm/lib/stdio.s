@@ -135,5 +135,5 @@ vga_status:
   .space 1, 0 # __current_row
   .space 1, 0 # __current_col
 .else 
-  .warning "stdio.s is already defined!"
+  .warning "include/asm/lib/stdio.s is already defined!"
 .endif

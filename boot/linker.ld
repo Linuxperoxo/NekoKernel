@@ -31,8 +31,6 @@ SECTIONS {
     *(.data)
     . = ALIGN(4);
     *(.gdt)
-    . = ALIGN(4);
-    *(.idt)
   }
   
   .string : {
@@ -41,9 +39,21 @@ SECTIONS {
   }
 
   . = origin_magic;
-
+ 
   .magic : {
     *(.magic)
+  }
+
+  .interrupts : {
+    . = ALIGN(4);
+    *(.text.idt)
+    . = ALIGN(4);
+    *(.data.idt)
+    
+    . = ALIGN(4);
+    *(.text.isr)
+    . = ALIGN(4);
+    *(.string.isr)
   }
 
   /DISCARD/ : {
