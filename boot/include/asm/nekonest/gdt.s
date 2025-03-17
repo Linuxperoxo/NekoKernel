@@ -60,7 +60,7 @@
 .global GDT_Ptr
 .type .GDT_Ptr, @object
 .align 4
-.GDT_Ptr:
+GDT_Ptr:
   .word .GDT_Entries_End - .GDT_Entries_Start - 1
   .long .GDT_Entries_Start
 .else

@@ -1,8 +1,16 @@
-.ifndef IDT
-  .equ IDT, 0
+/*
+ *
+ *    /--------------------------------------------O
+ *    |                                            |
+ *    |  COPYRIGHT : (c) 2025 per Linuxperoxo.     |
+ *    |  AUTHOR    : Linuxperoxo                   |
+ *    |  FILE      : idt.s                         |
+ *    |                                            |
+ *    O--------------------------------------------/
+ *
+ */
 
-.include "include/asm/nekonest/gdt.s"
-.include "include/asm/nekonest/isr.s"
+.extern CODE_SEGMENT
 
 .macro CREATE_IDT_STRUCT __num__, __seg_selector__, __flags__
 .type .idt_entry\__num__, @object
@@ -14,16 +22,8 @@
   .word 0
 .endm
 
-.section .text.idt
-.code32
-.global idt_init
-.type idt_init, @function
-.align 4
-idt_init:
-  lidt .isr_ptr
-
-.section .data.idt, "a", @progbits
-.type .isr_start, @notype
+.section .data
+.type .idt_start, @notype
 .align 4
 .idt_start:
   CREATE_IDT_STRUCT 0, CODE_SEGMENT, 0x8E 
@@ -47,11 +47,9 @@ idt_init:
 .type .isr_end, @notype
 .idt_end:
 
+.global isr_ptr
 .type isr_ptr, @object
 .align 4
-.isr_ptr:
+isr_ptr:
   .word .idt_end - .idt_start - 1 # __limit
   .long .idt_start                # __isr_ptr
-.else
-  .warning "include/asm/nekonest/idt.s is already defined!"
-.endif

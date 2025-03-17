@@ -91,24 +91,26 @@
  * =============================================
  * 
  */
-  
-.include "asm/lib/stdio.s"
-.include "asm/nekonest/gdt.s"
-.include "asm/nekonest/magic.s"
-.include "asm/nekonest/idt.s"
+
+.extern printf
+.extern cleanf
+.extern GDT_Ptr
+.extern idt_init
+.extern CODE_SEGMENT
+.extern DATA_SEGMENT
 
 .equ STACK, 0xFFFFFF
 
-.section .text.main, "a"
+.section .text
 .global .main
 .type .main, @function
 .main:
   .code16
   .type .real, @function
   .real:
-    cli
+    cli # Desabilitando as interrupções externas
 
-    lgdt .GDT_Ptr
+    lgdt GDT_Ptr
 
     # O registrador CR0 é um registrador de controle da CPU x86.
     # É por ele que ativamos o GDT, virtual memory, etc.
@@ -141,6 +143,9 @@
     movl $STACK, %esp
 
     call clearf
+
+    lidt isr_ptr
+    sti # Habilitando as interrupções externas
 
     pushl $.neko_booting
     call printf
@@ -198,11 +203,9 @@
 
 .section .string, "aS"
 .type .cpu_detected, @object
-.align 4
 .cpu_detected:
   .asciz "CPU: "
 
 .type .neko_booting, @object
-.align 4
 .neko_booting:
   .asciz "NEKONEST STARTING...\n\n"

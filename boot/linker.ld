@@ -4,7 +4,7 @@
  *    |                                            |
  *    |  COPYRIGHT : (c) 2025 per Linuxperoxo.     |
  *    |  AUTHOR    : Linuxperoxo                   |
- *    |  FILE      : nekonest.s                    |
+ *    |  FILE      : linker.ld                     |
  *    |                                            |
  *    O--------------------------------------------/
  *
@@ -20,40 +20,55 @@ origin_magic = 0x7DFE;
 SECTIONS {
   . = origin_text;
 
-  .text : {
-    *(.text.main)
+  .main.text. : {
     . = ALIGN(4);
-    *(.text)    
+    nekonest.o(.text)
   }
 
-  .data : {
+  .main.data : {
     . = ALIGN(4);
-    *(.data)
-    . = ALIGN(4);
-    *(.gdt)
+    nekonest.o(.data)
   }
   
-  .string : {
+  .main.string : {
     . = ALIGN(4);
-    *(.string)
+    nekonest.o(.string)
+  }
+
+  .std.text : {
+    . = ALIGN(4);
+    stdio.o(.text)
+  }
+
+  .gdt : {
+    . = ALIGN(4);
+    gdt.o(.gdt)
   }
 
   . = origin_magic;
  
   .magic : {
-    *(.magic)
+    magic.o(.magic)
   }
 
-  .interrupts : {
+  .idt.text : {
     . = ALIGN(4);
-    *(.text.idt)
+    idt.o(.text)
+  }
+
+  .idt.data : {
     . = ALIGN(4);
-    *(.data.idt)
-    
+    idt.o(.data)
+  }
+
+  .isr.text : {
     . = ALIGN(4);
-    *(.text.isr)
+    isr.o(.text)
+  }
+
+  .isr.data : {
     . = ALIGN(4);
-    *(.string.isr)
+    isr.o(.string)
   }
 
   /DISCARD/ : {
