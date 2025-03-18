@@ -144,8 +144,8 @@
 
     call clearf
 
-    lidt isr_ptr
-    sti # Habilitando as interrupções externas
+    #lidt isr_ptr
+    #sti # Habilitando as interrupções externas
 
     pushl $.neko_booting
     call printf
