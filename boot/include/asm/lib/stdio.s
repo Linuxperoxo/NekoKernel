@@ -10,9 +10,6 @@
  *
  */
 
-.ifndef LIBSTDIO
-  .equ LIBSTDIO, 0
-
 .equ VGA_FRAMEBUFFER, 0xB8000
 .equ VGA_ROW_LEN, 25
 .equ VGA_COL_LEN, 80
@@ -134,6 +131,3 @@ clearf:
 vga_status:
   .space 1, 0 # __current_row
   .space 1, 0 # __current_col
-.else 
-  .warning "include/asm/lib/stdio.s is already defined!"
-.endif
