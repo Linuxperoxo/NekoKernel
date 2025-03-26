@@ -10,7 +10,11 @@
  *
  */
 
-.extern CODE_SEGMENT
+.ifndef IDT
+  .equ IDT, 0
+
+.include "asm/nekonest/gdt.s"
+.include "asm/nekonest/isr.s"
 
 .macro CREATE_IDT_STRUCT __num__, __seg_selector__, __flags__
 .type .idt_entry\__num__, @object
@@ -22,7 +26,7 @@
   .word 0
 .endm
 
-.section .data
+.section .idt.data, "a", @progbits
 .type .idt_start, @notype
 .align 4
 .idt_start:
@@ -47,9 +51,11 @@
 .type .isr_end, @notype
 .idt_end:
 
-.global isr_ptr
 .type isr_ptr, @object
 .align 4
 isr_ptr:
   .word .idt_end - .idt_start - 1 # __limit
   .long .idt_start                # __isr_ptr
+.else 
+  .warning "include/asm/nekonest/idt.s is already defined!"
+.endif

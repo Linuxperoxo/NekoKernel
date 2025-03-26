@@ -92,120 +92,79 @@
  * 
  */
 
-.extern printf
-.extern cleanf
-.extern GDT_Ptr
-.extern idt_init
-.extern CODE_SEGMENT
-.extern DATA_SEGMENT
+.include "asm/lib/ata_lba.s"
+.include "asm/lib/stdio.s"
+.include "asm/nekonest/gdt.s"
+.include "asm/nekonest/idt.s"
+.include "asm/nekonest/isr.s"
+.include "asm/nekonest/magic.s"
 
 .equ STACK, 0xFFFFFF
 
-.section .text
-.global .main
-.type .main, @function
-.main:
-  .code16
-  .type .real, @function
-  .real:
-    cli # Desabilitando as interrupções externas
+.section .nekonest.text, "ax", @progbits
+.global main
+.type main, @function
+.code16
 
-    lgdt GDT_Ptr
+# NOTE: O Código que estiver aqui precisa está na primeira parte do binário que será carregado em 0x7C00 pela BIOS
+#       para entender como o binário está organizado olhe o arquivo ./linker.ld
 
-    # O registrador CR0 é um registrador de controle da CPU x86.
-    # É por ele que ativamos o GDT, virtual memory, etc.
-    # Alterações nesse registrador afetam diretamente o funcionamento do processador. 
-    
-    movl %cr0, %eax
-    orl $1, %eax
-    movl %eax, %cr0 # Agora o bit de ativação do GDT está habilitado
+main: # NOTE: -> Real mode 16 bits
+  cli # NOTE: -> Desabilitando as interrupções externas
 
-    movw $DATA_SEGMENT, %ax
-    movw %ax, %ds
-    movw %ax, %ss
-    movw %ax, %fs
-    movw %ax, %gs
-    movw %ax, %es
+  lgdt GDT_Ptr
 
-    
-    # Aqui precisamos alterar o segmento de código (CS)
-    # Para alterar ele precisamos usar uma instrução de far jmp (ljmp), que 
-    # serve para alterar o cs. O near jump (jmp), apenas um salto dentro do
-    # segmento atual, sem alterar o cs
+  # NOTE:
+  # O registrador CR0 é um registrador de controle da CPU x86.
+  # É por ele que ativamos o GDT, virtual memory, etc.
+  # Alterações nesse registrador afetam diretamente o funcionamento do processador. 
 
-    ljmp $CODE_SEGMENT, $.protected # Far jmp para alterar o CS 
+  movl %cr0, %eax
+  orl $1, %eax
+  movl %eax, %cr0 # NOTE: -> Agora o bit de ativação do GDT está habilitado
 
-  # Agora estamos no modo protegindo, usando instruções de 32 bits
-
-  .code32
-  .type .protected, @function
-  .protected:
-    movl $STACK, %esp
-
-    call clearf
-
-    #lidt isr_ptr
-    #sti # Habilitando as interrupções externas
-
-    pushl $.neko_booting
-    call printf
-
-    pushl $2000000000
-    call .sleep
-
-    movl $0x80000002, %eax
-    cpuid
-    movl $.cpuid, %edi
-    movl %eax, 0(%edi)
-    movl %ebx, 4(%edi)
-    movl %ecx, 8(%edi)
-    movl %edx, 12(%edi)
-     
-    movl $0x80000003, %eax
-    cpuid
-    movl %eax, 16(%edi)
-    movl %ebx, 20(%edi)
-    movl %ecx, 24(%edi)
-    movl %edx, 28(%edi)
+  movw $DATA_SEGMENT, %ax
+  movw %ax, %ds
+  movw %ax, %ss
+  movw %ax, %fs
+  movw %ax, %gs
+  movw %ax, %es
   
-    pushl $.cpu_detected
-    call printf
+  # NOTE:
+  # Aqui precisamos alterar o segmento de código (CS)
+  # Para alterar ele precisamos usar uma instrução de far jmp (ljmp), que 
+  # serve para alterar o cs. O near jump (jmp), apenas um salto dentro do
+  # segmento atual, sem alterar o cs
 
-    pushl $.cpuid
-    call printf
-     
-    hlt
+  jmp $CODE_SEGMENT, $.protected # NOTE: -> Far jmp para alterar o CS 
+
+# NOTE: -> Agora estamos no modo protegindo, usando instruções de 32 bits
 
 .code32
-.type .sleep, @function
-.align 4
-.sleep: # Uma função de delay temporária, usada até configurar o PIT
-  pushl %ebp
+.type .protected, @function
+.protected:
+  movl $STACK, %esp
+
+  call clearf
+
+  pushl $.neko_booting
+  call printf
+
+  pushl $0x7E00 # NOTE: -> De 0x7C00-0x7DFF temos a parte do bootloader, depois temos mais 2 setores para carregar que são para o IDT e seus ISR
+  pushl $0x00000003 # NOTE: -> Endereço 0x01 do LBA, segundo sector
+  pushl $0x02 # NOTE: -> Carregando 2 setor
+  pushl $0x00 # NOTE: -> Cabeçote
+  call ata_lba_read
+
+  # NOTE: Agora o bootloader está carregado por completo, podemos configurar o IDT
   
-  leal 8(%esp), %ebp
-  
-  pushl %ecx
-  
-  movl (%ebp), %ecx
+  # TODO: Carregar o restante do bootloader para carregar o IDT
+  # lidt
+  # sti
 
-  1:
-    loop 1b
+  hlt
 
-  popl %ecx
-  popl %ebp
-  ret
-
-.section .bss
-.type .cpuid, @object
-.align 4
-.cpuid:
-  .space 32, 0
-
-.section .string, "aS"
-.type .cpu_detected, @object
-.cpu_detected:
-  .asciz "CPU: "
-
+.section .nekonest.string, "aS", @progbits
 .type .neko_booting, @object
 .neko_booting:
   .asciz "NEKONEST STARTING...\n\n"

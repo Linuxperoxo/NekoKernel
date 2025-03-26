@@ -10,7 +10,10 @@
  *
  */
 
-.extern printf
+.ifndef ISR
+  .equ ISR, 0
+
+.include "asm/lib/stdio.s"
 
 .macro MAKE_ISR_SOFTWARE __num__
   .global isr_software\__num__
@@ -33,7 +36,7 @@
     .asciz "\__str__"
 .endm
 
-.section .text
+.section .isr.text, "ax", @progbits
 .code32
 .align 4
   MAKE_ISR_SOFTWARE 0
@@ -54,11 +57,7 @@
   MAKE_ISR_SOFTWARE 15
   MAKE_ISR_SOFTWARE 16
   
-.section .string, "aS", @progbits
-.type .panic_str, @object
-.panic_str:
-  .asciz "NEKONEST PANIC! -> "
-
+.section .isr.string, "aS", @progbits
 MAKE_MSG_ISR 0, "Division by zero!"
 MAKE_MSG_ISR 1, "Debug!"
 MAKE_MSG_ISR 2, "Non Maskable Interrupt!"
@@ -76,3 +75,6 @@ MAKE_MSG_ISR 13, "General Protection Fault!"
 MAKE_MSG_ISR 14, "Unknown Interrupt!"
 MAKE_MSG_ISR 15, "Coprocessor Fault!"
 MAKE_MSG_ISR 16, "Machine Check!"
+.else
+  .warning "include/asm/nekonest/isr.s is already defined!"
+.endif

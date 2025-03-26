@@ -10,6 +10,9 @@
  *
  */
 
+.ifndef LIBSTDIO
+  .equ LIBSTDIO, 0
+
 .equ VGA_FRAMEBUFFER, 0xB8000
 .equ VGA_ROW_LEN, 25
 .equ VGA_COL_LEN, 80
@@ -18,9 +21,8 @@
 .equ VGA_BC_DF_COLOR, 0x00 # Black
 .equ BRK_LINE, 0x0A
 
-.section .text
+.section .stdlib.text, "ax", @progbits 
 .code32
-.global printf
 .type printf, @function
 .align 4
 printf:
@@ -38,7 +40,7 @@ printf:
   xorl %edx, %edx
   xorl %eax, %eax
 
-  movw vga_status, %bx
+  movw .vga_status, %bx
   movb %bl, %al
   movb $VGA_COL_LEN, %dl
   mull %edx
@@ -93,7 +95,7 @@ printf:
     jmp 2b 
 
   5:
-    movw %bx, vga_status
+    movw %bx, .vga_status
 
     popl %esi
     popl %edi
@@ -104,7 +106,6 @@ printf:
     popl %ebp
     ret
 
-.global clearf
 .type clearf, @function
 .align 4
 clearf:
@@ -117,17 +118,20 @@ clearf:
   movl $VGA_FRAMEBUFFER, %edi
   rep stosw
 
-  movw %ax, vga_status
+  movw %ax, .vga_status
 
   popl %edi
   popl %ecx
   popl %eax
   ret
 
-.section .bss
-.global vga_status
-.type vga_status, @object
+.section .stdlib.bss, "a", @progbits
+.type .vga_status, @object
 .align 2
-vga_status:
+.vga_status:
   .space 1, 0 # __current_row
   .space 1, 0 # __current_col
+
+.else 
+  .warning "include/asm/lib/stdio.s is already defined!"
+.endif

@@ -12,7 +12,7 @@
 
 OUTPUT_FORMAT(binary)
 OUTPUT(nekonest)
-ENTRY(.main)
+ENTRY(main)
 
 origin_text  = 0x7C00;
 origin_magic = 0x7DFE;
@@ -20,55 +20,48 @@ origin_magic = 0x7DFE;
 SECTIONS {
   . = origin_text;
 
-  .main.text. : {
-    . = ALIGN(4);
-    nekonest.o(.text)
+  .nekonest.text : {
+    *(.nekonest.text)
+    *(.stdlib.text)
+    *(.panic.text)
   }
 
-  .main.data : {
+  .nekonest.data : {
     . = ALIGN(4);
-    nekonest.o(.data)
-  }
-  
-  .main.string : {
+    *(.nekonest.data)
+    *(.nekonest.string)
+    
     . = ALIGN(4);
-    nekonest.o(.string)
-  }
-
-  .std.text : {
-    . = ALIGN(4);
-    stdio.o(.text)
+    *(.stdlib.data)
+    *(.stdlib.bss)
+    *(.stdlib.string)
+    *(.panic.string)
   }
 
-  .gdt : {
+  .gdt.data : {
     . = ALIGN(4);
-    gdt.o(.gdt)
+    *(.gdt.data)
   }
 
   . = origin_magic;
- 
-  .magic : {
-    magic.o(.magic)
+  
+  .magic.data : {
+    *(.magic.data)
   }
-
-  .idt.text : {
-    . = ALIGN(4);
-    idt.o(.text)
-  }
-
-  .idt.data : {
-    . = ALIGN(4);
-    idt.o(.data)
-  }
-
+  
   .isr.text : {
     . = ALIGN(4);
-    isr.o(.text)
+    *(.isr.text)
   }
-
+  
   .isr.data : {
     . = ALIGN(4);
-    isr.o(.string)
+    *(.isr.string)
+  }
+  
+  .idt.data : {
+    . = ALIGN(4);
+    *(.idt.data)
   }
 
   /DISCARD/ : {

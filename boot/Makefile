@@ -14,28 +14,18 @@ ASM = /usr/bin/gcc
 LD = /usr/bin/ld
 QEMU = /usr/bin/qemu-system-i386
 
-ASMFLAGS = -nostdlib -I ./include
+ASMFLAGS = -nostdlib -I $(INCLUDE_DIR) -T $(LINKER_FILE)
 QEMUFLAGS = -drive file=$(BIN_FILE),format=raw -m 4G -smp 4
 
+NEKO_MAIN_SRC = ./nekonest.s
 BIN_FILE = $(BIN_DIR)/nekonest
 LINKER_FILE = ./linker.ld
 
+INCLUDE_DIR = ./include
 BUILD_DIR = ../build/nekonest
 BIN_DIR = $(BUILD_DIR)/bin
-OBJ_DIR = $(BUILD_DIR)/obj
-NEKO_SRC_DIR = ./include/asm/nekonest
-NEKO_LIB_DIR = ./include/asm/lib
 
-ALL_BUILD_DIR = $(BIN_DIR) $(OBJ_DIR)
-
-NEKO_SRCS = $(wildcard $(NEKO_SRC_DIR)/*.s)
-NEKO_SRCS_LIB = $(wildcard $(NEKO_LIB_DIR)/*.s)
-
-NEKO_SRCS_OBJS = $(patsubst $(NEKO_SRC_DIR)/%.s, $(OBJ_DIR)/%.o, $(NEKO_SRCS))
-NEKO_SRCS_LIB_OBJS = $(patsubst $(NEKO_LIB_DIR)/%.s, $(OBJ_DIR)/%.o, $(NEKO_SRCS_LIB))
-
-NEKO_MAIN_SRC = ./nekonest.s
-NEKO_MAIN_OBJ = $(OBJ_DIR)/nekonest.o
+ALL_BUILD_DIR = $(BUILD_DIR) $(BIN_DIR)
 
 all: $(BIN_FILE)
 
@@ -48,17 +38,8 @@ clean:
 run: $(BIN_FILE)
 	$(QEMU) $(QEMUFLAGS)
 
-$(OBJ_DIR)/%.o: $(NEKO_SRC_DIR)/%.s | make_dirs
-	$(ASM) $(ASMFLAGS) $< -c -o $@
-
-$(OBJ_DIR)/%.o: $(NEKO_LIB_DIR)/%.s | make_dirs
-	$(ASM) $(ASMFLAGS) $< -c -o $@
-
-$(NEKO_MAIN_OBJ): make_dirs
-	$(ASM) $(ASMFLAGS) $(NEKO_MAIN_SRC) -c -o $@
-
-$(BIN_FILE): $(NEKO_MAIN_OBJ) $(NEKO_SRCS_OBJS) $(NEKO_SRCS_LIB_OBJS) | make_dirs
-	$(LD) -L $(OBJ_DIR) -T $(LINKER_FILE) -o $(BIN_FILE)
+$(BIN_FILE): make_dirs
+	$(ASM) $(ASMFLAGS) $(NEKO_MAIN_SRC) -o $(BIN_FILE)
 
 .PHONY: all make_dirs clean run
 

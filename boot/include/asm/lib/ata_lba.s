@@ -10,6 +10,12 @@
  *
  */
 
+.ifndef LIBSTDATA
+  .equ LIBSTDATA, 0
+
+.include "asm/nekonest/panic.s"
+.include "asm/nekonest/isr.s"
+
 .equ DATA_PORT, 0x1F0 # Porta de dados
 .equ ERROR_PORT, 0x1F1 # Porta de erro
 .equ SECTOR_COUNT, 0x1F2 # Número de setores
@@ -68,9 +74,8 @@
 #
 # ==============================================
 
-.section .text
+.section .stdlib.text, "ax", @progbits 
 .code32
-.global ata_lba_read
 .type ata_lba_read, @function
 .align 4
 ata_lba_read:
@@ -107,7 +112,7 @@ ata_lba_read:
   movb (%ebp), %al
   andb $0b00001111, %al # NOTE: -> Pegando apenas os 4 bits mais baixos, que fala qual o cabeçote
   orb $0b11100000, %al # NOTE: -> LBA | Master, nesse vamos usar LBA em vez de CHS, mas o LBA faz um calcúlo com o CHS para chegar em um cabeçote, sector e cilindro válido no disco
-  movw $DriVE_HEAD, %dx
+  movw $DRIVE_HEAD, %dx
   outb %al, %dx
 
   # NOTE:
@@ -157,9 +162,8 @@ ata_lba_read:
   jmp 2f
 
   1:
-    # TODO: Add write_screen error here!
-
-    jmp .
+    pushl $.read_error
+    call panic
 
   2:
     movw $STATUS_PORT, %dx
@@ -213,3 +217,12 @@ ata_lba_read:
     popl %eax
     popl %ebp
     ret
+
+.section .stdlib.string, "aS", @progbits
+.type .read_error, @object
+.read_error:
+  .asciz "ERROR TO READ DISK SECTOR"
+.else
+  .warning "include/asm/lib/ata_lba.s is already defined!"
+.endif
+
